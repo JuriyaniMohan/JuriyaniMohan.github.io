@@ -1,8 +1,214 @@
-<div class="badges">
-  <a class="badge" href="AZ104-Identity-Governance-Complete-Training-Guide-DAY01.html">Day 1 — IAM</a>
-  <a class="badge" href="AZ104-Day2-Networking-Complete-Training-Guide.html">Day 2 — EC2</a>
-  <a class="badge" href="AZ104-Day2-Networking-Complete-Training-Guide-02.html">Day 2 — EC2 (Part 2)</a>
-  <a class="badge" href="AZ104-Day3-Storage-VMs-AppService-Guide.html">Day 3 — S3</a>
-  <a class="badge" href="scaling-guide-main-Day4.html">Day 4 — VPC</a>
-  <a class="badge" href="azure-backup-guide.html">Day 5 — Backup</a>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlienOps — AWS Cloud Journey</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0f1e;
+      color: #e0e6f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      color: #4fc3f7;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #90a4ae;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .nav-link {
+      color: #4fc3f7;
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    .nav-link:hover {
+      border-bottom: 2px solid #4fc3f7;
+    }
+
+    /* CARD */
+    .card {
+      background: #131929;
+      border: 1px solid #1e3a5f;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .card h2 {
+      color: #4fc3f7;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+    }
+
+    /* BADGES */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .badge {
+      background: #0d3b2e;
+      color: #4caf96;
+      border: 1px solid #4caf96;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .badge:hover {
+      background: #4caf96;
+      color: #0a0f1e;
+      transform: translateY(-2px);
+    }
+
+    /* STACK */
+    .stack {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stack-item {
+      background: #0d1a2e;
+      border-radius: 8px;
+      padding: 14px;
+      transition: 0.3s;
+    }
+
+    .stack-item:hover {
+      transform: scale(1.03);
+    }
+
+    .label {
+      color: #90a4ae;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .value {
+      color: #e0e6f0;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    footer {
+      text-align: center;
+      color: #455a6a;
+      margin-top: 24px;
+      font-size: 13px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .stack {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+
+```
+<h1>🚀 AlienOps</h1>
+<p class="subtitle">AWS Cloud Engineer Journey — alienops.online</p>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <a class="nav-link" href="#">Home</a>
+  <a class="nav-link" href="#">Projects</a>
+  <a class="nav-link" href="#">About</a>
 </div>
+
+<!-- DAYS SECTION -->
+<div class="card">
+  <h2>📅 Training Progress</h2>
+
+  <div class="badges">
+    <a class="badge" href="AZ104-Identity-Governance-Complete-Training-Guide-DAY01.html">Day 1 — IAM</a>
+
+    <a class="badge" href="AZ104-Day2-Networking-Complete-Training-Guide.html">Day 2 — EC2</a>
+
+    <a class="badge" href="AZ104-Day2-Networking-Complete-Training-Guide-02.html">Day 2 — EC2 (Part 2)</a>
+
+    <a class="badge" href="AZ104-Day3-Storage-VMs-AppService-Guide.html">Day 3 — S3 / VMs</a>
+
+    <a class="badge" href="scaling-guide-main-Day4.html">Day 4 — Scaling</a>
+
+    <a class="badge" href="azure-backup-guide.html">Day 5 — Backup</a>
+  </div>
+</div>
+
+<!-- STACK SECTION -->
+<div class="card">
+  <h2>🛠️ Tech Stack</h2>
+
+  <div class="stack">
+    <div class="stack-item">
+      <div class="label">Domain</div>
+      <div class="value">Namecheap — alienops.online</div>
+    </div>
+
+    <div class="stack-item">
+      <div class="label">DNS</div>
+      <div class="value">AWS Route 53</div>
+    </div>
+
+    <div class="stack-item">
+      <div class="label">Hosting</div>
+      <div class="value">GitHub Pages</div>
+    </div>
+
+    <div class="stack-item">
+      <div class="label">SSL</div>
+      <div class="value">HTTPS (Free)</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built during AWS Cloud Engineer Journey 🚀 — alienops.online
+</footer>
+```
+
+  </div>
+</body>
+</html>

@@ -139,7 +139,7 @@ p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
 
     <!-- M1: Storage Accounts -->
     <div class="module open" id="m-sa">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-hdd"></i></div>
         <div class="module-title"><h3>Module 1: Storage Accounts — The Foundation</h3><span>Account types, performance tiers, and creation</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -197,7 +197,7 @@ p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
 
     <!-- M2: Redundancy -->
     <div class="module" id="m-red">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-shield-alt"></i></div>
         <div class="module-title"><h3>Module 2: Storage Redundancy — Protecting Your Data</h3><span>LRS, ZRS, GRS, GZRS, RA-GRS, RA-GZRS explained</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -267,7 +267,7 @@ RPO (Recovery Point Objective) for GRS: ~15 minutes (data could be up to 15 min 
 
     <!-- M3: Blob Storage -->
     <div class="module" id="m-blob">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-cubes"></i></div>
         <div class="module-title"><h3>Module 3: Blob Storage — Objects, Tiers & Lifecycle</h3><span>Containers, access tiers, lifecycle management, soft delete, versioning</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -378,7 +378,7 @@ This entire lifecycle runs AUTOMATICALLY — zero human intervention needed!</di
 
     <!-- M4: Security -->
     <div class="module" id="m-sec">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(239,68,68,.15);color:var(--red)"><i class="fas fa-lock"></i></div>
         <div class="module-title"><h3>Module 4: Storage Security — Keys, SAS, RBAC, Encryption</h3><span>Access keys, shared access signatures, identity-based access, encryption</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -431,7 +431,7 @@ This entire lifecycle runs AUTOMATICALLY — zero human intervention needed!</di
 
     <!-- M5: Azure Files & Tools -->
     <div class="module" id="m-files">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-folder-open"></i></div>
         <div class="module-title"><h3>Module 5: Azure Files, AzCopy & Storage Explorer</h3><span>SMB file shares, data migration tools</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -497,7 +497,7 @@ This entire lifecycle runs AUTOMATICALLY — zero human intervention needed!</di
 
     <!-- VM Creation -->
     <div class="module open" id="m-vm1">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-server"></i></div>
         <div class="module-title"><h3>Module 6: Creating & Configuring VMs</h3><span>VM sizes, disks, images, creation process</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -578,7 +578,7 @@ This entire lifecycle runs AUTOMATICALLY — zero human intervention needed!</di
 
     <!-- Availability -->
     <div class="module" id="m-avail">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-layer-group"></i></div>
         <div class="module-title"><h3>Module 7: High Availability — Sets, Zones & Scale Sets</h3><span>Availability sets, availability zones, VMSS auto-scaling</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -667,7 +667,7 @@ Min: 2 instances    Max: 10 instances</div>
 
     <!-- App Service Basics -->
     <div class="module open" id="m-app1">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(6,182,212,.15);color:var(--cyan)"><i class="fas fa-globe"></i></div>
         <div class="module-title"><h3>Module 8: App Service Plans & Web Apps</h3><span>Plans, pricing tiers, scaling, configuration</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -726,7 +726,7 @@ Min: 2 instances    Max: 10 instances</div>
 
     <!-- Deployment Slots -->
     <div class="module" id="m-slots">
-      <div class="module-header" onclick="toggleModule(this)">
+      <div class="module-header">
         <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-exchange-alt"></i></div>
         <div class="module-title"><h3>Module 9: Deployment Slots & Custom Domains</h3><span>Zero-downtime deployment, slot swaps, TLS/SSL, custom DNS</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -922,7 +922,6 @@ If v2.0 has issues? Just SWAP AGAIN to roll back to v1.0 instantly!</div>
 </div>
 
 <script>
-// Tab navigation
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -933,10 +932,11 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
   });
 });
 
-// Module toggle
-function toggleModule(el) {
-  el.closest('.module').classList.toggle('open');
-}
+document.querySelectorAll('.module-header').forEach(function(header) {
+  header.addEventListener('click', function() {
+    this.parentElement.classList.toggle('open');
+  });
+});
 </script>
 
 <footer style="text-align:center; padding:20px 0; border-top: 1px solid #334155;">

@@ -32,6 +32,14 @@
       margin-bottom: 20px;
     }
 
+    h1::before {
+      content: '▌';
+      color: #10b981;
+      margin-right: 6px;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
     ul {
       line-height: 1.8;
     }
@@ -56,15 +64,13 @@
   <div class="card">
     <h1>About</h1>
 
-```
 <ul>
   <li>This repository contains structured day-by-day guides for learning Azure Cloud concepts and building real-world understanding.</li>
-  
+
   <li>Author: Mohan Juriyani</li>
-  
+
   <li>If you find any issues or want improvements, feel free to reach out or suggest edits.</li>
 </ul>
-```
 
   </div>
 </body>

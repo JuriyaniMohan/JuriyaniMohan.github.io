@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -72,6 +72,7 @@ p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
 .scenario-title{font-weight:700;color:var(--cyan);font-size:14px;margin-bottom:8px}
 .scenario-title i{margin-right:6px}
 @media(max-width:768px){.container{padding:12px}.nav-tab{padding:8px 14px;font-size:12px}.module-header{padding:14px 16px}.box,.lab,.think,.quiz,.scenario{padding:14px}.diagram{font-size:11px}}
+.hero .badge{position:relative;padding-left:26px}.hero .badge::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:#10b981;animation:blink 2s infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 </style>
 </head>
 <body>
@@ -103,7 +104,7 @@ p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
     </div>
 
     <div class="module open" id="m-what">
-      <div class="module-header" onclick="toggleModule('m-what')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-expand-arrows-alt"></i></div>
         <div class="module-title"><h3>What is Scaling and Why Does It Matter?</h3><span>The four problems scaling solves</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -120,7 +121,7 @@ p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
     </div>
 
     <div class="module" id="m-types">
-      <div class="module-header" onclick="toggleModule('m-types')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-code-branch"></i></div>
         <div class="module-title"><h3>Types of Scaling — Vertical vs Horizontal</h3><span>The two fundamental approaches</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -169,7 +170,7 @@ Virtually unlimited ceiling.</div>
   <div class="section" id="vertical">
 
     <div class="module open" id="m-vert-deep">
-      <div class="module-header" onclick="toggleModule('m-vert-deep')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-arrow-up"></i></div>
         <div class="module-title"><h3>Vertical Scaling — Deep Dive</h3><span>When to use it, advantages, disadvantages</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -201,7 +202,7 @@ Virtually unlimited ceiling.</div>
   <div class="section" id="horizontal">
 
     <div class="module open" id="m-horiz-deep">
-      <div class="module-header" onclick="toggleModule('m-horiz-deep')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-arrows-alt-h"></i></div>
         <div class="module-title"><h3>Horizontal Scaling — Deep Dive</h3><span>When to use it, requirements, and architecture</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -245,7 +246,7 @@ Any server must be able to handle any request</div>
     </div>
 
     <div class="module" id="m-autoscale">
-      <div class="module-header" onclick="toggleModule('m-autoscale')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-magic"></i></div>
         <div class="module-title"><h3>Auto Scaling — Making It Automatic</h3><span>Reactive, scheduled, and predictive scaling</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -310,7 +311,7 @@ Any server must be able to handle any request</div>
     </div>
 
     <div class="module open" id="m-db-vertical">
-      <div class="module-header" onclick="toggleModule('m-db-vertical')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-database"></i></div>
         <div class="module-title"><h3>Why Databases Prefer Vertical Scaling</h3><span>ACID, JOINs, foreign keys, locks — 5 core reasons</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -343,7 +344,7 @@ Any server must be able to handle any request</div>
     </div>
 
     <div class="module" id="m-db-horizontal">
-      <div class="module-header" onclick="toggleModule('m-db-horizontal')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-layer-group"></i></div>
         <div class="module-title"><h3>When Databases DO Scale Horizontally</h3><span>5 patterns: Read Replicas, Sharding, NoSQL, CQRS, NewSQL</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -385,7 +386,7 @@ Any server must be able to handle any request</div>
   <div class="section" id="patterns">
 
     <div class="module open" id="m-patterns">
-      <div class="module-header" onclick="toggleModule('m-patterns')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-project-diagram"></i></div>
         <div class="module-title"><h3>Scaling Patterns & Strategies</h3><span>6 real-world patterns architects use in production</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -414,7 +415,7 @@ Any server must be able to handle any request</div>
     </div>
 
     <div class="module" id="m-lb">
-      <div class="module-header" onclick="toggleModule('m-lb')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-balance-scale"></i></div>
         <div class="module-title"><h3>Load Balancers — The Backbone of Horizontal Scaling</h3><span>Layer 4 vs Layer 7, algorithms</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -442,7 +443,7 @@ Any server must be able to handle any request</div>
   <div class="section" id="realworld">
 
     <div class="module open" id="m-mistakes">
-      <div class="module-header" onclick="toggleModule('m-mistakes')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(239,68,68,.15);color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="module-title"><h3>Common Mistakes Juniors Make</h3><span>7 pitfalls that will kill your scalability</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -486,7 +487,7 @@ Any server must be able to handle any request</div>
     </div>
 
     <div class="module" id="m-checklist">
-      <div class="module-header" onclick="toggleModule('m-checklist')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-clipboard-check"></i></div>
         <div class="module-title"><h3>Architect's Decision Checklist</h3><span>10 questions to ask for every scaling decision</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -516,7 +517,7 @@ Any server must be able to handle any request</div>
     </div>
 
     <div class="module" id="m-realworld-arch">
-      <div class="module-header" onclick="toggleModule('m-realworld-arch')">
+      <div class="module-header" onclick="toggleModule(this)">
         <div class="module-icon" style="background:rgba(6,182,212,.15);color:var(--cyan)"><i class="fas fa-building"></i></div>
         <div class="module-title"><h3>Real-World Architecture Example</h3><span>E-commerce platform using all scaling strategies together</span></div>
         <i class="fas fa-chevron-down module-chevron"></i>
@@ -572,8 +573,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
   });
 });
 
-function toggleModule(id) {
-  document.getElementById(id).classList.toggle('open');
+function toggleModule(el) {
+  el.closest('.module').classList.toggle('open');
 }
 </script>
 

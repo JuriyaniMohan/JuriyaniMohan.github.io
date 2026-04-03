@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 | Identity & Governance Complete Training Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0b0f1a;--card:#111827;--card2:#1a2235;--border:#1e293b;--blue:#3b82f6;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--cyan:#06b6d4;--text:#e2e8f0;--muted:#64748b;--dim:#475569}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+.hero{text-align:center;padding:60px 20px 40px;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);border-bottom:1px solid var(--border)}
+.hero .badge{display:inline-block;background:linear-gradient(90deg,var(--blue),var(--purple));padding:6px 20px;border-radius:30px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-size:clamp(28px,5vw,48px);font-weight:800;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:16px;max-width:600px;margin:0 auto}
+.nav-tabs{display:flex;gap:8px;overflow-x:auto;padding:20px 0;position:sticky;top:0;background:var(--bg);z-index:100;border-bottom:1px solid var(--border)}
+.nav-tab{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:.2s}
+.nav-tab:hover,.nav-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
+.nav-tab.active{background:rgba(59,130,246,.15);color:#93c5fd}
+.section{display:none;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.module{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden}
+.module-header{padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s}
+.module-header:hover{background:var(--card2)}
+.module-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.module-title{flex:1}
+.module-title h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.module-title span{font-size:12px;color:var(--muted)}
+.module-chevron{font-size:14px;color:var(--dim);transition:.3s}
+.module.open .module-chevron{transform:rotate(180deg)}
+.module-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border)}
+.module.open .module-body{display:block}
+h2{font-size:22px;font-weight:800;margin:30px 0 12px;color:#f1f5f9}
+h4{font-size:16px;font-weight:700;margin:20px 0 10px;color:#cbd5e1}
+p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
+.list-item{padding-left:20px;position:relative}
+.list-item::before{content:'▸';position:absolute;left:0;color:var(--blue)}
+.box{border-radius:12px;padding:16px 18px;margin:14px 0;font-size:13px;line-height:1.7}
+.box-blue{background:rgba(59,130,246,.08);border-left:4px solid var(--blue);color:#93c5fd}
+.box-green{background:rgba(16,185,129,.08);border-left:4px solid var(--green);color:#6ee7b7}
+.box-orange{background:rgba(245,158,11,.08);border-left:4px solid var(--orange);color:#fcd34d}
+.box-red{background:rgba(239,68,68,.08);border-left:4px solid var(--red);color:#fca5a5}
+.box-purple{background:rgba(139,92,246,.08);border-left:4px solid var(--purple);color:#c4b5fd}
+.box-cyan{background:rgba(6,182,212,.08);border-left:4px solid var(--cyan);color:#67e8f9}
+.box strong{display:block;margin-bottom:6px;font-size:14px}
+.diagram{background:#0d1117;border:1px solid #21262d;border-radius:12px;padding:16px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:#8b949e;overflow-x:auto;white-space:pre}
+.diagram .label{color:var(--purple);font-weight:700;font-size:13px;margin-bottom:8px;display:block;font-family:'Plus Jakarta Sans',sans-serif}
+.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.tbl th{background:var(--card2);padding:10px 12px;text-align:left;font-weight:700;color:#93c5fd;border:1px solid var(--border)}
+.tbl td{padding:10px 12px;border:1px solid var(--border);color:#94a3b8}
+.tbl tr:hover td{background:rgba(59,130,246,.04)}
+.lab{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.lab-title{font-weight:700;color:var(--green);font-size:14px;margin-bottom:10px}
+.lab-title i{margin-right:6px}
+.lab ol{padding-left:20px;font-size:13px;color:#6ee7b7}
+.lab ol li{margin-bottom:6px;line-height:1.6}
+.cli{background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b949e;overflow-x:auto;white-space:pre-wrap}
+.think{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,130,246,.08));border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.think-title{font-weight:700;color:var(--purple);font-size:14px;margin-bottom:8px}
+.think-title i{margin-right:6px}
+.think p{font-size:13px;color:#c4b5fd;line-height:1.7}
+.quiz{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.quiz-title{font-weight:700;color:var(--orange);font-size:14px;margin-bottom:10px}
+.quiz-q{font-size:13px;font-weight:600;color:#fcd34d;margin-bottom:4px}
+.quiz-a{font-size:13px;color:#94a3b8;margin-bottom:10px;padding-left:16px;display:none}
+.quiz-a.show{display:block}
+.quiz-toggle{font-size:12px;color:var(--orange);cursor:pointer;margin-bottom:12px;text-decoration:underline}
+.scenario{background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.scenario-title{font-weight:700;color:var(--cyan);font-size:14px;margin-bottom:8px}
+.scenario-title i{margin-right:6px}
+@media(max-width:768px){.container{padding:12px}.nav-tab{padding:8px 14px;font-size:12px}.module-header{padding:14px 16px}.box,.lab,.think,.quiz,.scenario{padding:14px}.diagram{font-size:11px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">AZ-104 Identity & Governance • 20-25% of Exam</div>
+  <h1>Azure Identity & Governance</h1>
+  <p>Microsoft Entra ID · RBAC · Policy · Management Groups · Subscriptions — Complete Training Guide</p>
+  <p style="font-size:10px;">© 2026 Mohan Juriyani</p>
+</div>
+
+<div class="container">
+  <div class="nav-tabs" id="navTabs">
+    <div class="nav-tab active" data-section="bigpicture"><i class="fas fa-eye"></i> Big Picture</div>
+    <div class="nav-tab" data-section="entraid"><i class="fas fa-id-card"></i> Entra ID</div>
+    <div class="nav-tab" data-section="users"><i class="fas fa-user"></i> Users</div>
+    <div class="nav-tab" data-section="groups"><i class="fas fa-users"></i> Groups</div>
+    <div class="nav-tab" data-section="sspr"><i class="fas fa-key"></i> SSPR</div>
+    <div class="nav-tab" data-section="b2b"><i class="fas fa-user-friends"></i> B2B / Guests</div>
+    <div class="nav-tab" data-section="rbac"><i class="fas fa-user-shield"></i> RBAC</div>
+    <div class="nav-tab" data-section="subscriptions"><i class="fas fa-credit-card"></i> Subscriptions</div>
+    <div class="nav-tab" data-section="mgmtgroups"><i class="fas fa-sitemap"></i> Management Groups</div>
+    <div class="nav-tab" data-section="policy"><i class="fas fa-gavel"></i> Policy</div>
+    <div class="nav-tab" data-section="locks"><i class="fas fa-lock"></i> Locks</div>
+    <div class="nav-tab" data-section="tags"><i class="fas fa-tag"></i> Tags</div>
+    <div class="nav-tab" data-section="cost"><i class="fas fa-dollar-sign"></i> Cost Mgmt</div>
+    <div class="nav-tab" data-section="scenarios"><i class="fas fa-building"></i> Scenarios</div>
+    <div class="nav-tab" data-section="practice"><i class="fas fa-pencil-alt"></i> Practice Exam</div>
+
+  </div>
+
+  <div class="section active" id="bigpicture">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>What Is This Section About?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Imagine you are the security guard and office manager of a huge building (Azure). Your job is to:</p>
+        <div class="list-item">Decide WHO can enter the building (Identity = Microsoft Entra ID)</div>
+        <div class="list-item">Decide WHAT each person can do once inside (Access = RBAC)</div>
+        <div class="list-item">Set RULES for what is allowed in the building (Governance = Policy, Locks, Tags)</div>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          ANALOGY: Think of Azure Like a Company Building
+        </div>
+        <p>Entra ID = The reception desk that checks ID cards and gives badges. RBAC = The keycard system that decides which doors each badge can open. Policy = The building rules (no smoking, wear safety gear in the lab). Locks = The padlock on the server room that even the CEO cannot remove without a special key. Tags = The labels on each room (Floor 3, Department: Finance, Cost Center: 4001).</p>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>The Three Pillars (How They Connect)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>Pillar</h4>
+        <h4>What It Controls</h4>
+        <h4>Key Question</h4>
+        <h4>Example</h4>
+        <p>Identity (Entra ID)</p>
+        <p>Who exists in your organization</p>
+        <p>Who are you?</p>
+        <p>Create user john@company.com</p>
+        <p>Access (RBAC)</p>
+        <p>What users can do with resources</p>
+        <p>What can you do?</p>
+        <p>John can read VMs but not delete them</p>
+        <p>Governance (Policy)</p>
+        <p>What resources are allowed to exist</p>
+        <p>What is allowed?</p>
+        <p>VMs can only be created in East US</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: The exam LOVES to test the difference between RBAC and Policy. Remember: RBAC = controls WHO can do WHAT. Policy = controls WHAT CAN EXIST regardless of who does it.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="entraid">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>What Is Microsoft Entra ID?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          Microsoft Entra ID (formerly called Azure Active Directory or Azure AD) is Microsoft’s cloud-based identity and access management service. Think of it as the brain of your entire Azure security system.
+        </div>
+        <h4>Entra ID vs On-Premises Active Directory</h4>
+        <p>If you have worked with traditional Windows Server Active Directory (AD DS), you need to understand that Entra ID is NOT the same thing. Here are the key differences:</p>
+        <h4>Feature</h4>
+        <h4>On-Premises AD DS</h4>
+        <h4>Microsoft Entra ID</h4>
+        <p>Communication Protocol</p>
+        <p>LDAP, Kerberos</p>
+        <p>REST APIs (HTTPS), SAML, OAuth 2.0, OpenID Connect</p>
+        <p>Structure</p>
+        <p>Forests, Domains, OUs</p>
+        <p>Flat structure — Tenants with Users &amp; Groups</p>
+        <p>Group Policy</p>
+        <p>Yes (GPO)</p>
+        <p>No — use Intune or Azure Policy instead</p>
+        <p>Authentication</p>
+        <p>Kerberos tickets</p>
+        <p>Tokens (OAuth 2.0, SAML)</p>
+        <p>Where it runs</p>
+        <p>Your physical servers</p>
+        <p>Microsoft’s cloud infrastructure</p>
+        <p>Device Management</p>
+        <p>Domain Join</p>
+        <p>Entra Join, Entra Registered, Hybrid Join</p>
+        <h4>Entra ID Editions</h4>
+        <p>Microsoft Entra ID comes in multiple editions. This is heavily tested on the exam because specific features require specific editions:</p>
+        <h4>Edition</h4>
+        <h4>Cost</h4>
+        <h4>Key Features</h4>
+        <p>Free</p>
+        <p>Included with Azure</p>
+        <p>Basic user/group management, SSO for 10 apps, basic security reports</p>
+        <p>P1 (Premium 1)</p>
+        <p>~$6/user/month</p>
+        <p>Dynamic groups, Conditional Access, Self-Service Password Reset, Group-based licensing, Application Proxy, Hybrid identity</p>
+        <p>P2 (Premium 2)</p>
+        <p>~$9/user/month</p>
+        <p>Everything in P1 + Privileged Identity Management (PIM), Identity Protection, Access Reviews, Entitlement Management</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: The exam will describe a feature and ask which license is needed. Memorize this: Dynamic Groups = P1. Conditional Access = P1. SSPR = P1. PIM = P2. Identity Protection = P2. Access Reviews = P2.
+        </div>
+        <h4>What Is a Tenant?</h4>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          A tenant is your dedicated instance of Entra ID. When your organization signs up for Azure, a tenant is automatically created. Think of it as your private directory in the cloud.
+        </div>
+        <div class="list-item">Every tenant has a unique ID (GUID) and a default domain (e.g., yourcompany.onmicrosoft.com)</div>
+        <div class="list-item">You can add custom domains (e.g., yourcompany.com) by verifying DNS records</div>
+        <div class="list-item">A single tenant can have multiple Azure subscriptions attached to it</div>
+        <div class="list-item">A subscription can only trust ONE tenant at a time</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Explore Your Entra ID Tenant</div>
+          <ol>
+            <li>Go to portal.azure.com and sign in</li>
+            <li>Search for “Microsoft Entra ID” in the search bar and click on it</li>
+            <li>On the Overview page, note your Tenant ID and Primary Domain</li>
+            <li>Click “Properties” in the left menu — review Tenant Name, Country, and Notification Language</li>
+            <li>Click “Custom domain names” — you’ll see your default .onmicrosoft.com domain</li>
+            <li>Note: To add a custom domain, you’d need to add a TXT or MX record to your DNS provider</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="users">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>Understanding User Types</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>In Entra ID, there are two main types of users:</p>
+        <h4>1. Cloud-Only Users (Created directly in Entra ID)</h4>
+        <div class="list-item">Created and managed entirely in the cloud</div>
+        <div class="list-item">Username format: user@yourdomain.onmicrosoft.com (or custom domain)</div>
+        <div class="list-item">Best for cloud-first organizations or when you don’t have on-premises AD</div>
+        <div class="list-item">Password is managed in Entra ID</div>
+        <h4>2. Synced Users (Synced from On-Premises AD)</h4>
+        <div class="list-item">Created in your on-premises Active Directory, then synced to Entra ID using Entra Connect (formerly Azure AD Connect)</div>
+        <div class="list-item">Source of authority is on-premises AD — most changes must be made on-premises</div>
+        <div class="list-item">Supports Password Hash Sync, Pass-Through Authentication, or Federation (AD FS)</div>
+        <div class="list-item">Identified by “Directory synced: Yes” in the portal</div>
+        <h4>User Types: Member vs Guest</h4>
+        <h4>Property</h4>
+        <h4>Member User</h4>
+        <h4>Guest User</h4>
+        <p>Source</p>
+        <p>Your organization</p>
+        <p>External organization or email</p>
+        <p>Default Permissions</p>
+        <p>Full directory read access</p>
+        <p>Limited — cannot enumerate users/groups by default</p>
+        <p>License Required</p>
+        <p>Yes, for premium features</p>
+        <p>Depends on what they need to access</p>
+        <p>User Type field</p>
+        <p>Member</p>
+        <p>Guest</p>
+        <p>Created via</p>
+        <p>Portal, PowerShell, CLI, Bulk CSV</p>
+        <p>Invite (B2B Collaboration)</p>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>Creating Users — 4 Methods</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>Method 1: Azure Portal (GUI)</h4>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Cloud User via Portal</div>
+          <ol>
+            <li>Go to Microsoft Entra ID &gt; Users &gt; All users</li>
+            <li>Click “+ New user” &gt; “Create new user”</li>
+            <li>Fill in: User principal name (e.g., john@yourdomain.onmicrosoft.com), Display name (John Smith)</li>
+            <li>Under Password: Choose “Auto-generate password” and copy it, or set a custom password</li>
+            <li>Click “Properties” tab — fill in Job title: “Cloud Engineer”, Department: “IT”, Usage location: “United States”</li>
+            <li>Click “Assignments” tab — you can add the user to groups or assign roles here</li>
+            <li>Click “Review + create” &gt; “Create”</li>
+            <li>IMPORTANT: Note down the temporary password — the user must change it at first sign-in</li>
+          </ol>
+        </div>
+        <h4>Method 2: PowerShell (Az Module)</h4>
+        <h4>PowerShell: Create a New User</h4>
+        <div class="cli">
+# Connect to Azure (if not already connected)
+
+
+Connect-AzAccount
+
+
+# Install Microsoft Graph PowerShell module (if not installed)
+</div>
+        <p>Install-Module Microsoft.Graph -Scope CurrentUser</p>
+        <p>Connect-MgGraph -Scopes &quot;User.ReadWrite.All&quot;</p>
+        <div class="cli">
+# Create a new user
+</div>
+        <p>$PasswordProfile = @{</p>
+        <p>Password = &quot;TempP@ssw0rd123!&quot;</p>
+        <p>ForceChangePasswordNextSignIn = $true</p>
+        <p>}</p>
+        <div class="cli">
+New-MgUser -DisplayName &quot;Jane Doe&quot; \
+</div>
+        <p>-UserPrincipalName &quot;jane@yourdomain.onmicrosoft.com&quot; \</p>
+        <p>-PasswordProfile $PasswordProfile \</p>
+        <p>-AccountEnabled \</p>
+        <p>-MailNickname &quot;jane&quot; \</p>
+        <p>-Department &quot;Engineering&quot; \</p>
+        <p>-JobTitle &quot;DevOps Engineer&quot; \</p>
+        <p>-UsageLocation &quot;US&quot;</p>
+        <h4>Method 3: Azure CLI</h4>
+        <h4>Azure CLI: Create a New User</h4>
+        <div class="cli">
+# Login
+
+
+az login
+
+
+# Create user
+
+
+az ad user create \
+
+
+--display-name &quot;Bob Wilson&quot; \
+
+
+--user-principal-name bob@yourdomain.onmicrosoft.com \
+
+
+--password &quot;TempP@ssw0rd456!&quot; \
+
+
+--force-change-password-next-sign-in true \
+
+
+--department &quot;Sales&quot; \
+
+
+--job-title &quot;Sales Manager&quot;
+
+
+# Verify the user was created
+
+
+az ad user show --id bob@yourdomain.onmicrosoft.com
+</div>
+        <h4>Method 4: Bulk Operations (CSV)</h4>
+        <p>When you need to create hundreds of users at once, use bulk operations:</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Bulk Create Users via CSV</div>
+          <ol>
+            <li>Go to Microsoft Entra ID &gt; Users &gt; Bulk operations &gt; Bulk create</li>
+            <li>Click “Download” to get the CSV template</li>
+            <li>Open the CSV in Excel. You’ll see columns like: Name, User name, Initial password, Block sign in, First name, Last name, Job title, Department, Usage location, etc.</li>
+            <li>Fill in your user data (one user per row). Example row: John Smith, john@yourdomain.onmicrosoft.com, TempP@ss1!, No, John, Smith, Developer, IT, US</li>
+            <li>Save the file as CSV format</li>
+            <li>Upload the CSV back in the portal</li>
+            <li>Click “Submit” and wait for the operation to complete</li>
+            <li>Check the results — any errors will be listed with the specific row number</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Bulk operations require a CSV file (not Excel .xlsx). The template must be downloaded from the portal. You can bulk create, bulk invite (guests), and bulk delete users.
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-2">
+      <div class="module-header" onclick="toggleModule('m-2')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>Managing User Properties</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Every user has properties you can manage. The most important ones for the exam:</p>
+        <h4>Property</h4>
+        <h4>What It Does</h4>
+        <h4>Why It Matters</h4>
+        <p>Usage Location</p>
+        <p>Country where the user will consume services</p>
+        <p>REQUIRED before you can assign licenses! If missing, license assignment fails.</p>
+        <p>Block Sign In</p>
+        <p>Prevents the user from logging in</p>
+        <p>Use when employee leaves or account is compromised. User sessions are NOT immediately terminated.</p>
+        <p>Job Title / Department</p>
+        <p>Organizational info</p>
+        <p>Used in dynamic group membership rules</p>
+        <p>Manager</p>
+        <p>Sets the reporting chain</p>
+        <p>Used for approval workflows and Conditional Access</p>
+        <p>Authentication Methods</p>
+        <p>Phone, email, app for MFA/SSPR</p>
+        <p>Users can manage their own methods at mysignins.microsoft.com</p>
+      </div>
+    </div>
+
+    <div class="module" id="m-3">
+      <div class="module-header" onclick="toggleModule('m-3')">
+        <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>Deleting and Restoring Users</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>When you delete a user in Entra ID, the user goes into a “soft-deleted” state:</p>
+        <div class="list-item">Soft-deleted users can be restored within 30 days</div>
+        <div class="list-item">After 30 days, the user is permanently deleted and CANNOT be recovered</div>
+        <div class="list-item">Soft-deleted users still consume a license until permanently deleted</div>
+        <div class="list-item">To view soft-deleted users: Entra ID &gt; Users &gt; Deleted users</div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: If a question says “a user was accidentally deleted 15 days ago” — the answer is you CAN restore them. If it says “45 days ago” — the user is permanently gone and must be recreated.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="groups">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-users"></i></div>
+        <div class="module-title"><h3>Why Use Groups?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Instead of assigning permissions to each user individually (nightmare to manage), you create groups and assign permissions to the group. When someone joins or leaves, you just add/remove them from the group.</p>
+        <h4>Two Types of Groups</h4>
+        <h4>Feature</h4>
+        <h4>Security Group</h4>
+        <h4>Microsoft 365 Group</h4>
+        <p>Primary Purpose</p>
+        <p>Manage access to resources</p>
+        <p>Collaboration (shared mailbox, SharePoint, Teams)</p>
+        <p>Can be used for RBAC?</p>
+        <p>YES</p>
+        <p>YES</p>
+        <p>Can be used for licensing?</p>
+        <p>YES</p>
+        <p>YES</p>
+        <p>Creates shared mailbox?</p>
+        <p>No</p>
+        <p>Yes</p>
+        <p>Creates SharePoint site?</p>
+        <p>No</p>
+        <p>Yes</p>
+        <p>Creates Teams channel?</p>
+        <p>No</p>
+        <p>Can be connected to Teams</p>
+        <p>Dynamic membership?</p>
+        <p>Yes (requires P1)</p>
+        <p>Yes (requires P1)</p>
+        <h4>Membership Types</h4>
+        <p>Groups can have three types of membership:</p>
+        <p>1. Assigned: You manually add and remove members. Simple and direct.</p>
+        <p>2. Dynamic User: Members are automatically added/removed based on user attributes (like department, job title, country). Requires Entra ID P1 or P2.</p>
+        <p>3. Dynamic Device: Same as dynamic user but for devices. Only available for Security groups.</p>
+        <h4>Dynamic Group Membership Rules</h4>
+        <p>This is a powerful feature and is heavily tested on the exam. Dynamic groups use expressions to auto-populate:</p>
+        <h4>Dynamic Membership Rule Examples</h4>
+        <div class="cli">
+# All users in the IT department
+</div>
+        <p>(user.department -eq &quot;IT&quot;)</p>
+        <div class="cli">
+# All users with job title containing &quot;Engineer&quot;
+</div>
+        <p>(user.jobTitle -contains &quot;Engineer&quot;)</p>
+        <div class="cli">
+# All users in US OR UK
+</div>
+        <p>(user.usageLocation -eq &quot;US&quot;) -or (user.usageLocation -eq &quot;UK&quot;)</p>
+        <div class="cli">
+# All users in IT department AND with Manager role
+</div>
+        <p>(user.department -eq &quot;IT&quot;) -and (user.jobTitle -eq &quot;Manager&quot;)</p>
+        <div class="cli">
+# All users who are NOT guests
+</div>
+        <p>(user.userType -eq &quot;Member&quot;)</p>
+        <div class="cli">
+# All users with email ending in @company.com
+</div>
+        <p>(user.mail -match &quot;@company.com$&quot;)</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Dynamic Security Group</div>
+          <ol>
+            <li>Go to Microsoft Entra ID &gt; Groups &gt; New group</li>
+            <li>Group type: Security</li>
+            <li>Group name: “Dynamic-IT-Department”</li>
+            <li>Membership type: “Dynamic User”</li>
+            <li>Click “Add dynamic query”</li>
+            <li>In the rule builder: Property = department, Operator = Equals, Value = IT</li>
+            <li>Click “Validate Rules” tab — select a user to test if they would be included</li>
+            <li>Click “Save” &gt; “Create”</li>
+            <li>WAIT: Dynamic groups can take 5–15 minutes to populate. Check back after a few minutes.</li>
+            <li>Verify: Go to the group &gt; Members and confirm the correct users appear</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Dynamic groups can take up to 24 hours to fully evaluate in large tenants. You CANNOT manually add or remove members from a dynamic group — membership is entirely controlled by the rule. If you need to add even one exception, you must modify the rule or use a separate assigned group.
+        </div>
+        <h4>PRODUCTION TIP: Nesting Groups</h4>
+        <p>In real-world Azure, you often nest groups. For example: Create a dynamic group “All-Engineers” based on job title. Create a security group “Engineering-Resources-Access”. Add the “All-Engineers” group as a member of “Engineering-Resources-Access”. Assign RBAC roles to “Engineering-Resources-Access”. This way, when new engineers join, they automatically get the right access through the dynamic group membership chain.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="sspr">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-key"></i></div>
+        <div class="module-title"><h3>What Is SSPR?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>SSPR allows users to reset their own passwords without calling the helpdesk. This is one of the most asked-about features on the exam and one of the most useful in production.</p>
+        <h4>How SSPR Works (Step by Step)</h4>
+        <div class="list-item">User goes to passwordreset.microsoftonline.com (or clicks “Forgot password” at login)</div>
+        <div class="list-item">User enters their username (UPN)</div>
+        <div class="list-item">User must pass a CAPTCHA (to prevent bots)</div>
+        <div class="list-item">User verifies identity using one or more authentication methods</div>
+        <div class="list-item">If verification passes, user can set a new password</div>
+        <div class="list-item">If password writeback is enabled, the new password syncs back to on-premises AD</div>
+        <h4>SSPR Configuration Options</h4>
+        <h4>Setting</h4>
+        <h4>Options</h4>
+        <h4>Details</h4>
+        <p>SSPR Enabled</p>
+        <p>None / Selected / All</p>
+        <p>Selected lets you enable for specific groups first (pilot). All enables for entire tenant.</p>
+        <p>Authentication Methods Required</p>
+        <p>1 or 2</p>
+        <p>How many methods the user must complete. Microsoft recommends 2 for better security.</p>
+        <p>Available Methods</p>
+        <p>Mobile app notification, Mobile app code, Email, Mobile phone, Office phone, Security questions</p>
+        <p>You choose which methods are available. Security questions are NOT available for admins.</p>
+        <p>Number of Security Questions Required</p>
+        <p>3 to 5</p>
+        <p>Questions required to register AND questions required to reset (can be different numbers).</p>
+        <p>Registration</p>
+        <p>Require at registration / Days to re-confirm</p>
+        <p>Force users to register methods when they next sign in. Re-confirm every 180 days default.</p>
+        <p>Password Writeback</p>
+        <p>On / Off</p>
+        <p>Syncs new password back to on-premises AD. Requires Entra Connect + P1 license.</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Enable and Test SSPR</div>
+          <ol>
+            <li>Go to Microsoft Entra ID &gt; Password reset</li>
+            <li>Under “Properties”: Set “Self-service password reset enabled” to “Selected”</li>
+            <li>Select a group (e.g., create a test group with your test user)</li>
+            <li>Go to “Authentication methods”: Set “Number of methods required to reset” to 1 (for testing). Enable “Email” and “Mobile phone”</li>
+            <li>Go to “Registration”: Enable “Require users to register when signing in”</li>
+            <li>Click “Save”</li>
+            <li>Open an InPrivate/Incognito browser window</li>
+            <li>Sign in as your test user at portal.azure.com</li>
+            <li>The user will be prompted to register authentication methods (email, phone)</li>
+            <li>After registering, sign out and go to passwordreset.microsoftonline.com</li>
+            <li>Enter the test user’s email and complete the reset process</li>
+            <li>Verify the password was successfully changed by signing in with the new password</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Security questions are NOT available for administrator accounts — this is a security measure. Admins always need 2 methods. Also, SSPR requires Entra ID P1 minimum for the “Selected” option and P1 for password writeback.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="b2b">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>What Is B2B Collaboration?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Azure AD B2B (Business-to-Business) lets you invite external users (partners, vendors, contractors) to access your Azure resources. They sign in with their own identity (their company’s account, Gmail, etc.) but appear as “Guest” users in your directory.</p>
+        <h4>How B2B Invitation Works</h4>
+        <div class="list-item">You invite an external user by their email address</div>
+        <div class="list-item">They receive an email invitation with a link</div>
+        <div class="list-item">They click the link and sign in with their OWN identity provider</div>
+        <div class="list-item">A Guest user object is created in YOUR Entra ID directory</div>
+        <div class="list-item">You can assign them to groups, give RBAC roles, etc.</div>
+        <h4>Guest User Default Permissions</h4>
+        <p>By default, guest users have LIMITED permissions:</p>
+        <div class="list-item">Can read their own profile</div>
+        <div class="list-item">Cannot enumerate other users or groups (can’t browse the directory)</div>
+        <div class="list-item">Cannot read directory information (limited view)</div>
+        <div class="list-item">Can be granted additional permissions through RBAC</div>
+        <p>You can customize guest permissions at: Entra ID &gt; External Identities &gt; External collaboration settings:</p>
+        <div class="list-item">Most restrictive: Guest users have limited access to directory objects</div>
+        <div class="list-item">Default: Guests can see members but not roles</div>
+        <div class="list-item">Most inclusive: Guest users have the same access as members (NOT recommended)</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Invite an External Guest User</div>
+          <ol>
+            <li>Go to Microsoft Entra ID &gt; Users &gt; New user &gt; Invite external user</li>
+            <li>Enter the external email address (e.g., partner@theircompany.com)</li>
+            <li>Add a personal message: “Welcome to our Azure environment”</li>
+            <li>Click “Properties” tab and fill in: Display name, Job title, Department</li>
+            <li>Click “Assignments” tab — add them to a security group like “External-Vendors”</li>
+            <li>Click “Review + invite” &gt; “Invite”</li>
+            <li>The guest will receive an email. Once they accept, their status changes from “Pending” to “Accepted”</li>
+            <li>Verify: Go to Users &gt; filter by User Type = Guest to see all guest users</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="rbac">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>Understanding RBAC (The Core of Azure Security)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Role-Based Access Control (RBAC) is how Azure controls WHO can do WHAT with WHICH resources. It is built on three core concepts:</p>
+        <h4>The Three Components of Every RBAC Assignment</h4>
+        <h4>Component</h4>
+        <h4>Also Called</h4>
+        <h4>What It Is</h4>
+        <h4>Example</h4>
+        <p>Security Principal</p>
+        <p>WHO</p>
+        <p>The identity getting access</p>
+        <p>User: john@company.com, Group: IT-Admins, Service Principal, Managed Identity</p>
+        <p>Role Definition</p>
+        <p>WHAT</p>
+        <p>Collection of allowed actions</p>
+        <p>Reader (view only), Contributor (manage everything except access), Owner (full control)</p>
+        <p>Scope</p>
+        <p>WHERE</p>
+        <p>The level at which access applies</p>
+        <p>Management Group, Subscription, Resource Group, or Individual Resource</p>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          ANALOGY: Hotel Keycard System
+        </div>
+        <p>Security Principal = The hotel guest (WHO). Role Definition = The type of keycard (WHAT doors it opens — pool, gym, restaurant, room). Scope = Which floor or building the keycard works on (WHERE). Just like a hotel keycard, an RBAC assignment is the COMBINATION of a person + keycard type + building. Without all three, access doesn’t work.</p>
+        <h4>The Four Fundamental Built-in Roles</h4>
+        <p>Azure has 300+ built-in roles, but these four are the foundation:</p>
+        <h4>Role</h4>
+        <h4>Actions (What they CAN do)</h4>
+        <h4>Cannot Do</h4>
+        <h4>Use Case</h4>
+        <p>Owner</p>
+        <p>Everything — full control over resources</p>
+        <p>Nothing — has all permissions</p>
+        <p>Subscription administrators, team leads who need to delegate access</p>
+        <p>Contributor</p>
+        <p>Create, update, delete ANY resource</p>
+        <p>Cannot assign roles to others, cannot manage access</p>
+        <p>Developers, engineers who need to deploy resources but shouldn’t control access</p>
+        <p>Reader</p>
+        <p>View all resources and their configurations</p>
+        <p>Cannot modify, create, or delete anything</p>
+        <p>Auditors, finance teams, stakeholders who need visibility</p>
+        <p>User Access Administrator</p>
+        <p>Manage user access to Azure resources</p>
+        <p>Cannot create or modify resources themselves</p>
+        <p>Security teams who manage RBAC without needing resource control</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Owner = Contributor + User Access Administrator. This is a very common exam question. Also: Contributor CANNOT assign roles. If a question asks about giving someone the ability to assign roles, the answer is NEVER Contributor.
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>Scope Hierarchy — How Inheritance Works</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>RBAC follows a strict hierarchy. Permissions assigned at a higher level FLOW DOWN to all child levels:</p>
+        <p>Management Group (Highest)</p>
+        <div class="diagram">
+└── Subscription
+└── Resource Group
+└── Resource (Lowest)
+</div>
+        <h4>Key Rules:</h4>
+        <div class="list-item">Permissions are INHERITED downward (a Reader role at the Subscription level gives Reader access to ALL resource groups and resources in that subscription)</div>
+        <div class="list-item">RBAC is ADDITIVE — if you have Reader at Subscription + Contributor at Resource Group, you get Contributor at that Resource Group (permissions are a UNION, not intersection)</div>
+        <div class="list-item">Deny assignments OVERRIDE allow (but deny assignments can only be created by Azure Blueprints, not manually)</div>
+        <div class="list-item">You CANNOT restrict inherited permissions at a lower scope — you can only ADD more permissions</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Assign RBAC Roles at Different Scopes</div>
+          <ol>
+            <li>PART A: Assign Reader Role at Subscription Level</li>
+            <li>Go to Subscriptions &gt; select your subscription &gt; Access control (IAM)</li>
+            <li>Click “+ Add” &gt; “Add role assignment”</li>
+            <li>Search for “Reader” role &gt; select it &gt; click Next</li>
+            <li>Click “+ Select members” &gt; search for your test user &gt; select them &gt; click Select</li>
+            <li>Click “Review + assign” twice</li>
+            <li>PART B: Assign Contributor Role at Resource Group Level</li>
+            <li>Go to Resource groups &gt; select a resource group &gt; Access control (IAM)</li>
+            <li>Add role assignment: “Contributor” to the same test user</li>
+            <li>PART C: Verify Effective Access</li>
+            <li>Go to any resource inside that resource group &gt; Access control (IAM) &gt; Check access</li>
+            <li>Search for the test user and examine their effective roles</li>
+            <li>You should see BOTH Reader (inherited from subscription) AND Contributor (from resource group)</li>
+            <li>The effective permission is Contributor at this scope because RBAC is additive</li>
+          </ol>
+        </div>
+        <h4>Understanding Role Definitions (JSON Structure)</h4>
+        <p>Every role (built-in or custom) is defined as a JSON structure. Understanding this structure is essential:</p>
+        <h4>Example: Contributor Role Definition</h4>
+        <p>{</p>
+        <p>&quot;Name&quot;: &quot;Contributor&quot;,</p>
+        <p>&quot;Id&quot;: &quot;b24988ac-6180-42a0-ab88-20f7382dd24c&quot;,</p>
+        <p>&quot;Description&quot;: &quot;Lets you manage everything except access&quot;,</p>
+        <p>&quot;Actions&quot;: [</p>
+        <p>&quot;*&quot;                           // ALL actions allowed</p>
+        <p>],</p>
+        <p>&quot;NotActions&quot;: [</p>
+        <p>&quot;Microsoft.Authorization/*/Delete&quot;,  // Cannot delete role assignments</p>
+        <p>&quot;Microsoft.Authorization/*/Write&quot;,   // Cannot create role assignments</p>
+        <p>&quot;Microsoft.Authorization/elevateAccess/Action&quot;</p>
+        <p>],</p>
+        <p>&quot;DataActions&quot;: [],            // No data-plane access specified</p>
+        <p>&quot;NotDataActions&quot;: [],</p>
+        <p>&quot;AssignableScopes&quot;: [&quot;/&quot;]    // Assignable everywhere</p>
+        <p>}</p>
+        <p>The key fields are:</p>
+        <div class="list-item">Actions: Management-plane operations allowed (e.g., Microsoft.Compute/virtualMachines/start/action)</div>
+        <div class="list-item">NotActions: Operations explicitly excluded from Actions</div>
+        <div class="list-item">DataActions: Data-plane operations allowed (e.g., Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read)</div>
+        <div class="list-item">NotDataActions: Data-plane operations explicitly excluded</div>
+        <div class="list-item">AssignableScopes: Where this role can be used/assigned</div>
+        <h4>Custom Roles</h4>
+        <p>When built-in roles don’t meet your needs, you can create custom roles. Custom roles require Entra ID P1 or P2 (or Pay-As-You-Go/Enterprise subscription).</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Custom Role via Azure CLI</div>
+          <ol>
+            <li>Create a JSON file called custom-role.json with this content:</li>
+            <li>{</li>
+            <li>&quot;Name&quot;: &quot;VM Operator&quot;,</li>
+            <li>&quot;Description&quot;: &quot;Can start, stop, and restart VMs but not create or delete them&quot;,</li>
+            <li>&quot;Actions&quot;: [</li>
+            <li>&quot;Microsoft.Compute/virtualMachines/start/action&quot;,</li>
+            <li>&quot;Microsoft.Compute/virtualMachines/restart/action&quot;,</li>
+            <li>&quot;Microsoft.Compute/virtualMachines/deallocate/action&quot;,</li>
+            <li>&quot;Microsoft.Compute/virtualMachines/read&quot;,</li>
+            <li>&quot;Microsoft.Network/*/read&quot;,</li>
+            <li>&quot;Microsoft.Resources/subscriptions/resourceGroups/read&quot;</li>
+            <li>],</li>
+            <li>&quot;NotActions&quot;: [],</li>
+            <li>&quot;AssignableScopes&quot;: [&quot;/subscriptions/YOUR-SUBSCRIPTION-ID&quot;]</li>
+            <li>}</li>
+            <li>Run: az role definition create --role-definition custom-role.json</li>
+            <li>Verify: az role definition list --custom-role-only true</li>
+            <li>Assign it: az role assignment create --assignee user@domain.com --role &quot;VM Operator&quot; --resource-group myRG</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Custom roles can be scoped to Management Groups, Subscriptions, or Resource Groups — but NOT individual resources. You can have a maximum of 5000 custom roles per tenant. Custom roles are defined in JSON and MUST include AssignableScopes.
+        </div>
+        <h4>RBAC vs Entra ID Roles — The Critical Difference</h4>
+        <h4>Aspect</h4>
+        <h4>Azure RBAC Roles</h4>
+        <h4>Entra ID Roles</h4>
+        <p>What they control</p>
+        <p>Azure resources (VMs, Storage, Networks)</p>
+        <p>Entra ID directory (Users, Groups, Apps)</p>
+        <p>Examples</p>
+        <p>Owner, Contributor, VM Contributor, Storage Blob Data Reader</p>
+        <p>Global Administrator, User Administrator, Application Administrator</p>
+        <p>Where assigned</p>
+        <p>Management Group, Subscription, Resource Group, Resource</p>
+        <p>Entra ID tenant level only</p>
+        <p>Where managed</p>
+        <p>Subscription &gt; Access Control (IAM)</p>
+        <p>Entra ID &gt; Roles and administrators</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: If a question asks about managing USER PASSWORDS or APPLICATION REGISTRATIONS, the answer is an Entra ID Role (like User Administrator). If it asks about managing VIRTUAL MACHINES or STORAGE, the answer is an Azure RBAC Role (like Contributor). The exam WILL try to confuse you on this.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="subscriptions">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-sitemap"></i></div>
+        <div class="module-title"><h3>What Is a Subscription?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>A subscription is a logical container that serves as BOTH a billing boundary and an access control boundary. Every Azure resource must belong to exactly one subscription.</p>
+        <h4>Key Facts About Subscriptions</h4>
+        <div class="list-item">A subscription is linked to exactly ONE Entra ID tenant (trust relationship)</div>
+        <div class="list-item">A tenant can have MULTIPLE subscriptions</div>
+        <div class="list-item">A subscription is the default scope for billing — all resources in a subscription are billed to that subscription’s payment method</div>
+        <div class="list-item">RBAC assigned at the subscription level is inherited by ALL resource groups and resources within it</div>
+        <div class="list-item">Subscriptions have limits/quotas (e.g., max 980 resource groups, max vCPU cores per region)</div>
+        <h4>Subscription Types</h4>
+        <h4>Type</h4>
+        <h4>Who Uses It</h4>
+        <h4>Key Feature</h4>
+        <p>Pay-As-You-Go</p>
+        <p>Small businesses, individuals</p>
+        <p>Pay only for what you use, credit card billing</p>
+        <p>Enterprise Agreement (EA)</p>
+        <p>Large organizations (500+ seats)</p>
+        <p>Volume discounts, monetary commitments, centralized billing</p>
+        <p>Cloud Solution Provider (CSP)</p>
+        <p>Organizations buying through a partner</p>
+        <p>Partner manages billing and support</p>
+        <p>Free Trial</p>
+        <p>New users exploring Azure</p>
+        <p>$200 credit for 30 days + free services for 12 months</p>
+        <p>Visual Studio / Dev-Test</p>
+        <p>Developers with VS subscriptions</p>
+        <p>Discounted rates for dev/test workloads</p>
+        <h4>CRITICAL PRODUCTION FACT: Moving Subscriptions Between Tenants</h4>
+        <p>When you transfer a subscription to a different Entra ID tenant, ALL RBAC role assignments are PERMANENTLY DELETED. All managed identities are disabled. All key vault access policies are removed. This is one of the most impactful operations in Azure and is a favorite exam question. Always plan for re-assignment of all permissions after a tenant transfer.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="mgmtgroups">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-users"></i></div>
+        <div class="module-title"><h3>What Are Management Groups?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Management groups are containers ABOVE subscriptions that allow you to organize subscriptions into a hierarchy and apply governance (RBAC and Policy) at scale.</p>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          Think of it this way:
+        </div>
+        <p>Root Management Group (auto-created, cannot be deleted)</p>
+        <div class="diagram">
+├── Production Management Group
+│    ├── Prod Subscription 1
+│    └── Prod Subscription 2
+├── Development Management Group
+│    └── Dev Subscription
+└── Testing Management Group
+└── Test Subscription
+</div>
+        <h4>Key Rules</h4>
+        <div class="list-item">Maximum depth: 6 levels (not counting the root)</div>
+        <div class="list-item">Maximum 10,000 management groups per tenant</div>
+        <div class="list-item">Each management group can have multiple children but only ONE parent</div>
+        <div class="list-item">All subscriptions and management groups roll up to the root management group</div>
+        <div class="list-item">The root management group CANNOT be moved or deleted</div>
+        <div class="list-item">By default, only Global Administrator (after elevating access) can manage the root management group</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Management Group Hierarchy</div>
+          <ol>
+            <li>Go to portal.azure.com &gt; search for “Management groups”</li>
+            <li>If this is your first time, click “Start using management groups”</li>
+            <li>Click “+ Add management group”</li>
+            <li>Management group ID: “mg-production” (this cannot be changed later!)</li>
+            <li>Display name: “Production”</li>
+            <li>Click Save</li>
+            <li>Create another: ID = “mg-development”, Name = “Development”</li>
+            <li>Now move a subscription: Click on “Production” &gt; “+ Add subscription” &gt; select your subscription</li>
+            <li>Apply a policy: Click on “Production” &gt; “Policies” &gt; Assign the “Allowed locations” policy</li>
+            <li>This policy will now apply to ALL subscriptions under the Production management group</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: The Management Group ID is PERMANENT and cannot be changed after creation. The display name CAN be changed. This is a common trick question. Also, by default the root management group ID equals the Entra ID tenant ID.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="policy">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-gavel"></i></div>
+        <div class="module-title"><h3>What Is Azure Policy?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Azure Policy is a service that lets you create, assign, and manage rules (policies) that your Azure resources must follow. Unlike RBAC (which controls WHO), Policy controls WHAT CAN EXIST regardless of who is creating it.</p>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          ANALOGY: City Building Codes
+        </div>
+        <p>Imagine Azure Policy as the building codes for a city. RBAC decides who is allowed to build (licensed contractors). Policy decides what kind of buildings are allowed (no more than 10 stories, must have fire exits, must use approved materials). Even if you’re the most powerful contractor in town, you STILL have to follow building codes. Similarly, even an Owner in Azure must follow Policy rules.</p>
+        <h4>Policy Concepts</h4>
+        <h4>Concept</h4>
+        <h4>What It Is</h4>
+        <h4>Example</h4>
+        <p>Policy Definition</p>
+        <p>A single rule written in JSON</p>
+        <p>Require a tag on every resource group</p>
+        <p>Policy Initiative (Set)</p>
+        <p>A GROUP of related policy definitions bundled together</p>
+        <p>A “Compliance” initiative that includes: require tags + allowed locations + require encryption</p>
+        <p>Policy Assignment</p>
+        <p>Applying a policy/initiative to a specific SCOPE</p>
+        <p>Assign “Allowed Locations” policy to the Production subscription</p>
+        <p>Policy Parameters</p>
+        <p>Variables that make a policy reusable</p>
+        <p>The “Allowed Locations” policy has a parameter for which locations to allow</p>
+        <p>Compliance</p>
+        <p>Whether existing resources follow the policy</p>
+        <p>85% of resources are compliant, 15% need remediation</p>
+        <h4>Policy Effects (MUST MEMORIZE)</h4>
+        <p>Every policy definition has an “effect” that determines what happens when a resource doesn’t comply:</p>
+        <h4>Effect</h4>
+        <h4>What Happens</h4>
+        <h4>When to Use</h4>
+        <p>Deny</p>
+        <p>BLOCKS creation or modification of non-compliant resources</p>
+        <p>When you want to PREVENT something (e.g., block VMs in unapproved regions)</p>
+        <p>Audit</p>
+        <p>ALLOWS the resource but flags it as non-compliant in compliance reports</p>
+        <p>When you want visibility without blocking (discovery phase)</p>
+        <p>AuditIfNotExists</p>
+        <p>Checks if a related resource exists and audits if it doesn’t</p>
+        <p>Check if diagnostic settings are enabled on resources</p>
+        <p>Append</p>
+        <p>ADDS properties to a resource during creation/update</p>
+        <p>Auto-add a tag to resources that don’t have one</p>
+        <p>Modify</p>
+        <p>ADDS, UPDATES, or REMOVES properties/tags on existing resources</p>
+        <p>Enforce specific tag values or add managed identity to VMs</p>
+        <p>DeployIfNotExists (DINE)</p>
+        <p>Deploys a related resource if it doesn’t exist</p>
+        <p>Auto-deploy diagnostic settings when a VM is created</p>
+        <p>Disabled</p>
+        <p>Policy exists but is not enforced</p>
+        <p>Temporarily disable a policy without deleting the assignment</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Policy evaluation order: Disabled &gt; Append/Modify &gt; Deny &gt; Audit. This means: if a policy has Deny effect, the resource is blocked BEFORE Audit policies even evaluate. Also: DeployIfNotExists and Modify require a MANAGED IDENTITY for remediation (because they need to create/modify resources).
+        </div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create and Assign an Azure Policy</div>
+          <ol>
+            <li>PART A: Assign a Built-in Policy (Allowed Locations)</li>
+            <li>Go to Policy service in the portal (search for “Policy”)</li>
+            <li>Click “Assignments” &gt; “Assign policy”</li>
+            <li>Scope: Select your subscription (or a specific resource group to limit impact)</li>
+            <li>Policy definition: Search for “Allowed locations” and select it</li>
+            <li>Click “Parameters” tab: Select “East US” and “West US” as allowed locations</li>
+            <li>Click “Review + create” &gt; “Create”</li>
+            <li>PART B: Test the Policy</li>
+            <li>Try to create a resource (like a resource group) in “UK South”</li>
+            <li>You should get a DENY error saying the location is not allowed by policy</li>
+            <li>Now create the same resource in “East US” — it should succeed</li>
+            <li>PART C: Check Compliance</li>
+            <li>Go to Policy &gt; Compliance</li>
+            <li>You’ll see overall compliance state and which resources are non-compliant</li>
+            <li>Non-compliant resources created BEFORE the policy was assigned will show as non-compliant but won’t be deleted (policies are NOT retroactive for Deny)</li>
+          </ol>
+        </div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Custom Policy (Require Tag on Resource Groups)</div>
+          <ol>
+            <li>Go to Policy &gt; Definitions &gt; “+ Policy definition”</li>
+            <li>Definition location: Select your subscription</li>
+            <li>Name: “Require CostCenter Tag on Resource Groups”</li>
+            <li>Category: Create new &gt; “Custom-Governance”</li>
+            <li>In the policy rule, paste this JSON structure (conceptually):</li>
+            <li>Rule: IF resourceType equals Microsoft.Resources/subscriptions/resourceGroups AND tag CostCenter does not exist THEN effect = Deny</li>
+            <li>Click Save</li>
+            <li>Now assign this policy to your subscription (same process as Part A above)</li>
+            <li>Test: Try creating a resource group WITHOUT the CostCenter tag — it should be denied</li>
+            <li>Test: Create a resource group WITH tag CostCenter=IT001 — it should succeed</li>
+          </ol>
+        </div>
+        <h4>PRODUCTION TIP: Policy Adoption Strategy</h4>
+        <p>In real-world production environments, NEVER start with Deny. Follow this rollout: Phase 1 — Audit: Assign policies with Audit effect to understand current compliance state. Phase 2 — Remediate: Fix existing non-compliant resources. Phase 3 — Deny: Change the effect to Deny once you’re confident everything is compliant. This prevents accidentally blocking critical production deployments.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="locks">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-lock"></i></div>
+        <div class="module-title"><h3>What Are Resource Locks?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Resource locks prevent accidental deletion or modification of critical Azure resources. Even users with Owner permissions cannot bypass a lock — they must first REMOVE the lock, then perform the action.</p>
+        <h4>Two Types of Locks</h4>
+        <h4>Lock Type</h4>
+        <h4>Can Read?</h4>
+        <h4>Can Modify?</h4>
+        <h4>Can Delete?</h4>
+        <h4>Use Case</h4>
+        <p>ReadOnly (CanNotModify)</p>
+        <p>Yes</p>
+        <p>No</p>
+        <p>No</p>
+        <p>Production databases, critical configs that should never change</p>
+        <p>Delete (CanNotDelete)</p>
+        <p>Yes</p>
+        <p>Yes</p>
+        <p>No</p>
+        <p>Production VMs that can be scaled/updated but never accidentally deleted</p>
+        <h4>Important Lock Behaviors</h4>
+        <div class="list-item">Locks are INHERITED: A lock on a resource group applies to ALL resources inside it</div>
+        <div class="list-item">Locks override RBAC: Even an Owner CANNOT delete a resource that has a Delete lock without removing the lock first</div>
+        <div class="list-item">ReadOnly lock on a Storage Account blocks listing access keys (because listing keys is a POST operation, not GET)</div>
+        <div class="list-item">ReadOnly lock on a resource group prevents creating NEW resources inside it (because create is a write operation)</div>
+        <div class="list-item">Locks do NOT prevent data-plane operations (e.g., a Delete lock on a storage account doesn’t prevent someone from deleting blobs inside it)</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Apply and Test Resource Locks</div>
+          <ol>
+            <li>Create a test resource group: “RG-LockTest”</li>
+            <li>Create a storage account inside it</li>
+            <li>Go to RG-LockTest &gt; Locks &gt; + Add</li>
+            <li>Lock name: “prevent-deletion”, Lock type: Delete</li>
+            <li>Click OK</li>
+            <li>Now try to delete the resource group — you should get an error about the lock</li>
+            <li>Now try to delete the storage account inside the RG — this should also fail (lock is inherited)</li>
+            <li>Try modifying the storage account (e.g., change access tier) — this should succeed (Delete lock allows modifications)</li>
+            <li>Now change the lock to ReadOnly and try modifying the storage account — it should fail</li>
+            <li>To delete: First remove the lock (Locks &gt; select lock &gt; Delete), then delete the resource</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: The ReadOnly lock on a Storage Account blocking key listing is one of the MOST tested gotchas. Remember: Listing keys = POST action = blocked by ReadOnly. Also: Locks are about management-plane operations, NOT data-plane. A Delete lock on a SQL database prevents deleting the database but NOT deleting data inside it.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="tags">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-tag"></i></div>
+        <div class="module-title"><h3>What Are Tags?</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Tags are name-value pairs (metadata) you attach to Azure resources for organization, cost tracking, and automation. They are NOT security boundaries — they are organizational labels.</p>
+        <h4>Key Tag Facts</h4>
+        <div class="list-item">Format: Key = Value (e.g., Environment = Production, CostCenter = IT001, Owner = john@company.com)</div>
+        <div class="list-item">Maximum: 50 tags per resource, resource group, or subscription</div>
+        <div class="list-item">Tag names are case-INSENSITIVE, tag values are case-SENSITIVE</div>
+        <div class="list-item">Tags are NOT inherited from resource group to resources by default</div>
+        <div class="list-item">Use Azure Policy to enforce tag inheritance</div>
+        <div class="list-item">Tags appear in billing reports for cost allocation</div>
+        <h4>Common Tag Strategies in Production</h4>
+        <h4>Tag Name</h4>
+        <h4>Example Values</h4>
+        <h4>Purpose</h4>
+        <p>Environment</p>
+        <p>Production, Development, Testing, Staging</p>
+        <p>Identify which environment a resource belongs to</p>
+        <p>CostCenter</p>
+        <p>IT001, MKT002, FIN003</p>
+        <p>Allocate costs to departments</p>
+        <p>Owner</p>
+        <p>john@company.com</p>
+        <p>Know who is responsible for the resource</p>
+        <p>Project</p>
+        <p>ProjectAlpha, WebsiteRedesign</p>
+        <p>Track resources by project</p>
+        <p>CreatedDate</p>
+        <p>2026-03-30</p>
+        <p>Track when resources were created</p>
+        <p>AutoShutdown</p>
+        <p>Yes, No</p>
+        <p>Used by automation to identify resources to shut down after hours</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Apply Tags and Enforce with Policy</div>
+          <ol>
+            <li>PART A: Manually Apply Tags</li>
+            <li>Go to any resource &gt; Tags</li>
+            <li>Add: Name = Environment, Value = Production</li>
+            <li>Add: Name = CostCenter, Value = IT001</li>
+            <li>Click Save</li>
+            <li>PART B: Apply Tags at Resource Group Level</li>
+            <li>Go to your resource group &gt; Tags</li>
+            <li>Add: Name = Department, Value = Engineering</li>
+            <li>Note: This tag does NOT automatically appear on resources inside the RG!</li>
+            <li>PART C: Enforce Tag Inheritance with Policy</li>
+            <li>Go to Policy &gt; Assignments &gt; Assign policy</li>
+            <li>Search for “Inherit a tag from the resource group” and select it</li>
+            <li>Parameter: Tag Name = Department</li>
+            <li>Effect: Modify (this auto-adds the tag to resources missing it)</li>
+            <li>Create a remediation task to fix existing resources</li>
+            <li>New resources in the RG will now automatically get the Department tag</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Tags are NOT inherited by default — this is one of the top 5 most tested facts in AZ-104. You MUST use Azure Policy to enforce inheritance. The specific built-in policies are: “Inherit a tag from the resource group” and “Inherit a tag from the subscription.”
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="cost">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-tag"></i></div>
+        <div class="module-title"><h3>Managing Azure Costs</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Azure Cost Management helps you monitor, allocate, and optimize cloud spending. This is important both for the exam and for real-world production.</p>
+        <h4>Key Tools</h4>
+        <h4>Tool</h4>
+        <h4>What It Does</h4>
+        <h4>Key Detail</h4>
+        <p>Cost Analysis</p>
+        <p>View and analyze current spending</p>
+        <p>Filter by resource, tag, location, service. Export to CSV.</p>
+        <p>Budgets</p>
+        <p>Set spending limits with alert thresholds</p>
+        <p>Budgets do NOT stop spending — they only send alerts!</p>
+        <p>Azure Advisor</p>
+        <p>Recommendations for cost optimization</p>
+        <p>Suggests right-sizing VMs, reserved instances, unused resources</p>
+        <p>Cost Alerts</p>
+        <p>Notify when spending reaches thresholds</p>
+        <p>Actual alerts (already spent) vs Forecasted alerts (projected to spend)</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Budget with Alerts</div>
+          <ol>
+            <li>Go to Cost Management + Billing &gt; Cost Management &gt; Budgets</li>
+            <li>Click “+ Add”</li>
+            <li>Name: “Monthly-IT-Budget”</li>
+            <li>Reset period: Monthly</li>
+            <li>Budget amount: $100 (for testing)</li>
+            <li>Click Next to set alert conditions:</li>
+            <li>Alert 1: Type = Actual, % of budget = 50, Email = your-email@company.com</li>
+            <li>Alert 2: Type = Actual, % of budget = 80, Email = your-email@company.com</li>
+            <li>Alert 3: Type = Forecasted, % of budget = 100, Email = your-email@company.com + manager@company.com</li>
+            <li>Click Create</li>
+            <li>Remember: This will ALERT you but NOT stop resources from running!</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Budgets do NOT prevent spending — they ONLY send notifications. If a question says “how to prevent exceeding a budget,” the answer is NOT just setting a budget. You would need Azure Policy or manual intervention. This is a very common trap.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="scenarios">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-building"></i></div>
+        <div class="module-title"><h3>Scenario 1: New Company Onboarding</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>You are tasked with setting up Azure identity and governance for a new company with 200 employees across 3 departments (Engineering, Marketing, Finance) with Dev/Test and Production environments.</p>
+        <h4>Solution Architecture</h4>
+        <div class="list-item">Create a tenant with a custom domain (company.com)</div>
+        <div class="list-item">Create Management Groups: Root &gt; Production, Development</div>
+        <div class="list-item">Create Subscriptions: Prod-Sub, Dev-Sub (one per management group)</div>
+        <div class="list-item">Create Dynamic Groups based on department attribute</div>
+        <div class="list-item">Assign RBAC: Engineering = Contributor on Dev-Sub, Reader on Prod-Sub. Operations = Owner on Prod-Sub</div>
+        <div class="list-item">Apply Policies at Management Group level: Allowed locations, Required tags (Environment, CostCenter, Owner)</div>
+        <div class="list-item">Enable SSPR for all users with 2 authentication methods</div>
+        <div class="list-item">Lock all Production resource groups with Delete locks</div>
+        <div class="list-item">Set up budgets per subscription with alerts at 50%, 80%, and 100%</div>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-building"></i></div>
+        <div class="module-title"><h3>Scenario 2: External Vendor Access</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>A third-party vendor needs temporary access to your production storage accounts for a 3-month data migration project.</p>
+        <h4>Solution</h4>
+        <div class="list-item">Invite the vendor team as B2B Guest users</div>
+        <div class="list-item">Create a Security Group called “External-DataMigration”</div>
+        <div class="list-item">Add all vendor guest users to this group</div>
+        <div class="list-item">Assign the “Storage Blob Data Contributor” RBAC role to this group, scoped to ONLY the specific storage accounts (not the entire subscription)</div>
+        <div class="list-item">Set a calendar reminder to remove the group assignment after 3 months</div>
+        <div class="list-item">For production: Use Entra ID P2 with Access Reviews to auto-review guest access quarterly</div>
+      </div>
+    </div>
+
+    <div class="module" id="m-2">
+      <div class="module-header" onclick="toggleModule('m-2')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-gavel"></i></div>
+        <div class="module-title"><h3>Scenario 3: Compliance Enforcement</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Your company must ensure all resources are deployed only in US regions, all resources have cost tracking tags, and no one can accidentally delete production databases.</p>
+        <h4>Solution</h4>
+        <div class="list-item">Azure Policy: Assign “Allowed locations” policy at the Root Management Group with only US regions selected</div>
+        <div class="list-item">Azure Policy: Assign “Require tag and its value” for Environment and CostCenter tags</div>
+        <div class="list-item">Resource Locks: Apply Delete locks on all production database resources</div>
+        <div class="list-item">RBAC: Use custom roles that exclude delete permissions for database administrators</div>
+        <div class="list-item">Cost Management: Create budgets with alerts for each department’s cost center</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="practice">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>Top 20 Must-Know Facts (Quick Revision)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <div class="list-item">Entra ID P1 is needed for: Dynamic Groups, Conditional Access, SSPR, Group-based licensing</div>
+        <div class="list-item">Entra ID P2 is needed for: PIM, Identity Protection, Access Reviews</div>
+        <div class="list-item">Deleted users can be restored within 30 days (soft delete)</div>
+        <div class="list-item">Dynamic group membership can take up to 24 hours in large tenants</div>
+        <div class="list-item">You cannot manually add members to a dynamic group</div>
+        <div class="list-item">Security questions are NOT available for admin accounts in SSPR</div>
+        <div class="list-item">SSPR password writeback requires Entra ID P1 + Entra Connect</div>
+        <div class="list-item">RBAC is ADDITIVE — permissions are a union, not intersection</div>
+        <div class="list-item">Owner = Contributor + User Access Administrator</div>
+        <div class="list-item">Contributor CANNOT assign roles to others</div>
+        <div class="list-item">Moving a subscription between tenants DELETES all RBAC assignments</div>
+        <div class="list-item">Management groups: max 6 levels deep (excluding root), max 10,000 per tenant</div>
+        <div class="list-item">Management group ID is permanent and cannot be changed after creation</div>
+        <div class="list-item">Policy effects evaluation order: Disabled &gt; Append/Modify &gt; Deny &gt; Audit</div>
+        <div class="list-item">DeployIfNotExists and Modify effects require a managed identity</div>
+        <div class="list-item">Policies are NOT retroactive for Deny (won’t delete existing non-compliant resources)</div>
+        <div class="list-item">Tags are NOT inherited from resource groups to resources by default</div>
+        <div class="list-item">ReadOnly lock on storage account blocks listing access keys</div>
+        <div class="list-item">Resource locks don’t affect data-plane operations</div>
+        <div class="list-item">Budgets do NOT prevent spending — they only send alerts</div>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-pencil-alt"></i></div>
+        <div class="module-title"><h3>Practice Questions</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <p>Q1: Your company requires that all virtual machines must be deployed only in the East US and West US regions. No user, regardless of their role, should be able to create VMs in other regions. What should you use?</p>
+        <p>A) RBAC custom role  B) Azure Policy with Deny effect  C) Resource Lock  D) Management Group</p>
+        <p>Answer: B — Azure Policy with Deny effect enforces what resources CAN EXIST regardless of who creates them.</p>
+        <p>Q2: A user has the Reader role at the Subscription level and the Contributor role at a Resource Group level. What is their effective access at the Resource Group level?</p>
+        <p>A) Reader only  B) Contributor only  C) Reader + Contributor (both apply)  D) No access</p>
+        <p>Answer: C — RBAC is additive. The user has the union of both roles at the RG level, which effectively gives them Contributor permissions.</p>
+        <p>Q3: You need to automatically add all users in the Sales department to a security group. The group membership should update without manual intervention. What type of group should you create?</p>
+        <p>A) Assigned security group  B) Dynamic user security group  C) Microsoft 365 group  D) Distribution group</p>
+        <p>Answer: B — A dynamic user security group with rule (user.department -eq &quot;Sales&quot;) will auto-update membership. Requires Entra ID P1.</p>
+        <p>Q4: You applied a ReadOnly lock on a storage account. A developer reports they cannot list the storage account access keys. Why?</p>
+        <p>A) They don’t have the right RBAC role  B) ReadOnly lock blocks POST operations and listing keys is a POST action  C) The lock is broken  D) ReadOnly locks only block delete operations</p>
+        <p>Answer: B — Listing storage keys is a POST action, and ReadOnly locks block all write/POST operations. This is a well-known gotcha.</p>
+        <p>Q5: You created a budget of $500/month for your subscription. What happens when the spending reaches $500?</p>
+        <p>A) All resources are automatically stopped  B) New deployments are blocked  C) Nothing happens to resources — only alert notifications are sent  D) The subscription is suspended</p>
+        <p>Answer: C — Budgets only send alerts. They do NOT stop, suspend, or block any resources.</p>
+        <p>Q6: You need to give a contractor the ability to manage virtual machines but NOT assign roles to other users. Which built-in role should you assign?</p>
+        <p>A) Owner  B) Contributor  C) User Access Administrator  D) Virtual Machine Administrator Login</p>
+        <p>Answer: B — Contributor can manage all resources but cannot assign roles. Owner can do both.</p>
+        <p>Q7: You applied the tag Department=IT to a resource group. Do the resources inside the resource group automatically get this tag?</p>
+        <p>A) Yes, tags are always inherited  B) No, tags are never inherited  C) No, but you can use Azure Policy to enforce inheritance  D) Yes, but only for new resources</p>
+        <p>Answer: C — Tags are NOT inherited by default. Use the built-in policy “Inherit a tag from the resource group” to enforce this.</p>
+        <p>Q8: Your organization transfers a subscription to a new Entra ID tenant. What happens to the existing RBAC role assignments?</p>
+        <p>A) They are transferred with the subscription  B) They are permanently deleted  C) They are temporarily disabled  D) They remain but become inactive</p>
+        <p>Answer: B — ALL RBAC role assignments are permanently deleted when a subscription is transferred to a different tenant.</p>
+      </div>
+    </div>
+
+    <div class="module" id="m-2">
+      <div class="module-header" onclick="toggleModule('m-2')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>Your Next Steps</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <div class="list-item">Complete ALL labs above in a free Azure account (portal.azure.com &gt; free trial)</div>
+        <div class="list-item">Take the free Microsoft Practice Assessment: search “AZ-104 practice assessment” on Microsoft Learn</div>
+        <div class="list-item">Watch the Microsoft Exam Readiness video for this section on Microsoft Learn Shows</div>
+        <div class="list-item">Review the official Microsoft Learn path: “AZ-104: Manage identities and governance in Azure”</div>
+        <div class="list-item">Practice CLI/PowerShell commands — the exam may include command-line scenarios</div>
+        <div class="list-item">Remember: The exam is open-book — you can access Microsoft Learn during the test!</div>
+        <h4>Good luck with your AZ-104 exam! You’ve got this!</h4>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.section).classList.add('active');
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  });
+});
+
+function toggleModule(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+
+<footer style="text-align:center; padding:20px 0; border-top: 1px solid #334155;">
+  <p style="color:#67e8f9;font-size:13px; text-align:Center; margin-bottom:10px"><strong>© 2026 Mohan Juriyani | Cloud Infrastructure Engineer</strong></p>
+</footer>
+
+</body>
+</html>

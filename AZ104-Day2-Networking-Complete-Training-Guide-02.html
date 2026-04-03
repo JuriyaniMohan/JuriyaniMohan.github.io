@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Day 2 | Azure Networking Masterclass — Advanced</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0b0f1a;--card:#111827;--card2:#1a2235;--border:#1e293b;--blue:#3b82f6;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--cyan:#06b6d4;--text:#e2e8f0;--muted:#64748b;--dim:#475569}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+.hero{text-align:center;padding:60px 20px 40px;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);border-bottom:1px solid var(--border)}
+.hero .badge{display:inline-block;background:linear-gradient(90deg,var(--blue),var(--purple));padding:6px 20px;border-radius:30px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-size:clamp(28px,5vw,48px);font-weight:800;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:16px;max-width:600px;margin:0 auto}
+.nav-tabs{display:flex;gap:8px;overflow-x:auto;padding:20px 0;position:sticky;top:0;background:var(--bg);z-index:100;border-bottom:1px solid var(--border)}
+.nav-tab{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:.2s}
+.nav-tab:hover,.nav-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
+.nav-tab.active{background:rgba(59,130,246,.15);color:#93c5fd}
+.section{display:none;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.module{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden}
+.module-header{padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s}
+.module-header:hover{background:var(--card2)}
+.module-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.module-title{flex:1}
+.module-title h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.module-title span{font-size:12px;color:var(--muted)}
+.module-chevron{font-size:14px;color:var(--dim);transition:.3s}
+.module.open .module-chevron{transform:rotate(180deg)}
+.module-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border)}
+.module.open .module-body{display:block}
+h2{font-size:22px;font-weight:800;margin:30px 0 12px;color:#f1f5f9}
+h4{font-size:16px;font-weight:700;margin:20px 0 10px;color:#cbd5e1}
+p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
+.list-item{padding-left:20px;position:relative}
+.list-item::before{content:'▸';position:absolute;left:0;color:var(--blue)}
+.box{border-radius:12px;padding:16px 18px;margin:14px 0;font-size:13px;line-height:1.7}
+.box-blue{background:rgba(59,130,246,.08);border-left:4px solid var(--blue);color:#93c5fd}
+.box-green{background:rgba(16,185,129,.08);border-left:4px solid var(--green);color:#6ee7b7}
+.box-orange{background:rgba(245,158,11,.08);border-left:4px solid var(--orange);color:#fcd34d}
+.box-red{background:rgba(239,68,68,.08);border-left:4px solid var(--red);color:#fca5a5}
+.box-purple{background:rgba(139,92,246,.08);border-left:4px solid var(--purple);color:#c4b5fd}
+.box-cyan{background:rgba(6,182,212,.08);border-left:4px solid var(--cyan);color:#67e8f9}
+.box strong{display:block;margin-bottom:6px;font-size:14px}
+.diagram{background:#0d1117;border:1px solid #21262d;border-radius:12px;padding:16px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:#8b949e;overflow-x:auto;white-space:pre}
+.diagram .label{color:var(--purple);font-weight:700;font-size:13px;margin-bottom:8px;display:block;font-family:'Plus Jakarta Sans',sans-serif}
+.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.tbl th{background:var(--card2);padding:10px 12px;text-align:left;font-weight:700;color:#93c5fd;border:1px solid var(--border)}
+.tbl td{padding:10px 12px;border:1px solid var(--border);color:#94a3b8}
+.tbl tr:hover td{background:rgba(59,130,246,.04)}
+.lab{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.lab-title{font-weight:700;color:var(--green);font-size:14px;margin-bottom:10px}
+.lab-title i{margin-right:6px}
+.lab ol{padding-left:20px;font-size:13px;color:#6ee7b7}
+.lab ol li{margin-bottom:6px;line-height:1.6}
+.cli{background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b949e;overflow-x:auto;white-space:pre-wrap}
+.think{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,130,246,.08));border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.think-title{font-weight:700;color:var(--purple);font-size:14px;margin-bottom:8px}
+.think-title i{margin-right:6px}
+.think p{font-size:13px;color:#c4b5fd;line-height:1.7}
+.quiz{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.quiz-title{font-weight:700;color:var(--orange);font-size:14px;margin-bottom:10px}
+.quiz-q{font-size:13px;font-weight:600;color:#fcd34d;margin-bottom:4px}
+.quiz-a{font-size:13px;color:#94a3b8;margin-bottom:10px;padding-left:16px;display:none}
+.quiz-a.show{display:block}
+.quiz-toggle{font-size:12px;color:var(--orange);cursor:pointer;margin-bottom:12px;text-decoration:underline}
+.scenario{background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.scenario-title{font-weight:700;color:var(--cyan);font-size:14px;margin-bottom:8px}
+.scenario-title i{margin-right:6px}
+@media(max-width:768px){.container{padding:12px}.nav-tab{padding:8px 14px;font-size:12px}.module-header{padding:14px 16px}.box,.lab,.think,.quiz,.scenario{padding:14px}.diagram{font-size:11px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">AZ-104 Day 2 • 15-20% of Exam</div>
+  <h1>Azure Networking Masterclass — Advanced</h1>
+  <p>Virtual Networking • Intersite Connectivity • Network Traffic Management — The #1 domain where candidates fail</p>
+  <p style="font-size:10px;">© 2026 Mohan Juriyani</p>
+</div>
+
+<div class="container">
+  <div class="nav-tabs" id="navTabs">
+    <div class="nav-tab active" data-section="part1"><i class="fas fa-network-wired"></i> Virtual Networking</div>
+    <div class="nav-tab" data-section="part2"><i class="fas fa-plug"></i> Intersite Connectivity</div>
+    <div class="nav-tab" data-section="part3"><i class="fas fa-balance-scale"></i> Traffic Management</div>
+    <div class="nav-tab" data-section="practice"><i class="fas fa-pencil-alt"></i> Practice Exam</div>
+
+  </div>
+
+  <div class="section active" id="part1">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-network-wired"></i></div>
+        <div class="module-title"><h3>Module 1: Azure Virtual Networks (VNets)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is a VNet?</h4>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          A Virtual Network (VNet) is your own private network inside Azure. Think of it as your own private neighborhood in a massive city. Your resources (VMs, databases, etc.) live inside this neighborhood and can talk to each other, but they’re isolated from everyone else’s neighborhoods by default.
+        </div>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          ANALOGY: VNet = Your Private Neighborhood
+        </div>
+        <p>Imagine Azure as a huge city. A VNet is your gated community within that city. Subnets are the different streets inside your community (Elm Street for web servers, Oak Avenue for databases). NSGs are the security guards at each street entrance checking who can enter and leave. The VNet address space (10.0.0.0/16) is like your community’s postal code range — all houses get addresses from this range.</p>
+        <h4>Key VNet Facts</h4>
+        <div class="list-item">A VNet exists in a single Azure region (e.g., East US) and a single subscription</div>
+        <div class="list-item">A VNet has one or more address spaces defined in CIDR notation (e.g., 10.0.0.0/16)</div>
+        <div class="list-item">VNets are FREE — you don’t pay for VNets themselves</div>
+        <div class="list-item">Resources in the SAME VNet can communicate by default (no extra config needed)</div>
+        <div class="list-item">Resources in DIFFERENT VNets CANNOT communicate by default (you need peering or VPN)</div>
+        <div class="list-item">A VNet is completely isolated from other VNets unless you explicitly connect them</div>
+        <h4>IP Addressing &amp; CIDR — The Must-Know Basics</h4>
+        <p>Before we create a VNet, you MUST understand IP addressing. This is tested heavily:</p>
+        <h4>CIDR Notation</h4>
+        <h4>Total IPs</h4>
+        <h4>Usable IPs</h4>
+        <h4>Range Example</h4>
+        <h4>Typical Use</h4>
+        <p>/8</p>
+        <p>16,777,216</p>
+        <p>16,777,211</p>
+        <p>10.0.0.0 – 10.255.255.255</p>
+        <p>Massive enterprise (rare in Azure)</p>
+        <p>/16</p>
+        <p>65,536</p>
+        <p>65,531</p>
+        <p>10.0.0.0 – 10.0.255.255</p>
+        <p>Standard VNet address space</p>
+        <p>/24</p>
+        <p>256</p>
+        <p>251</p>
+        <p>10.0.1.0 – 10.0.1.255</p>
+        <p>Standard subnet</p>
+        <p>/27</p>
+        <p>32</p>
+        <p>27</p>
+        <p>10.0.1.0 – 10.0.1.31</p>
+        <p>Small subnet (e.g., GatewaySubnet)</p>
+        <p>/28</p>
+        <p>16</p>
+        <p>11</p>
+        <p>10.0.1.0 – 10.0.1.15</p>
+        <p>Very small subnet</p>
+        <p>/32</p>
+        <p>1</p>
+        <p>1</p>
+        <p>10.0.1.5</p>
+        <p>Single IP (used in NSG rules)</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Azure RESERVES 5 IPs in every subnet: x.x.x.0 (network), x.x.x.1 (gateway), x.x.x.2 &amp; x.x.x.3 (DNS), x.x.x.255 (broadcast). So a /24 subnet has 256 - 5 = 251 usable IPs. A /27 has 32 - 5 = 27 usable IPs. The smallest allowed subnet is /29 (8 IPs, 3 usable).
+        </div>
+        <div class="diagram"><span class="label">Three-Tier VNet Design</span>
+┌─────────────────────────────────────────────────────┐
+│         VNet: Prod-VNet (10.0.0.0/16)              │
+│                                                     │
+│  ┌───────────────┐  ┌───────────────┐  ┌─────────────┐  │
+│  │  Web Subnet  │  │  App Subnet  │  │  DB Subnet  │  │
+│  │ 10.0.1.0/24 │  │ 10.0.2.0/24 │  │ 10.0.3.0/24│  │
+│  │             │  │             │  │            │  │
+│  │  [VM1][VM2] │  │  [VM3][VM4] │  │  [SQL DB]   │  │
+│  │  NSG: Allow │  │  NSG: Allow │  │  NSG: Allow │  │
+│  │  HTTP/HTTPS │  │  from Web   │  │  from App   │  │
+│  └───────────────┘  └───────────────┘  └─────────────┘  │
+│       ↑              ↑               ↑             │
+│    Internet      Web only        App only         │
+└─────────────────────────────────────────────────────┘
+</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a VNet with Subnets</div>
+          <ol>
+            <li>Go to portal.azure.com &gt; search “Virtual networks” &gt; + Create</li>
+            <li>Resource group: Create new “RG-Networking-Lab”</li>
+            <li>Name: “Prod-VNet”, Region: East US</li>
+            <li>Go to “IP Addresses” tab: Address space = 10.0.0.0/16</li>
+            <li>Add Subnet: Name = “WebSubnet”, Range = 10.0.1.0/24</li>
+            <li>Add Subnet: Name = “AppSubnet”, Range = 10.0.2.0/24</li>
+            <li>Add Subnet: Name = “DbSubnet”, Range = 10.0.3.0/24</li>
+            <li>Click Review + create &gt; Create</li>
+            <li>Verify: Go to the VNet &gt; Subnets — confirm all 3 subnets appear with correct ranges</li>
+          </ol>
+        </div>
+        <h4>Azure CLI: Create VNet with Subnets</h4>
+        <div class="cli">
+# Create resource group
+
+
+az group create --name RG-Networking-Lab --location eastus
+
+
+# Create VNet
+
+
+az network vnet create \
+
+
+--resource-group RG-Networking-Lab \
+
+
+--name Prod-VNet \
+
+
+--address-prefix 10.0.0.0/16 \
+
+
+--subnet-name WebSubnet \
+
+
+--subnet-prefix 10.0.1.0/24
+
+
+# Add more subnets
+
+
+az network vnet subnet create \
+
+
+--resource-group RG-Networking-Lab \
+
+
+--vnet-name Prod-VNet \
+
+
+--name AppSubnet --address-prefix 10.0.2.0/24
+
+
+az network vnet subnet create \
+
+
+--resource-group RG-Networking-Lab \
+
+
+--vnet-name Prod-VNet \
+
+
+--name DbSubnet --address-prefix 10.0.3.0/24
+</div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: How many IPs does Azure reserve per subnet?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: 5 IPs (network, default gateway, 2 DNS, broadcast)</div>
+          <div class="quiz-q">Q2: Can two VNets communicate by default?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. VNets are isolated. You need VNet peering or VPN Gateway to connect them.</div>
+          <div class="quiz-q">Q3: What is the smallest allowed subnet in Azure?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: /29 (8 total IPs, 3 usable after Azure reservations)</div>
+          <div class="quiz-q">Q4: Can a VNet span multiple regions?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. A VNet is tied to a single region. Use Global VNet Peering for cross-region connectivity.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-network-wired"></i></div>
+        <div class="module-title"><h3>Module 2: Network Security Groups (NSGs)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is an NSG?</h4>
+        <p>A Network Security Group is a virtual firewall that filters network traffic to and from Azure resources. It contains security rules that allow or deny inbound and outbound traffic based on source, destination, port, and protocol.</p>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          ANALOGY: NSG = Nightclub Bouncer
+        </div>
+        <p>Think of an NSG as a bouncer at a nightclub. The bouncer has a list of rules (VIP list). Rule 1 (Priority 100): Allow anyone wearing a blue wristband (port 443). Rule 2 (Priority 200): Allow anyone with a VIP card (port 3389 from specific IP). Rule 3 (Priority 65000): Deny everyone else. The bouncer checks each person against the rules IN ORDER of priority (lowest number = checked first). First match wins — once a rule matches, the bouncer stops checking.</p>
+        <h4>NSG Rule Components</h4>
+        <h4>Component</h4>
+        <h4>What It Is</h4>
+        <h4>Example</h4>
+        <p>Priority</p>
+        <p>Number 100-4096, lower = processed first</p>
+        <p>100 (checked before 200)</p>
+        <p>Name</p>
+        <p>Descriptive rule name</p>
+        <p>Allow-HTTPS-Inbound</p>
+        <p>Source</p>
+        <p>Where traffic comes from</p>
+        <p>Any, IP address, Service Tag, ASG</p>
+        <p>Source Port</p>
+        <p>Port traffic comes from</p>
+        <p>* (any)</p>
+        <p>Destination</p>
+        <p>Where traffic goes to</p>
+        <p>Any, IP address, Service Tag, ASG</p>
+        <p>Destination Port</p>
+        <p>Port traffic goes to</p>
+        <p>443, 80, 3389, 22</p>
+        <p>Protocol</p>
+        <p>TCP, UDP, ICMP, or Any</p>
+        <p>TCP</p>
+        <p>Action</p>
+        <p>Allow or Deny</p>
+        <p>Allow</p>
+        <h4>Default NSG Rules (CANNOT be deleted)</h4>
+        <h4>Priority</h4>
+        <h4>Rule Name</h4>
+        <h4>Direction</h4>
+        <h4>Action</h4>
+        <h4>What It Does</h4>
+        <p>65000</p>
+        <p>AllowVnetInBound</p>
+        <p>Inbound</p>
+        <p>Allow</p>
+        <p>Allow all traffic between resources in the same VNet</p>
+        <p>65001</p>
+        <p>AllowAzureLoadBalancerInBound</p>
+        <p>Inbound</p>
+        <p>Allow</p>
+        <p>Allow health probes from Azure Load Balancer</p>
+        <p>65500</p>
+        <p>DenyAllInBound</p>
+        <p>Inbound</p>
+        <p>Deny</p>
+        <p>Deny everything else (catch-all)</p>
+        <p>65000</p>
+        <p>AllowVnetOutBound</p>
+        <p>Outbound</p>
+        <p>Allow</p>
+        <p>Allow outbound to any resource in VNet</p>
+        <p>65001</p>
+        <p>AllowInternetOutBound</p>
+        <p>Outbound</p>
+        <p>Allow</p>
+        <p>Allow all outbound internet traffic</p>
+        <p>65500</p>
+        <p>DenyAllOutBound</p>
+        <p>Outbound</p>
+        <p>Deny</p>
+        <p>Deny everything else</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Default rules CANNOT be deleted but CAN be overridden by creating rules with a LOWER priority number. For example, to block internet outbound, create a Deny rule at priority 4000 for destination Internet. This overrides the default AllowInternetOutBound at 65001.
+        </div>
+        <h4>NSG Association: Subnet vs NIC</h4>
+        <p>NSGs can be associated at two levels:</p>
+        <div class="list-item">Subnet level: Applies to ALL resources in the subnet</div>
+        <div class="list-item">NIC (Network Interface) level: Applies to a specific VM only</div>
+        <p>When BOTH are applied, traffic must pass BOTH NSGs:</p>
+        <h4>FLOW: How NSG Rules Are Evaluated</h4>
+        <p>INBOUND TRAFFIC FLOW:</p>
+        <p>Internet/Source</p>
+        <div class="diagram">
+│
+▼
+┌──────────────────┐
+│  Subnet NSG     │  ← Evaluated FIRST
+│  (if attached)   │
+└────────┬─────────┘
+│ Allowed?
+▼
+┌──────────────────┐
+│  NIC NSG        │  ← Evaluated SECOND
+│  (if attached)   │
+└────────┬─────────┘
+│ Allowed?
+▼
+[VM]  ← Traffic reaches VM
+</div>
+        <p>OUTBOUND: Reverse — NIC NSG first, then Subnet NSG</p>
+        <h4>Service Tags — Built-in IP Groups</h4>
+        <p>Instead of memorizing IP ranges, Azure provides Service Tags — predefined labels for groups of IP addresses:</p>
+        <h4>Service Tag</h4>
+        <h4>What It Represents</h4>
+        <h4>Common Use</h4>
+        <p>Internet</p>
+        <p>All public internet IPs</p>
+        <p>Allow/Deny internet access</p>
+        <p>VirtualNetwork</p>
+        <p>All VNet address spaces + peered VNets</p>
+        <p>Allow internal VNet traffic</p>
+        <p>AzureLoadBalancer</p>
+        <p>Azure’s health probe IPs</p>
+        <p>Always allow (needed for LB health checks)</p>
+        <p>Storage</p>
+        <p>Azure Storage service IPs</p>
+        <p>Allow access to storage from VMs</p>
+        <p>Sql</p>
+        <p>Azure SQL Database IPs</p>
+        <p>Allow SQL access from app subnets</p>
+        <p>AzureCloud</p>
+        <p>All Azure datacenter IPs</p>
+        <p>Broad Azure service access</p>
+        <h4>Application Security Groups (ASGs)</h4>
+        <p>ASGs let you group VMs logically and use those groups in NSG rules instead of IP addresses. This is extremely powerful for large environments:</p>
+        <div class="diagram"><span class="label">ASGs in Action</span>
+WITHOUT ASGs (nightmare to manage):
+Allow 10.0.1.4 to 10.0.3.4 on port 1433
+Allow 10.0.1.5 to 10.0.3.4 on port 1433
+Allow 10.0.1.6 to 10.0.3.4 on port 1433  ... 100 more rules
+WITH ASGs (clean and scalable):
+┌─────────────┐    NSG Rule:        ┌─────────────┐
+│ ASG:        │    Allow             │ ASG:        │
+│ WebServers  │ ───Port 1433───&gt;  │ DbServers   │
+│ [VM1,VM2,  │                      │ [SQL1,SQL2] │
+│  VM3]       │                      │             │
+└─────────────┘                      └─────────────┘
+Just 1 rule! Add new VMs to the ASG — rule auto-applies.
+</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create NSG Rules for a Three-Tier App</div>
+          <ol>
+            <li>Go to Network security groups &gt; + Create</li>
+            <li>Name: “NSG-WebSubnet”, Region: East US, RG: RG-Networking-Lab</li>
+            <li>After creation, go to NSG &gt; Inbound security rules &gt; + Add</li>
+            <li>Rule 1: Source=Internet, Dest Port=80,443, Protocol=TCP, Action=Allow, Priority=100, Name=Allow-HTTP-HTTPS</li>
+            <li>Rule 2: Source=Any, Dest Port=3389, Protocol=TCP, Action=Deny, Priority=200, Name=Deny-RDP-From-Internet</li>
+            <li>Go to NSG &gt; Subnets &gt; Associate &gt; select Prod-VNet &gt; WebSubnet</li>
+            <li>Create another NSG: “NSG-DbSubnet”</li>
+            <li>Rule: Source=10.0.2.0/24 (AppSubnet), Dest Port=1433, Protocol=TCP, Action=Allow, Priority=100, Name=Allow-SQL-From-App</li>
+            <li>Associate NSG-DbSubnet with DbSubnet</li>
+            <li>Test: Deploy a VM in WebSubnet — verify it can receive HTTP traffic but not RDP from internet</li>
+          </ol>
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What is the priority range for NSG rules?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: 100 to 4096. Lower number = higher priority (evaluated first). Default rules use 65000-65500.</div>
+          <div class="quiz-q">Q2: Can you delete default NSG rules?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Default rules cannot be deleted but can be overridden by rules with lower priority numbers.</div>
+          <div class="quiz-q">Q3: If both subnet NSG and NIC NSG exist, which is checked first for inbound?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Subnet NSG is evaluated FIRST for inbound traffic, then NIC NSG. For outbound, it’s reversed.</div>
+          <div class="quiz-q">Q4: What is a Service Tag?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: A predefined label representing a group of Azure service IPs (e.g., Internet, VirtualNetwork, Storage).</div>
+          <div class="quiz-q">Q5: What is the benefit of ASGs over IP-based rules?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: ASGs let you group VMs logically. Add/remove VMs from the group without changing NSG rules.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-2">
+      <div class="module-header" onclick="toggleModule('m-2')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-server"></i></div>
+        <div class="module-title"><h3>Module 3: Public &amp; Private IP Addresses</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>Private IPs</h4>
+        <p>Every resource in a VNet gets a private IP address from the subnet range. Two allocation methods:</p>
+        <h4>Method</h4>
+        <h4>How It Works</h4>
+        <h4>Use Case</h4>
+        <p>Dynamic (Default)</p>
+        <p>Azure assigns from available pool; may change on VM stop/start</p>
+        <p>Most VMs, test environments</p>
+        <p>Static</p>
+        <p>You choose a specific IP; it never changes</p>
+        <p>DNS servers, domain controllers, load balancers, any resource that needs a permanent address</p>
+        <h4>Public IPs</h4>
+        <h4>Feature</h4>
+        <h4>Basic SKU</h4>
+        <h4>Standard SKU</h4>
+        <p>Availability Zones</p>
+        <p>Not zone-redundant</p>
+        <p>Zone-redundant by default</p>
+        <p>Default Security</p>
+        <p>Open to inbound by default</p>
+        <p>Closed to inbound by default (secure!)</p>
+        <p>Allocation</p>
+        <p>Dynamic or Static</p>
+        <p>Static ONLY</p>
+        <p>Load Balancer</p>
+        <p>Basic LB only</p>
+        <p>Standard LB only</p>
+        <p>Cost</p>
+        <p>Free</p>
+        <p>Charges apply</p>
+        <p>Microsoft Recommendation</p>
+        <p>Being retired</p>
+        <p>Use this for production</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Standard Public IPs are CLOSED to inbound traffic by default. You MUST create an NSG rule to allow any inbound traffic. Basic Public IPs are OPEN by default. Microsoft is retiring Basic SKU — always use Standard for production.
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What’s the difference between Dynamic and Static private IPs?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Dynamic = Azure assigns and may change on deallocate. Static = you pick, it never changes.</div>
+          <div class="quiz-q">Q2: Are Standard Public IPs open or closed by default?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Closed. You must add NSG rules to allow inbound traffic. This is a security-first design.</div>
+          <div class="quiz-q">Q3: Can a Basic Public IP work with a Standard Load Balancer?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Basic IPs work only with Basic LBs. Standard IPs work only with Standard LBs. They cannot mix.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-3">
+      <div class="module-header" onclick="toggleModule('m-3')">
+        <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>Module 3B: How VMs Connect to the Internet (Outbound)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>The Outbound Connectivity Problem</h4>
+        <p>By default, when a VM in a private subnet needs to reach the internet (e.g., to download updates, call an API, or send email), Azure needs to translate its private IP (like 10.0.1.4) to a public IP. This process is called Source Network Address Translation (SNAT). There are multiple ways Azure handles this:</p>
+        <h4>Method</h4>
+        <h4>How It Works</h4>
+        <h4>Priority</h4>
+        <h4>Best For</h4>
+        <p>NAT Gateway (Recommended)</p>
+        <p>All VMs in subnet share the NAT Gateway’s static public IP(s) for outbound</p>
+        <p>1st (Highest)</p>
+        <p>Production workloads — scalable, reliable, no SNAT exhaustion</p>
+        <p>Instance-level Public IP</p>
+        <p>VM has its own public IP for both inbound AND outbound</p>
+        <p>2nd</p>
+        <p>Single VMs that need a dedicated public IP</p>
+        <p>Load Balancer Outbound Rules</p>
+        <p>VMs behind a public LB use LB’s frontend IP for outbound SNAT</p>
+        <p>3rd</p>
+        <p>VMs already behind a load balancer</p>
+        <p>Default Outbound Access (AVOID)</p>
+        <p>Azure assigns a random, invisible public IP owned by Microsoft</p>
+        <p>Last (Lowest)</p>
+        <p>NEVER use in production — IP can change without notice, being deprecated</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Microsoft is deprecating Default Outbound Access. As of late 2025, new subnets can be configured as “private subnets” that block default outbound. The recommended approach is ALWAYS to use NAT Gateway or explicit public IPs for outbound. The exam will test this.
+        </div>
+        <h4>FLOW: How Outbound Internet Traffic Works</h4>
+        <p>VM (10.0.1.4) wants to reach api.github.com</p>
+        <div class="diagram">
+│
+▼
+┌─────────────────────────────────────────┐
+│  Does the subnet have a NAT Gateway?    │
+└──────────┬───────────┬──────────────────┘
+</div>
+        <p>YES              NO</p>
+        <div class="diagram">
+│               │
+▼               ▼
+</div>
+        <p>Use NAT Gateway’s     Does VM have its own</p>
+        <p>public IP for SNAT    public IP?</p>
+        <div class="diagram">
+(10.0.1.4 → 52.x.x.1)     │
+</div>
+        <p>YES    NO</p>
+        <div class="diagram">
+│      │
+▼      ▼
+</div>
+        <p>Use VM’s   Is VM behind a</p>
+        <p>public IP  public Load Balancer?</p>
+        <div class="diagram">
+│
+</div>
+        <p>YES       NO</p>
+        <div class="diagram">
+│        │
+▼        ▼
+</div>
+        <p>Use LB’s   Default outbound</p>
+        <p>frontend   (random Microsoft IP)</p>
+        <p>IP         ⚠ AVOID IN PRODUCTION</p>
+      </div>
+    </div>
+
+    <div class="module" id="m-4">
+      <div class="module-header" onclick="toggleModule('m-4')">
+        <div class="module-icon" style="background:rgba(6,182,212,.15);color:var(--cyan)"><i class="fas fa-plug"></i></div>
+        <div class="module-title"><h3>Module 3C: Azure NAT Gateway — Deep Dive</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is NAT Gateway?</h4>
+        <p>Azure NAT Gateway is a fully managed, highly resilient Network Address Translation service. It provides outbound-only internet connectivity for VMs in a subnet using a static public IP, without requiring those VMs to have their own public IPs.</p>
+        <div class="box box-purple">
+          <strong>Analogy / Memory Tip</strong>
+          ANALOGY: NAT Gateway = Your Office’s Internet Router
+        </div>
+        <p>Imagine your office has 200 computers (VMs) all sharing one internet connection through a single router (NAT Gateway). Every computer has a private desk number (private IP like 10.0.1.4), but when any computer sends data to the internet, the router translates the desk number to the office’s public address (public IP like 52.186.77.23). From the outside, ALL 200 computers appear to come from ONE address. When replies come back, the router knows which desk to forward them to. But NOBODY from outside can randomly call a desk number — only responses to outgoing calls get through.</p>
+        <h4>How NAT Gateway Works (Step by Step)</h4>
+        <div class="list-item">You create a NAT Gateway resource and attach a Standard Static Public IP to it</div>
+        <div class="list-item">You associate the NAT Gateway with a subnet (e.g., WebSubnet)</div>
+        <div class="list-item">Immediately, ALL VMs in that subnet use the NAT Gateway’s public IP for outbound internet traffic</div>
+        <div class="list-item">The private IP (10.0.1.4) is translated (SNAT’d) to the NAT Gateway’s public IP (52.x.x.1)</div>
+        <div class="list-item">Return traffic (responses) flows back through the NAT Gateway to the correct VM</div>
+        <div class="list-item">UNSOLICITED inbound traffic from the internet is BLOCKED — only responses get through</div>
+        <div class="diagram"><span class="label">NAT Gateway</span>
+Internet
+│
+┌─────┴─────┐
+│ NAT Gateway │
+│ Public IP:   │
+│ 52.186.77.23 │
+└─────┬─────┘
+│ SNAT
+┌────────────┼────────────┐
+│              │              │
+┌──┴──┐       ┌──┴──┐       ┌──┴──┐
+│ VM1  │       │ VM2  │       │ VM3  │
+│10.0.1.4│      │10.0.1.5│      │10.0.1.6│
+└──────┘       └──────┘       └──────┘
+No public IPs needed on VMs!
+All outbound traffic appears as 52.186.77.23
+INBOUND from internet ──&gt; BLOCKED (secure by default)
+OUTBOUND to internet  ──&gt; ALLOWED (via SNAT)
+RESPONSE to outbound  ──&gt; ALLOWED (stateful)
+</div>
+        <h4>NAT Gateway Key Specifications</h4>
+        <h4>Feature</h4>
+        <h4>Detail</h4>
+        <p>Max Public IPs</p>
+        <p>Up to 16 public IP addresses (or prefixes) per NAT Gateway</p>
+        <p>SNAT Ports per IP</p>
+        <p>64,512 ports per public IP = total capacity up to 1,032,192 ports</p>
+        <p>Supported Protocols</p>
+        <p>TCP and UDP only (ICMP/ping is NOT supported through NAT Gateway)</p>
+        <p>Scope</p>
+        <p>Works within a single VNet — cannot span multiple VNets</p>
+        <p>Association</p>
+        <p>Attached at the SUBNET level — all VMs in the subnet use it</p>
+        <p>Priority</p>
+        <p>Takes precedence over Load Balancer outbound rules and instance-level public IPs</p>
+        <p>SKUs</p>
+        <p>Standard (zonal) and StandardV2 (zone-redundant, supports IPv6 and flow logs)</p>
+        <p>Idle Timeout</p>
+        <p>Configurable 4–120 minutes for TCP (default 4 min). UDP idle timeout is fixed at 4 min.</p>
+        <p>Cost</p>
+        <p>Charged per hour + per GB of data processed</p>
+        <h4>SNAT Port Exhaustion — The Problem NAT Gateway Solves</h4>
+        <p>SNAT port exhaustion is one of the most common production issues in Azure. Here’s what happens:</p>
+        <div class="list-item">Every outbound connection from a VM requires a SNAT port (think of it as a temporary channel number)</div>
+        <div class="list-item">A Load Balancer pre-allocates a FIXED number of ports per VM (e.g., 1,024 ports per VM when pool has 8-15 VMs)</div>
+        <div class="list-item">If a VM makes too many simultaneous outbound connections (e.g., a web scraper calling thousands of APIs), it runs out of ports</div>
+        <div class="list-item">Result: Connection failures, timeouts, application errors</div>
+        <p>NAT Gateway fixes this by: dynamically allocating SNAT ports on-demand. Instead of fixed allocation, all 64,512 ports per IP are shared across all VMs in the subnet. VMs that need more ports get more ports. VMs that are idle use fewer. No fixed limits per VM.</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Deploy a NAT Gateway</div>
+          <ol>
+            <li>Go to portal.azure.com &gt; search “NAT gateways” &gt; + Create</li>
+            <li>Resource group: RG-Networking-Lab</li>
+            <li>Name: “nat-gw-prod”, Region: East US</li>
+            <li>Availability zone: Zone 1 (or No Zone for non-zonal)</li>
+            <li>Idle timeout: 4 minutes (default, leave as-is)</li>
+            <li>Go to “Outbound IP” tab: Click “Create a new public IP address”, name it “nat-gw-pip”</li>
+            <li>Go to “Subnet” tab: Select Prod-VNet &gt; WebSubnet</li>
+            <li>Click Review + create &gt; Create</li>
+            <li>VERIFY: SSH/RDP into a VM in WebSubnet and run: curl ifconfig.me</li>
+            <li>The returned IP should be the NAT Gateway’s public IP (not the VM’s individual IP)</li>
+            <li>VERIFY: Try the same from a VM in a DIFFERENT subnet (not attached to NAT GW) — it will show a different IP</li>
+          </ol>
+        </div>
+        <h4>Azure CLI: Create a NAT Gateway</h4>
+        <div class="cli">
+# Create a public IP for the NAT Gateway
+
+
+az network public-ip create \
+
+
+--resource-group RG-Networking-Lab \
+
+
+--name nat-gw-pip \
+
+
+--sku Standard \
+
+
+--allocation-method Static
+
+
+# Create the NAT Gateway
+
+
+az network nat gateway create \
+
+
+--resource-group RG-Networking-Lab \
+
+
+--name nat-gw-prod \
+
+
+--public-ip-addresses nat-gw-pip \
+
+
+--idle-timeout 4
+
+
+# Associate NAT Gateway with a subnet
+
+
+az network vnet subnet update \
+
+
+--resource-group RG-Networking-Lab \
+
+
+--vnet-name Prod-VNet \
+
+
+--name WebSubnet \
+
+
+--nat-gateway nat-gw-prod
+
+
+# Verify from a VM in WebSubnet
+
+
+# SSH into VM, then run: curl ifconfig.me
+
+
+# Should show the NAT Gateway&#x27;s public IP
+</div>
+        <h4>NAT Gateway vs Other Outbound Methods</h4>
+        <h4>Feature</h4>
+        <h4>NAT Gateway</h4>
+        <h4>LB Outbound Rules</h4>
+        <h4>VM Public IP</h4>
+        <h4>Default Outbound</h4>
+        <p>SNAT Port Allocation</p>
+        <p>Dynamic (on-demand)</p>
+        <p>Fixed per VM</p>
+        <p>All 64K ports for that VM</p>
+        <p>Random, limited</p>
+        <p>Scalability</p>
+        <p>Up to 1M+ ports</p>
+        <p>Limited by pool size</p>
+        <p>Single VM only</p>
+        <p>Not scalable</p>
+        <p>Static IP</p>
+        <p>Yes (predictable)</p>
+        <p>Yes (LB frontend IP)</p>
+        <p>Yes (VM’s own IP)</p>
+        <p>No (random, changes)</p>
+        <p>Inbound Blocked</p>
+        <p>Yes (outbound only)</p>
+        <p>No (LB is bidirectional)</p>
+        <p>No (VM exposed)</p>
+        <p>N/A</p>
+        <p>Recommended</p>
+        <p>YES — best practice</p>
+        <p>Acceptable</p>
+        <p>For single VMs only</p>
+        <p>NEVER in production</p>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What is SNAT?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Source Network Address Translation — translating a VM’s private IP to a public IP for outbound internet access.</div>
+          <div class="quiz-q">Q2: Why is NAT Gateway better than Load Balancer for outbound?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: NAT Gateway dynamically allocates ports on-demand (no fixed limits per VM), preventing SNAT port exhaustion.</div>
+          <div class="quiz-q">Q3: Does NAT Gateway allow inbound traffic from the internet?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Only outbound traffic and return responses. Unsolicited inbound is blocked. It’s outbound-only.</div>
+          <div class="quiz-q">Q4: What protocols does NAT Gateway support?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: TCP and UDP only. ICMP (ping) is NOT supported through NAT Gateway.</div>
+          <div class="quiz-q">Q5: What takes priority: NAT Gateway or a VM’s public IP?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: NAT Gateway takes priority over ALL other outbound methods for new connections.</div>
+          <div class="quiz-q">Q6: How many SNAT ports does each NAT Gateway public IP provide?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: 64,512 ports per public IP. Up to 16 IPs = over 1 million total ports.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-5">
+      <div class="module-header" onclick="toggleModule('m-5')">
+        <div class="module-icon" style="background:rgba(239,68,68,.15);color:var(--red)"><i class="fas fa-server"></i></div>
+        <div class="module-title"><h3>Module 3D: Service Endpoints &amp; Private Endpoints</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>The Problem: Securing Access to Azure PaaS Services</h4>
+        <p>When a VM accesses Azure services like Storage or SQL Database, by default the traffic goes over the public internet via the service’s public endpoint. This is a security concern — even though Azure encrypts the traffic, it still travels over the internet.</p>
+        <div class="diagram"><span class="label">Service Endpoint vs Private Endpoint</span>
+WITHOUT ENDPOINTS (default):
+VM (10.0.1.4) ──&gt; Internet ──&gt; Storage (public endpoint)
+Traffic goes via public internet path
+WITH SERVICE ENDPOINT:
+VM (10.0.1.4) ──&gt; Azure Backbone ──&gt; Storage (public endpoint)
+Traffic stays on Microsoft network, but storage still has public IP
+Storage firewall can restrict: “only allow from WebSubnet”
+WITH PRIVATE ENDPOINT (most secure):
+VM (10.0.1.4) ──&gt; 10.0.5.4 (storage’s private IP in your VNet!)
+Storage gets a PRIVATE IP inside your VNet!
+No public endpoint needed. Completely private.
+</div>
+        <h4>Feature</h4>
+        <h4>Service Endpoint</h4>
+        <h4>Private Endpoint</h4>
+        <p>Traffic Path</p>
+        <p>Azure backbone (not internet)</p>
+        <p>Directly to a private IP in your VNet</p>
+        <p>Service IP</p>
+        <p>Still uses public IP of the service</p>
+        <p>Gets a PRIVATE IP in your VNet (10.x.x.x)</p>
+        <p>Security Model</p>
+        <p>Service firewall restricts by subnet/VNet</p>
+        <p>No public exposure at all — completely private</p>
+        <p>DNS Requirement</p>
+        <p>None</p>
+        <p>Requires Private DNS Zone for name resolution</p>
+        <p>Cost</p>
+        <p>Free</p>
+        <p>Charges apply (per hour + per GB)</p>
+        <p>Scope</p>
+        <p>Subnet-level — enabled per subnet</p>
+        <p>Resource-level — one endpoint per resource</p>
+        <p>On-Premises Access</p>
+        <p>No — only from VNet subnets</p>
+        <p>Yes — accessible from on-prem via VPN/ExpressRoute</p>
+        <p>Cross-Region</p>
+        <p>No — same region only</p>
+        <p>Yes — works across regions</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Configure a Service Endpoint for Azure Storage</div>
+          <ol>
+            <li>Go to Prod-VNet &gt; Subnets &gt; select WebSubnet</li>
+            <li>Under “Service endpoints”, click “+ Add”</li>
+            <li>Select “Microsoft.Storage” from the dropdown</li>
+            <li>Click Save — this enables the service endpoint on the subnet</li>
+            <li>Now go to your Storage Account &gt; Networking</li>
+            <li>Under “Firewalls and virtual networks”, select “Enabled from selected virtual networks and IP addresses”</li>
+            <li>Click “+ Add existing virtual network” &gt; select Prod-VNet &gt; WebSubnet</li>
+            <li>Click Save</li>
+            <li>Now ONLY VMs in WebSubnet can access this storage account via Azure backbone</li>
+            <li>Any other source (internet, other subnets without endpoint) is BLOCKED by the storage firewall</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Service Endpoints are free but only work from within Azure VNets (not from on-premises). Private Endpoints cost money but work from everywhere (including on-prem via VPN/ExpressRoute) and give the service a private IP in your VNet. The exam loves asking when to use which. Key rule: if on-prem access is needed, use Private Endpoint.
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: Does a Service Endpoint give the Azure service a private IP?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. The service still uses its public IP. Traffic just routes over Azure backbone instead of internet.</div>
+          <div class="quiz-q">Q2: Does a Private Endpoint give the Azure service a private IP?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Yes! The service gets a private IP (e.g., 10.0.5.4) inside your VNet. Completely private.</div>
+          <div class="quiz-q">Q3: Can on-premises servers access a Service Endpoint?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Service Endpoints only work from VNet subnets. For on-prem access, use Private Endpoints.</div>
+          <div class="quiz-q">Q4: What DNS is required for Private Endpoints?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: A Private DNS Zone (e.g., privatelink.blob.core.windows.net) must be linked to your VNet for name resolution.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-6">
+      <div class="module-header" onclick="toggleModule('m-6')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-server"></i></div>
+        <div class="module-title"><h3>Module 4: Azure DNS</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is DNS?</h4>
+        <p>DNS (Domain Name System) translates human-readable names (like www.company.com) into IP addresses (like 52.186.77.23). Without DNS, you’d have to memorize IP addresses for every website.</p>
+        <h4>Azure DNS: Public Zones vs Private Zones</h4>
+        <h4>Feature</h4>
+        <h4>Public DNS Zone</h4>
+        <h4>Private DNS Zone</h4>
+        <p>Purpose</p>
+        <p>Resolve names from the INTERNET</p>
+        <p>Resolve names INSIDE your VNets only</p>
+        <p>Accessible From</p>
+        <p>Anywhere on the internet</p>
+        <p>Only from linked VNets</p>
+        <p>Example</p>
+        <div class="diagram">
+www.company.com → 52.186.77.23
+vm1.internal.company.com → 10.0.1.4
+</div>
+        <p>Use Case</p>
+        <p>Public websites, APIs</p>
+        <p>Internal app-to-app communication, private endpoints</p>
+        <p>Auto-registration</p>
+        <p>No</p>
+        <p>Yes — VMs auto-register their hostname and IP</p>
+        <h4>DNS Record Types (Must Know)</h4>
+        <h4>Record Type</h4>
+        <h4>What It Maps</h4>
+        <h4>Example</h4>
+        <p>A</p>
+        <div class="diagram">
+Name → IPv4 address
+www → 52.186.77.23
+</div>
+        <p>AAAA</p>
+        <div class="diagram">
+Name → IPv6 address
+www → 2001:db8::1
+</div>
+        <p>CNAME</p>
+        <div class="diagram">
+Name → another name (alias)
+blog → www.company.com
+</div>
+        <p>MX</p>
+        <p>Mail exchange server</p>
+        <div class="diagram">
+company.com → mail.company.com (priority 10)
+</div>
+        <p>TXT</p>
+        <p>Text record (verification, SPF)</p>
+        <p>Used for domain ownership verification</p>
+        <p>NS</p>
+        <p>Name server for the zone</p>
+        <p>Delegates a zone to Azure’s name servers</p>
+        <p>SOA</p>
+        <p>Start of Authority</p>
+        <p>Auto-created, contains zone metadata</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Private DNS Zone with Auto-Registration</div>
+          <ol>
+            <li>Go to portal &gt; search “Private DNS zones” &gt; + Create</li>
+            <li>Name: “internal.company.com”, RG: RG-Networking-Lab</li>
+            <li>After creation, go to the zone &gt; Virtual network links &gt; + Add</li>
+            <li>Link name: “link-to-prod-vnet”, Select Prod-VNet</li>
+            <li>CHECK the box: “Enable auto registration” — this is the magic!</li>
+            <li>Click OK</li>
+            <li>Now deploy a VM in Prod-VNet (e.g., “web-vm1” in WebSubnet)</li>
+            <li>Go back to the Private DNS zone &gt; Record sets</li>
+            <li>You should see: web-vm1.internal.company.com → 10.0.1.4 (auto-created!)</li>
+            <li>From another VM in the same VNet, you can now ping web-vm1.internal.company.com</li>
+          </ol>
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What’s the difference between a Public and Private DNS zone?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Public = resolves from internet. Private = resolves only from linked VNets (internal use).</div>
+          <div class="quiz-q">Q2: What does auto-registration do in Private DNS?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Automatically creates DNS records for VMs in linked VNets. No manual record creation needed.</div>
+          <div class="quiz-q">Q3: What record type maps a name to another name (alias)?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: CNAME record. Example: blog.company.com → www.company.com</div>
+          <div class="quiz-q">Q4: Can a CNAME record exist at the zone apex (e.g., company.com)?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Use an A record or an Alias record set for the zone apex. CNAME only works for subdomains.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="part2">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-network-wired"></i></div>
+        <div class="module-title"><h3>Module 5: VNet Peering</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is VNet Peering?</h4>
+        <p>VNet Peering connects two Azure VNets so resources in each VNet can communicate with each other using private IP addresses. Traffic uses Microsoft’s backbone network (not the public internet) — ultra-fast, low latency.</p>
+        <div class="diagram"><span class="label">VNet Peering</span>
+┌──────────────────┐        ┌──────────────────┐
+│  VNet-A (East US) │        │  VNet-B (East US) │
+│  10.0.0.0/16      │&lt;─────&gt;│  10.1.0.0/16      │
+│  [VM-A1] [VM-A2]  │ Peering │  [VM-B1] [VM-B2]  │
+└──────────────────┘        └──────────────────┘
+VM-A1 (10.0.1.4) can directly reach VM-B1 (10.1.1.4)
+Traffic stays on Microsoft backbone — never hits internet
+CRITICAL RULE: NON-TRANSITIVE!
+A &lt;──&gt; B    B &lt;──&gt; C    Does NOT mean A &lt;──&gt; C
+You must explicitly create A &lt;──&gt; C peering!
+</div>
+        <h4>Peering Types</h4>
+        <h4>Type</h4>
+        <h4>Scope</h4>
+        <h4>Latency</h4>
+        <h4>Use Case</h4>
+        <p>Regional Peering</p>
+        <p>Same Azure region</p>
+        <p>Ultra-low (sub-millisecond)</p>
+        <p>Connect VNets in same region (most common)</p>
+        <p>Global Peering</p>
+        <p>Different Azure regions</p>
+        <p>Slightly higher (cross-region)</p>
+        <p>Connect East US VNet to West Europe VNet</p>
+        <h4>Peering Requirements &amp; Rules</h4>
+        <div class="list-item">Address spaces must NOT overlap (10.0.0.0/16 and 10.0.0.0/24 = OVERLAP = FAIL)</div>
+        <div class="list-item">Peering must be created from BOTH sides (VNet-A to VNet-B AND VNet-B to VNet-A)</div>
+        <div class="list-item">Peering is NON-TRANSITIVE (A↔B + B↔C does NOT mean A↔C)</div>
+        <div class="list-item">Peering can cross subscriptions and even tenants</div>
+        <div class="list-item">Once peered, address spaces CANNOT be modified (must delete peering first)</div>
+        <div class="list-item">Gateway Transit: One VNet’s VPN gateway can be shared with the peered VNet</div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create VNet Peering</div>
+          <ol>
+            <li>Create a second VNet: “Dev-VNet” with address space 10.1.0.0/16 in the same region</li>
+            <li>Add a subnet: DevSubnet (10.1.1.0/24)</li>
+            <li>Deploy a VM in each VNet (one in Prod-VNet, one in Dev-VNet)</li>
+            <li>Try to ping between them — it will FAIL (VNets are isolated)</li>
+            <li>Go to Prod-VNet &gt; Peerings &gt; + Add</li>
+            <li>Peering link name (this VNet): “prod-to-dev”</li>
+            <li>Remote VNet: select Dev-VNet</li>
+            <li>Peering link name (remote VNet): “dev-to-prod”</li>
+            <li>Leave defaults (Allow virtual network access = Enabled)</li>
+            <li>Click Add</li>
+            <li>Wait 30 seconds, then try pinging between VMs again — it should work!</li>
+            <li>Check: Both peering connections should show status “Connected”</li>
+          </ol>
+        </div>
+        <div class="diagram"><span class="label">Hub-and-Spoke Topology (Production Standard)</span>
+┌────────────────────┐
+│   HUB VNet         │
+│   10.0.0.0/16       │
+│   [Azure Firewall]   │
+│   [VPN Gateway]      │
+│   [Bastion Host]     │
+└─────┬─────┬────────┘
+Peering  │ Peering  │ Peering
+┌───────┘    │    └───────┐
+┌─────────┐ ┌───────┐ ┌─────────┐
+│ Spoke 1 │ │ Spoke 2│ │ Spoke 3 │
+│ Web App │ │ HR App │ │ Finance │
+│ 10.1/16 │ │10.2/16 │ │ 10.3/16 │
+└─────────┘ └───────┘ └─────────┘
+Spokes cannot talk to each other directly (non-transitive)
+All traffic goes through Hub for inspection &amp; routing
+</div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: Is VNet peering transitive?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No! A↔B + B↔C does NOT mean A↔C. You must create each peering explicitly.</div>
+          <div class="quiz-q">Q2: Can you peer two VNets with overlapping address spaces?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Address spaces must not overlap. 10.0.0.0/16 and 10.0.0.0/24 would fail.</div>
+          <div class="quiz-q">Q3: How many sides must peering be created on?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Both sides. You need a peering link FROM VNet-A TO VNet-B AND FROM VNet-B TO VNet-A.</div>
+          <div class="quiz-q">Q4: What is Gateway Transit?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Allows a spoke VNet to use the hub VNet’s VPN gateway to reach on-premises. Avoids deploying a gateway in every VNet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-plug"></i></div>
+        <div class="module-title"><h3>Module 6: VPN Gateway (Azure to On-Premises)</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is a VPN Gateway?</h4>
+        <p>A VPN Gateway creates an encrypted tunnel between your Azure VNet and your on-premises network (or another VNet) over the public internet. It’s how you extend your office network into Azure.</p>
+        <div class="diagram"><span class="label">Site-to-Site VPN</span>
+ON-PREMISES                              AZURE
+┌───────────────┐    IPsec/IKE Tunnel    ┌───────────────┐
+│ Local Network │&lt;─── Encrypted ───&gt;│  Azure VNet    │
+│               │  over Internet       │               │
+│ [Servers]     │                      │  [VMs]        │
+│ [File Share]  │                      │  [Databases]  │
+│               │                      │               │
+│ VPN Device    │                      │ VPN Gateway   │
+│ (Router/FW)   │                      │ GatewaySubnet │
+└───────────────┘                      └───────────────┘
+Three Azure resources needed:
+1. Virtual Network Gateway (the VPN gateway in Azure)
+2. Local Network Gateway (represents your on-prem device)
+3. Connection (links #1 and #2 with a shared key)
+</div>
+        <h4>VPN Types</h4>
+        <h4>Connection Type</h4>
+        <h4>What It Connects</h4>
+        <h4>Uses Internet?</h4>
+        <h4>Use Case</h4>
+        <p>Site-to-Site (S2S)</p>
+        <div class="diagram">
+On-prem network ↔ Azure VNet
+</div>
+        <p>Yes (encrypted)</p>
+        <div class="diagram">
+Office ↔ Azure for hybrid workloads
+</div>
+        <p>Point-to-Site (P2S)</p>
+        <div class="diagram">
+Individual device ↔ Azure VNet
+</div>
+        <p>Yes (encrypted)</p>
+        <p>Remote workers connecting to Azure</p>
+        <p>VNet-to-VNet</p>
+        <div class="diagram">
+Azure VNet ↔ Azure VNet
+</div>
+        <p>Yes (encrypted via gateway)</p>
+        <p>Cross-region VNets (peering is usually better)</p>
+        <h4>The GatewaySubnet</h4>
+        <p>The VPN Gateway MUST be deployed into a special subnet named exactly “GatewaySubnet”:</p>
+        <div class="list-item">Name must be exactly “GatewaySubnet” (case-sensitive, no other name works)</div>
+        <div class="list-item">Recommended size: /27 or larger (32 IPs minimum)</div>
+        <div class="list-item">Do NOT put any other resources in the GatewaySubnet</div>
+        <div class="list-item">Do NOT attach an NSG to the GatewaySubnet</div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: The GatewaySubnet name is MANDATORY and EXACT. If a question mentions creating a VPN but the VNet has no room for a GatewaySubnet (all address space used by existing subnets), the answer is you CANNOT create the VPN. You must first expand the address space or use a VNet with available space.
+        </div>
+        <h4>VPN Gateway SKUs</h4>
+        <h4>SKU</h4>
+        <h4>Max S2S Tunnels</h4>
+        <h4>Max P2S Connections</h4>
+        <h4>Throughput</h4>
+        <h4>BGP Support</h4>
+        <p>Basic</p>
+        <p>10</p>
+        <p>128</p>
+        <p>100 Mbps</p>
+        <p>No</p>
+        <p>VpnGw1</p>
+        <p>30</p>
+        <p>250</p>
+        <p>650 Mbps</p>
+        <p>Yes</p>
+        <p>VpnGw2</p>
+        <p>30</p>
+        <p>500</p>
+        <p>1 Gbps</p>
+        <p>Yes</p>
+        <p>VpnGw3</p>
+        <p>30</p>
+        <p>1000</p>
+        <p>1.25 Gbps</p>
+        <p>Yes</p>
+        <p>VpnGw4</p>
+        <p>100</p>
+        <p>5000</p>
+        <p>5 Gbps</p>
+        <p>Yes</p>
+        <p>VpnGw5</p>
+        <p>100</p>
+        <p>10000</p>
+        <p>10 Gbps</p>
+        <p>Yes</p>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Basic SKU does NOT support BGP, IKEv2, active-active mode, or ExpressRoute coexistence. Never use Basic for production. VPN Gateway takes 30-45 minutes to deploy!
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What three Azure resources do you need for a Site-to-Site VPN?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: 1) Virtual Network Gateway 2) Local Network Gateway 3) Connection object</div>
+          <div class="quiz-q">Q2: What is the GatewaySubnet?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: A dedicated subnet named exactly “GatewaySubnet” where the VPN Gateway is deployed. /27 or larger recommended.</div>
+          <div class="quiz-q">Q3: Can you put other resources in the GatewaySubnet?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Only VPN Gateway or ExpressRoute gateway should be in GatewaySubnet.</div>
+          <div class="quiz-q">Q4: What’s the difference between S2S and P2S VPN?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: S2S = entire on-prem network to Azure. P2S = individual computer/device to Azure.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-2">
+      <div class="module-header" onclick="toggleModule('m-2')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-plug"></i></div>
+        <div class="module-title"><h3>Module 7: ExpressRoute</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is ExpressRoute?</h4>
+        <p>ExpressRoute is a PRIVATE, dedicated connection between your on-premises datacenter and Azure. Unlike VPN, traffic NEVER goes over the public internet. It’s faster, more reliable, and more secure.</p>
+        <div class="diagram"><span class="label">VPN Gateway vs ExpressRoute</span>
+VPN Gateway:                    ExpressRoute:
+┌───────┐  Internet   ┌─────┐   ┌───────┐ Private  ┌─────┐
+│On-Prem│──────────&gt;│Azure│   │On-Prem│───────&gt;│Azure│
+└───────┘ (Encrypted)└─────┘   └───────┘ Link   └─────┘
+(No Internet)
+┌───────────────┬───────────────┬───────────────┐
+│   Feature       │  VPN Gateway    │  ExpressRoute   │
+├───────────────┼───────────────┼───────────────┤
+│ Uses Internet   │  Yes            │  No (private)   │
+│ Max Bandwidth   │  10 Gbps        │  100 Gbps       │
+│ Latency         │  Variable       │  Predictable    │
+│ Cost            │  Lower          │  Higher         │
+│ Setup Time      │  ~45 min        │  Days/Weeks     │
+│ Encryption      │  IPsec (built-in)│  Not by default│
+└───────────────┴───────────────┴───────────────┘
+</div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: ExpressRoute does NOT encrypt traffic by default (it’s a private link, so Microsoft considers it already secure). If you need encryption over ExpressRoute, you must configure a VPN tunnel ON TOP of ExpressRoute. Both can coexist on the same VNet.
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: Does ExpressRoute traffic go over the internet?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. It’s a private, dedicated connection through a connectivity provider.</div>
+          <div class="quiz-q">Q2: Is ExpressRoute encrypted by default?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. You can add encryption by running a VPN tunnel over ExpressRoute.</div>
+          <div class="quiz-q">Q3: When should you use ExpressRoute over VPN?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: When you need: high bandwidth (&gt;10Gbps), low/predictable latency, compliance (data can’t traverse internet).</div>
+          <div class="quiz-q">Q4: Can VPN Gateway and ExpressRoute coexist on the same VNet?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Yes! They can both connect to the same VNet for redundancy. VPN acts as failover if ExpressRoute goes down.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="part3">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-balance-scale"></i></div>
+        <div class="module-title"><h3>Module 8: Azure Load Balancer</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is a Load Balancer?</h4>
+        <p>A load balancer distributes incoming traffic across multiple backend servers (VMs) to ensure no single server gets overwhelmed. It’s essential for high availability.</p>
+        <div class="diagram"><span class="label">Azure Load Balancer</span>
+Users / Internet
+│
+▼
+┌───────────────────┐
+│  LOAD BALANCER    │
+│  (Frontend IP)    │
+│  Public: 52.x.x.x │
+└────┬────┬────┬────┘
+│    │    │
+▼    ▼    ▼
+┌───┐ ┌───┐ ┌───┐
+│VM1│ │VM2│ │VM3│  Backend Pool
+└───┘ └───┘ └───┘
+Health Probe checks each VM every 15 seconds.
+If VM2 fails the probe, traffic stops going to VM2.
+</div>
+        <h4>Load Balancer Components</h4>
+        <h4>Component</h4>
+        <h4>What It Is</h4>
+        <h4>Example</h4>
+        <p>Frontend IP</p>
+        <p>The IP clients connect to</p>
+        <p>Public IP 52.186.77.23 or Private IP 10.0.1.100</p>
+        <p>Backend Pool</p>
+        <p>Group of VMs receiving traffic</p>
+        <p>VM1, VM2, VM3 in an availability set</p>
+        <p>Health Probe</p>
+        <p>Checks if VMs are healthy</p>
+        <p>TCP probe on port 80 every 15 seconds</p>
+        <p>Load Balancing Rule</p>
+        <p>Maps frontend to backend + port</p>
+        <div class="diagram">
+Frontend:80 → Backend Pool:80 (TCP)
+</div>
+        <p>Inbound NAT Rule</p>
+        <p>Maps to a specific VM (not pool)</p>
+        <div class="diagram">
+Frontend:50001 → VM1:3389 (for RDP to specific VM)
+</div>
+        <h4>Public vs Internal Load Balancer</h4>
+        <h4>Feature</h4>
+        <h4>Public Load Balancer</h4>
+        <h4>Internal Load Balancer</h4>
+        <p>Frontend IP</p>
+        <p>Public IP address</p>
+        <p>Private IP from VNet subnet</p>
+        <p>Traffic Source</p>
+        <div class="diagram">
+Internet → VMs
+Internal resources → VMs
+</div>
+        <p>Use Case</p>
+        <p>Web servers, public APIs</p>
+        <p>Database tier, internal app tier</p>
+        <p>Accessible From Internet?</p>
+        <p>Yes</p>
+        <p>No — only from within VNet</p>
+        <h4>Basic vs Standard SKU</h4>
+        <h4>Feature</h4>
+        <h4>Basic (Being Retired)</h4>
+        <h4>Standard (Use This)</h4>
+        <p>Backend Pool Size</p>
+        <p>Up to 300 VMs</p>
+        <p>Up to 1000 VMs</p>
+        <p>Health Probes</p>
+        <p>TCP, HTTP</p>
+        <p>TCP, HTTP, HTTPS</p>
+        <p>Availability Zones</p>
+        <p>No</p>
+        <p>Yes (zone-redundant)</p>
+        <p>SLA</p>
+        <p>No SLA</p>
+        <p>99.99% SLA</p>
+        <p>Security</p>
+        <p>Open by default</p>
+        <p>Closed by default (needs NSG)</p>
+        <p>Multiple Frontend IPs</p>
+        <p>No</p>
+        <p>Yes</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Public Load Balancer</div>
+          <ol>
+            <li>Create 2 VMs in the same VNet/subnet with a web server installed (IIS or Nginx)</li>
+            <li>Go to Load balancers &gt; + Create</li>
+            <li>Type: Public, SKU: Standard, Name: “web-lb”</li>
+            <li>Frontend IP: Create new public IP “lb-public-ip” (Standard, Static)</li>
+            <li>Backend pool: Add both VMs</li>
+            <li>Health probe: Name=“http-probe”, Protocol=HTTP, Port=80, Path=/, Interval=15</li>
+            <li>Load balancing rule: Frontend IP:80 → Backend pool:80, Protocol=TCP, Health probe=http-probe</li>
+            <li>Create the LB</li>
+            <li>Create an NSG rule on the subnet allowing port 80 inbound from Internet</li>
+            <li>Browse to the LB’s public IP — you should see your web page. Refresh — traffic alternates between VMs!</li>
+          </ol>
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What is the difference between a Public and Internal Load Balancer?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Public LB has a public IP (internet traffic). Internal LB has a private IP (internal VNet traffic only).</div>
+          <div class="quiz-q">Q2: What happens when a VM fails a health probe?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: The Load Balancer stops sending traffic to that VM until it passes the probe again.</div>
+          <div class="quiz-q">Q3: Can you mix Basic and Standard resources?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Standard LB requires Standard Public IPs. Basic LB requires Basic IPs. They cannot mix.</div>
+          <div class="quiz-q">Q4: What layer does Azure Load Balancer operate at?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Layer 4 (Transport layer — TCP/UDP). It does NOT inspect HTTP content. For Layer 7, use Application Gateway.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-1">
+      <div class="module-header" onclick="toggleModule('m-1')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-plug"></i></div>
+        <div class="module-title"><h3>Module 9: Azure Application Gateway</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is Application Gateway?</h4>
+        <p>Application Gateway is a Layer 7 (HTTP/HTTPS) load balancer. Unlike Azure Load Balancer (Layer 4), it can inspect HTTP traffic and make intelligent routing decisions based on URL path, host headers, cookies, and more.</p>
+        <div class="diagram"><span class="label">Application Gateway URL-Based Routing</span>
+Users
+www.company.com/images/*     www.company.com/api/*
+│                        │
+▼                        ▼
+┌─────────────────────────────────┐
+│     APPLICATION GATEWAY        │
+│  SSL Termination + WAF          │
+│  URL Path-Based Routing          │
+└────────┬────────┬────────┬──────┘
+│        │        │
+/images/*  /api/*    /default
+▼        ▼        ▼
+[Image    [API      [Web
+VMs]     VMs]      VMs]
+</div>
+        <h4>Load Balancer vs Application Gateway</h4>
+        <h4>Feature</h4>
+        <h4>Azure Load Balancer</h4>
+        <h4>Application Gateway</h4>
+        <p>OSI Layer</p>
+        <p>Layer 4 (TCP/UDP)</p>
+        <p>Layer 7 (HTTP/HTTPS)</p>
+        <p>Routing</p>
+        <p>IP + Port only</p>
+        <p>URL path, host header, cookies</p>
+        <p>SSL Termination</p>
+        <p>No</p>
+        <p>Yes (offloads SSL from VMs)</p>
+        <p>Web Application Firewall</p>
+        <p>No</p>
+        <p>Yes (WAF for OWASP protection)</p>
+        <p>Session Affinity</p>
+        <p>Source IP based</p>
+        <p>Cookie-based affinity</p>
+        <p>Health Probes</p>
+        <p>TCP, HTTP</p>
+        <p>HTTP, HTTPS with custom paths</p>
+        <p>Use Case</p>
+        <p>Non-HTTP traffic, internal routing</p>
+        <p>Web apps, APIs, microservices</p>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: At what OSI layer does Application Gateway operate?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Layer 7 (Application layer). It inspects HTTP/HTTPS content.</div>
+          <div class="quiz-q">Q2: What is URL path-based routing?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Routes traffic to different backends based on URL (e.g., /images/* → Image VMs, /api/* → API VMs).</div>
+          <div class="quiz-q">Q3: What is SSL termination?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: The gateway decrypts SSL at the gateway so backend VMs don’t need to handle encryption (reduces VM CPU load).</div>
+          <div class="quiz-q">Q4: What is WAF?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Web Application Firewall. Protects against common web attacks like SQL injection, XSS. Based on OWASP rules.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-2">
+      <div class="module-header" onclick="toggleModule('m-2')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-user-shield"></i></div>
+        <div class="module-title"><h3>Module 10: User-Defined Routes (UDRs) &amp; Azure Bastion</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>User-Defined Routes</h4>
+        <p>By default, Azure automatically routes traffic between subnets, VNets, and the internet using system routes. UDRs let you OVERRIDE these defaults and force traffic through a specific path (like a firewall).</p>
+        <h4>FLOW: UDR Forcing Traffic Through a Firewall (NVA)</h4>
+        <p>WITHOUT UDR:                   WITH UDR:</p>
+        <div class="diagram">
+WebSubnet ──&gt; Internet          WebSubnet ──&gt; Firewall ──&gt; Internet
+</div>
+        <p>(direct, no inspection)        (inspected, logged, filtered)</p>
+        <p>Route Table applied to WebSubnet:</p>
+        <div class="diagram">
+┌─────────────┬───────────────┬──────────────────┐
+│ Destination  │ Next Hop Type  │ Next Hop IP       │
+├─────────────┼───────────────┼──────────────────┤
+│ 0.0.0.0/0    │ Virtual Appl.  │ 10.0.4.4 (FW IP)  │
+└─────────────┴───────────────┴──────────────────┘
+</div>
+        <h4>Next Hop Types</h4>
+        <h4>Next Hop Type</h4>
+        <h4>What It Does</h4>
+        <h4>When To Use</h4>
+        <p>Virtual Network</p>
+        <p>Route within the VNet (default)</p>
+        <p>Subnet-to-subnet traffic</p>
+        <p>Virtual Appliance</p>
+        <p>Send to a specific IP (firewall/NVA)</p>
+        <p>Force traffic through a firewall for inspection</p>
+        <p>Virtual Network Gateway</p>
+        <p>Send to VPN/ExpressRoute gateway</p>
+        <p>Route on-prem-bound traffic</p>
+        <p>Internet</p>
+        <p>Send directly to internet</p>
+        <p>Default for internet-bound traffic</p>
+        <p>None</p>
+        <p>Drop the traffic (black hole)</p>
+        <p>Block traffic to a specific destination</p>
+        <h4>Azure Bastion</h4>
+        <p>Azure Bastion provides secure RDP/SSH access to your VMs directly through the Azure portal, without exposing VMs to the public internet.</p>
+        <div class="diagram"><span class="label">Azure Bastion vs Direct RDP</span>
+WITHOUT Bastion (INSECURE):     WITH Bastion (SECURE):
+User ──&gt; Public Internet ──&gt; VM   User ──&gt; Azure Portal ──&gt; Bastion ──&gt; VM
+(RDP port 3389 exposed!)        (No public IP needed on VM!)
+(Attackers can scan port 3389)   (Bastion is in AzureBastionSubnet)
+(Browser-based RDP/SSH)
+</div>
+        <h4>Bastion Requirements</h4>
+        <div class="list-item">Dedicated subnet named exactly “AzureBastionSubnet” (minimum /26)</div>
+        <div class="list-item">Standard Public IP for the Bastion resource</div>
+        <div class="list-item">VMs do NOT need public IPs — Bastion connects via private IP</div>
+        <div class="list-item">All connections go through the Azure portal (browser-based)</div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Azure Bastion requires a subnet named exactly “AzureBastionSubnet” with minimum size /26 (64 IPs). This is different from GatewaySubnet for VPN. A VNet can have BOTH AzureBastionSubnet AND GatewaySubnet.
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: What is a UDR used for?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Override Azure’s default routing. Force traffic through a firewall or drop it entirely.</div>
+          <div class="quiz-q">Q2: What Next Hop Type drops traffic?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: “None” — creates a black hole route that silently drops matching traffic.</div>
+          <div class="quiz-q">Q3: What subnet does Azure Bastion require?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: AzureBastionSubnet (minimum /26). Exactly that name.</div>
+          <div class="quiz-q">Q4: Does a VM need a public IP to use Azure Bastion?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: No. Bastion connects to VMs via their private IP. No public IP needed on VMs.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-3">
+      <div class="module-header" onclick="toggleModule('m-3')">
+        <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-network-wired"></i></div>
+        <div class="module-title"><h3>Module 11: Azure Network Watcher</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is Network Watcher?</h4>
+        <p>Network Watcher is a suite of diagnostic and monitoring tools for troubleshooting Azure networking. When something goes wrong (VM can’t reach internet, VMs can’t talk to each other, website is unreachable), Network Watcher helps you find WHY.</p>
+        <h4>Key Network Watcher Tools</h4>
+        <h4>Tool</h4>
+        <h4>What It Does</h4>
+        <h4>When To Use</h4>
+        <p>IP Flow Verify</p>
+        <p>Tests if traffic is allowed or denied to/from a VM (checks NSG rules)</p>
+        <p>VM can’t receive traffic — which NSG rule is blocking it?</p>
+        <p>Next Hop</p>
+        <p>Shows where traffic from a VM will be routed (which route table entry)</p>
+        <p>Traffic is going to wrong destination — is a UDR misconfigured?</p>
+        <p>Connection Troubleshoot</p>
+        <p>Full end-to-end connectivity test between source and destination</p>
+        <p>Comprehensive check: is it NSG? Route? DNS? Firewall?</p>
+        <p>NSG Flow Logs</p>
+        <p>Records all traffic flowing through an NSG (allowed + denied)</p>
+        <p>Audit who accessed what, detect suspicious traffic patterns</p>
+        <p>Topology</p>
+        <p>Visual diagram of your VNet resources and connections</p>
+        <p>Understanding complex network architectures at a glance</p>
+        <p>Packet Capture</p>
+        <p>Captures network packets on a VM for deep analysis</p>
+        <p>Deep debugging: analyze exact packets being sent/received</p>
+        <p>VPN Troubleshoot</p>
+        <p>Diagnoses VPN Gateway connection issues</p>
+        <p>Site-to-Site VPN is down — what’s wrong?</p>
+        <p>Connection Monitor</p>
+        <p>Continuous monitoring of connectivity between endpoints</p>
+        <p>Ongoing alerting when a connection degrades or fails</p>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Use IP Flow Verify to Troubleshoot NSG</div>
+          <ol>
+            <li>Scenario: A VM in WebSubnet cannot receive HTTP traffic. Let’s find out why.</li>
+            <li>Go to Network Watcher (search in portal)</li>
+            <li>Click “IP flow verify”</li>
+            <li>Select your VM, Network Interface, Direction = Inbound</li>
+            <li>Protocol = TCP, Local port = 80, Remote address = 8.8.8.8, Remote port = 12345</li>
+            <li>Click “Check”</li>
+            <li>Result will show: “Access denied” or “Access allowed”</li>
+            <li>If denied, it tells you EXACTLY which NSG rule is blocking (e.g., “DenyAllInBound at priority 65500”)</li>
+            <li>Fix: Go to the NSG &gt; add an Allow rule with a lower priority number (e.g., 100)</li>
+            <li>Re-run IP Flow Verify — should now show “Access allowed”</li>
+          </ol>
+        </div>
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Use Connection Troubleshoot</div>
+          <ol>
+            <li>Go to Network Watcher &gt; Connection troubleshoot</li>
+            <li>Source: Select your web VM</li>
+            <li>Destination: Choose “Specify manually” and enter an IP or FQDN (e.g., google.com, port 443)</li>
+            <li>Click “Check”</li>
+            <li>Network Watcher will test the full path and show: Status (Reachable/Unreachable), Latency, Hops, and which hop is failing</li>
+            <li>If unreachable, it identifies: Is it an NSG rule? A missing route? A DNS issue? A firewall block?</li>
+            <li>This is the single most useful troubleshooting tool for the exam and real-world production</li>
+          </ol>
+        </div>
+        <div class="box box-red">
+          <strong>Exam Tip</strong>
+          EXAM TIP: Network Watcher IP Flow Verify is the #1 troubleshooting tool for NSG issues. It tells you EXACTLY which rule is allowing or blocking traffic. Connection Troubleshoot is the comprehensive tool that checks everything (NSG + routing + DNS). Know when to use which tool — this is frequently tested.
+        </div>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: Which tool checks if an NSG rule is blocking traffic?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: IP Flow Verify — it tells you the exact NSG rule name and priority that’s allowing or denying.</div>
+          <div class="quiz-q">Q2: Which tool shows you the next hop for traffic from a VM?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Next Hop — shows whether traffic goes to VNet, Internet, Virtual Appliance, or is dropped.</div>
+          <div class="quiz-q">Q3: Which tool provides end-to-end connectivity diagnosis?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Connection Troubleshoot — tests the full path and identifies where it fails (NSG, route, DNS).</div>
+          <div class="quiz-q">Q4: What are NSG Flow Logs used for?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Recording all traffic through an NSG for auditing and security analysis. Stored in a Storage Account.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module" id="m-4">
+      <div class="module-header" onclick="toggleModule('m-4')">
+        <div class="module-icon" style="background:rgba(6,182,212,.15);color:var(--cyan)"><i class="fas fa-network-wired"></i></div>
+        <div class="module-title"><h3>Module 12: The Complete Networking Decision Guide</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>When to Use What — Decision Flowchart</h4>
+        <p>This is the single most important chart for the exam. Memorize this:</p>
+        <h4>DECISION: Connecting Two Azure VNets</h4>
+        <p>Need to connect VNet-A to VNet-B?</p>
+        <div class="diagram">
+│
+</div>
+        <p>Same region or cross-region?</p>
+        <div class="diagram">
+│
+├── Same region ──&gt; Regional VNet Peering (fastest, cheapest)
+├── Cross-region ──&gt; Global VNet Peering (still fast, backbone)
+└── Need encryption? ──&gt; VNet-to-VNet VPN (encrypted but slower)
+</div>
+        <h4>DECISION: Connecting On-Premises to Azure</h4>
+        <p>Need to connect your office/datacenter to Azure?</p>
+        <div class="diagram">
+│
+├── Budget-friendly, &lt; 10 Gbps ──&gt; VPN Gateway (Site-to-Site)
+├── High bandwidth, low latency ──&gt; ExpressRoute
+├── Single user/device ──&gt; VPN Gateway (Point-to-Site)
+└── Data can’t touch internet ──&gt; ExpressRoute (mandatory)
+</div>
+        <h4>DECISION: Load Balancing</h4>
+        <p>Need to distribute traffic across VMs?</p>
+        <div class="diagram">
+│
+</div>
+        <p>What type of traffic?</p>
+        <div class="diagram">
+│
+├── TCP/UDP (non-HTTP) ──&gt; Azure Load Balancer (Layer 4)
+├── HTTP/HTTPS ──&gt; Application Gateway (Layer 7)
+│    ├── Need WAF? ──&gt; App Gateway with WAF
+│    └── Need URL routing? ──&gt; App Gateway path-based rules
+├── Global (multi-region) HTTP ──&gt; Azure Front Door
+└── DNS-level (non-HTTP global) ──&gt; Traffic Manager
+</div>
+        <h4>DECISION: Outbound Internet Access</h4>
+        <p>VMs need to access the internet (outbound)?</p>
+        <div class="diagram">
+│
+├── Production workload ──&gt; NAT Gateway (recommended)
+├── Single VM needs its own IP ──&gt; Instance-level public IP
+├── Already behind a Load Balancer ──&gt; LB outbound rules (acceptable)
+└── Default outbound ──&gt; NEVER use in production (being deprecated)
+</div>
+        <h4>DECISION: Securing Access to PaaS Services</h4>
+        <p>Need to secure access to Storage/SQL/etc.?</p>
+        <div class="diagram">
+│
+├── Only from Azure VNet, no on-prem ──&gt; Service Endpoint (free)
+├── From on-prem + Azure, fully private ──&gt; Private Endpoint (paid)
+└── Need to disable public endpoint entirely ──&gt; Private Endpoint + disable public access
+</div>
+        <h4>All Special Subnet Names (MUST MEMORIZE)</h4>
+        <h4>Subnet Name</h4>
+        <h4>Purpose</h4>
+        <h4>Min Size</h4>
+        <h4>Key Rules</h4>
+        <p>GatewaySubnet</p>
+        <p>VPN Gateway or ExpressRoute Gateway</p>
+        <p>/27 recommended</p>
+        <p>Must be exactly this name. No NSGs. No other resources.</p>
+        <p>AzureBastionSubnet</p>
+        <p>Azure Bastion secure RDP/SSH</p>
+        <p>/26 minimum</p>
+        <p>Must be exactly this name. Requires a Standard Public IP.</p>
+        <p>AzureFirewallSubnet</p>
+        <p>Azure Firewall</p>
+        <p>/26 minimum</p>
+        <p>Must be exactly this name. Dedicated to Azure Firewall only.</p>
+        <p>AzureFirewallManagementSubnet</p>
+        <p>Azure Firewall forced tunneling</p>
+        <p>/26 minimum</p>
+        <p>Required only when using forced tunneling with Azure Firewall.</p>
+        <p>RouteServerSubnet</p>
+        <p>Azure Route Server</p>
+        <p>/27 minimum</p>
+        <p>Must be exactly this name.</p>
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP</div>
+          <div class="quiz-q">Q1: Connect 2 Azure VNets in the same region?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Regional VNet Peering — fastest, cheapest, uses Microsoft backbone.</div>
+          <div class="quiz-q">Q2: Connect office to Azure, budget-friendly?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: VPN Gateway (Site-to-Site) — encrypted tunnel over internet.</div>
+          <div class="quiz-q">Q3: Load balance web traffic with URL routing?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Application Gateway (Layer 7) — supports URL path-based routing + WAF.</div>
+          <div class="quiz-q">Q4: Provide outbound internet for production VMs?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: NAT Gateway — dynamic SNAT, scalable, prevents port exhaustion.</div>
+          <div class="quiz-q">Q5: Secure access to Azure Storage from VNet only?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">A: Service Endpoint (free). For on-prem access too, use Private Endpoint.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section " id="practice">
+
+    <div class="module open" id="m-0">
+      <div class="module-header" onclick="toggleModule('m-0')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>Your Day 2 Action Plan</h3><span>Click to expand</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <div class="list-item">Review all architecture diagrams until you can draw them from memory</div>
+        <div class="list-item">Complete every LAB in this guide using a free Azure account</div>
+        <div class="list-item">Pay special attention to NSG rule evaluation order — this is the #1 networking exam topic</div>
+        <div class="list-item">Memorize: Azure reserves 5 IPs per subnet, GatewaySubnet, AzureBastionSubnet</div>
+        <div class="list-item">Understand when to use: VNet Peering vs VPN vs ExpressRoute vs Load Balancer vs App Gateway</div>
+        <div class="list-item">Take the free Microsoft Practice Assessment for the networking section</div>
+        <p>Day 2 Complete! Networking is the #1 domain where candidates fail.</p>
+        <h4>Master these concepts and you’ll have a massive advantage on exam day!</h4>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.section).classList.add('active');
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  });
+});
+
+function toggleModule(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+
+<footer style="text-align:center; padding:20px 0; border-top: 1px solid #334155;">
+  <p style="color:#67e8f9;font-size:13px; text-align:Center; margin-bottom:10px"><strong>© 2026 Mohan Juriyani | Cloud Infrastructure Engineer</strong></p>
+</footer>
+
+</body>
+</html>

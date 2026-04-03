@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Day 3 | Storage, VMs & App Service</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0b0f1a;--card:#111827;--card2:#1a2235;--border:#1e293b;--blue:#3b82f6;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--cyan:#06b6d4;--text:#e2e8f0;--muted:#64748b;--dim:#475569}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+
+/* Hero */
+.hero{text-align:center;padding:60px 20px 40px;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);border-bottom:1px solid var(--border)}
+.hero .badge{display:inline-block;background:linear-gradient(90deg,var(--blue),var(--purple));padding:6px 20px;border-radius:30px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.hero .badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:100px;padding:.4rem 1.2rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--azure);margin-bottom:2rem;position:relative}
+.hero .badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero h1{font-size:clamp(28px,5vw,48px);font-weight:800;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:16px;max-width:600px;margin:0 auto}
+
+/* Nav */
+.nav-tabs{display:flex;gap:8px;overflow-x:auto;padding:20px 0;position:sticky;top:0;background:var(--bg);z-index:100;border-bottom:1px solid var(--border)}
+.nav-tab{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:.2s}
+.nav-tab:hover,.nav-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
+.nav-tab.active{background:rgba(59,130,246,.15);color:#93c5fd}
+
+/* Section */
+.section{display:none;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Module Card */
+.module{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden}
+.module-header{padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s}
+.module-header:hover{background:var(--card2)}
+.module-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.module-title{flex:1}
+.module-title h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.module-title span{font-size:12px;color:var(--muted)}
+.module-chevron{font-size:14px;color:var(--dim);transition:.3s}
+.module.open .module-chevron{transform:rotate(180deg)}
+.module-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border)}
+.module.open .module-body{display:block}
+
+/* Content Blocks */
+h2{font-size:22px;font-weight:800;margin:30px 0 12px;color:#f1f5f9}
+h4{font-size:16px;font-weight:700;margin:20px 0 10px;color:#cbd5e1}
+p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
+.list-item{padding-left:20px;position:relative}
+.list-item::before{content:'▸';position:absolute;left:0;color:var(--blue)}
+
+/* Box styles */
+.box{border-radius:12px;padding:16px 18px;margin:14px 0;font-size:13px;line-height:1.7}
+.box-blue{background:rgba(59,130,246,.08);border-left:4px solid var(--blue);color:#93c5fd}
+.box-green{background:rgba(16,185,129,.08);border-left:4px solid var(--green);color:#6ee7b7}
+.box-orange{background:rgba(245,158,11,.08);border-left:4px solid var(--orange);color:#fcd34d}
+.box-red{background:rgba(239,68,68,.08);border-left:4px solid var(--red);color:#fca5a5}
+.box-purple{background:rgba(139,92,246,.08);border-left:4px solid var(--purple);color:#c4b5fd}
+.box-cyan{background:rgba(6,182,212,.08);border-left:4px solid var(--cyan);color:#67e8f9}
+.box strong{display:block;margin-bottom:6px;font-size:14px}
+.box-title{font-weight:700;font-size:14px;margin-bottom:6px}
+
+/* Diagram */
+.diagram{background:#0d1117;border:1px solid #21262d;border-radius:12px;padding:16px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:#8b949e;overflow-x:auto;white-space:pre}
+.diagram .label{color:var(--purple);font-weight:700;font-size:13px;margin-bottom:8px;display:block;font-family:'Plus Jakarta Sans',sans-serif}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.tbl th{background:var(--card2);padding:10px 12px;text-align:left;font-weight:700;color:#93c5fd;border:1px solid var(--border)}
+.tbl td{padding:10px 12px;border:1px solid var(--border);color:#94a3b8}
+.tbl tr:hover td{background:rgba(59,130,246,.04)}
+
+/* Lab */
+.lab{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.lab-title{font-weight:700;color:var(--green);font-size:14px;margin-bottom:10px}
+.lab-title i{margin-right:6px}
+.lab ol{padding-left:20px;font-size:13px;color:#6ee7b7}
+.lab ol li{margin-bottom:6px;line-height:1.6}
+
+/* CLI */
+.cli{background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b949e;overflow-x:auto;white-space:pre-wrap}
+.cli .cmd{color:#79c0ff}
+.cli .comment{color:#484f58}
+
+/* Thinking */
+.think{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,130,246,.08));border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.think-title{font-weight:700;color:var(--purple);font-size:14px;margin-bottom:8px}
+.think-title i{margin-right:6px}
+.think p{font-size:13px;color:#c4b5fd;line-height:1.7}
+
+/* Quiz */
+.quiz{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.quiz-title{font-weight:700;color:var(--orange);font-size:14px;margin-bottom:10px}
+.quiz-q{font-size:13px;font-weight:600;color:#fcd34d;margin-bottom:4px}
+.quiz-a{font-size:13px;color:#94a3b8;margin-bottom:10px;padding-left:16px;cursor:pointer;display:none}
+.quiz-a.show{display:block}
+.quiz-toggle{font-size:12px;color:var(--orange);cursor:pointer;margin-bottom:12px;text-decoration:underline}
+
+/* Scenario */
+.scenario{background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:16px 18px;margin:14px 0}
+.scenario-title{font-weight:700;color:var(--cyan);font-size:14px;margin-bottom:8px}
+.scenario-title i{margin-right:6px}
+
+/* Responsive */
+@media(max-width:768px){.container{padding:12px}.nav-tab{padding:8px 14px;font-size:12px}.module-header{padding:14px 16px}.box,.lab,.think,.quiz,.scenario{padding:14px}.diagram{font-size:11px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">Day 3 Deep Dive • 35–45% of Exam</div>
+  <h1>Azure Storage, VMs & App Service</h1>
+  <p>The heaviest exam day — master Storage (15–20%), Compute (20–25%) with thinking frameworks, labs, and production scenarios</p>
+  <p style="font-size: 10px;">© 2026 Mohan Juriyani</p>
+</div>
+
+<div class="container">
+  <div class="nav-tabs" id="navTabs">
+    <div class="nav-tab active" data-section="storage"><i class="fas fa-database"></i> Azure Storage</div>
+    <div class="nav-tab" data-section="vms"><i class="fas fa-server"></i> Virtual Machines</div>
+    <div class="nav-tab" data-section="appservice"><i class="fas fa-globe"></i> App Service</div>
+    <div class="nav-tab" data-section="scenarios"><i class="fas fa-building"></i> Real-World Scenarios</div>
+    <div class="nav-tab" data-section="practice"><i class="fas fa-pencil-alt"></i> Practice Exam</div>
+  </div>
+
+  <!-- ══════════════════ STORAGE SECTION ══════════════════ -->
+  <div class="section active" id="storage">
+
+    <div class="think">
+      <div class="think-title"><i class="fas fa-brain"></i> HOW TO THINK ABOUT AZURE STORAGE</div>
+      <p>Imagine you're moving into a new house. You need different types of storage for different things:<br><br>
+      <strong style="color:#a78bfa">📦 Blob Storage</strong> = Your attic — dump anything: photos, videos, backups, logs. Just throw boxes up there.<br>
+      <strong style="color:#a78bfa">📁 Azure Files</strong> = A shared network drive — everyone in the office maps the same F: drive. Familiar folders and files.<br>
+      <strong style="color:#a78bfa">📊 Table Storage</strong> = A giant spreadsheet — billions of rows of simple structured data (NoSQL).<br>
+      <strong style="color:#a78bfa">📬 Queue Storage</strong> = A mailbox queue — apps drop messages in, other apps pick them up one by one.<br><br>
+      The <strong>Storage Account</strong> is the HOUSE itself. You first build the house (choose location, security, how many copies), then use the rooms (blob, file, table, queue) inside it.</p>
+    </div>
+
+    <!-- M1: Storage Accounts -->
+    <div class="module open" id="m-sa">
+      <div class="module-header" onclick="toggleModule('m-sa')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-hdd"></i></div>
+        <div class="module-title"><h3>Module 1: Storage Accounts — The Foundation</h3><span>Account types, performance tiers, and creation</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>What Is a Storage Account?</h4>
+        <p>A Storage Account is the top-level container for all Azure Storage services. It provides a unique namespace (URL) for your data, like <code>https://mystorageaccount.blob.core.windows.net</code>. Every piece of data you store in Azure lives inside a storage account.</p>
+
+        <h4>Storage Account Types</h4>
+        <table class="tbl">
+          <tr><th>Type</th><th>Services Supported</th><th>Performance</th><th>Use Case</th></tr>
+          <tr><td><strong>General-purpose v2 (GPv2)</strong></td><td>Blob, File, Queue, Table, Data Lake</td><td>Standard or Premium</td><td>✅ DEFAULT — use for almost everything</td></tr>
+          <tr><td>Premium Block Blobs</td><td>Block blobs only</td><td>Premium (SSD)</td><td>Low-latency apps, high transaction rates</td></tr>
+          <tr><td>Premium File Shares</td><td>Azure Files only</td><td>Premium (SSD)</td><td>Enterprise file shares needing high IOPS</td></tr>
+          <tr><td>Premium Page Blobs</td><td>Page blobs only</td><td>Premium (SSD)</td><td>Unmanaged VM disks (rare now)</td></tr>
+        </table>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP</strong>If the question doesn't mention high-performance or low-latency, the answer is almost ALWAYS General-purpose v2 (GPv2). It's the most versatile and cost-effective. GPv1 is legacy — you can upgrade GPv1 to GPv2 with no downtime and no data loss.</div>
+
+        <h4>Standard vs Premium Performance</h4>
+        <table class="tbl">
+          <tr><th>Feature</th><th>Standard (HDD)</th><th>Premium (SSD)</th></tr>
+          <tr><td>Backed by</td><td>Hard Disk Drives</td><td>Solid State Drives</td></tr>
+          <tr><td>Latency</td><td>Milliseconds</td><td>Sub-millisecond</td></tr>
+          <tr><td>Cost</td><td>Lower per GB</td><td>Higher per GB</td></tr>
+          <tr><td>Best for</td><td>Backups, archives, infrequent access</td><td>Databases, real-time analytics, high IOPS</td></tr>
+          <tr><td>Redundancy Options</td><td>LRS, ZRS, GRS, GZRS, RA-GRS, RA-GZRS</td><td>LRS and ZRS only</td></tr>
+        </table>
+
+        <div class="think">
+          <div class="think-title"><i class="fas fa-lightbulb"></i> THINKING FRAMEWORK: Choosing Storage</div>
+          <p>Ask yourself 3 questions in order:<br><br>
+          <strong>1. What type of data?</strong> → Unstructured (Blob), file shares (Files), key-value (Table), messages (Queue)<br>
+          <strong>2. How fast does it need to be?</strong> → Standard for most things, Premium only if sub-millisecond latency is required<br>
+          <strong>3. How important is it?</strong> → This determines your redundancy (next module)</p>
+        </div>
+
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Storage Account</div>
+          <ol>
+            <li>Go to portal.azure.com → search "Storage accounts" → + Create</li>
+            <li>Resource group: RG-Storage-Lab</li>
+            <li>Storage account name: <code>myaz104storage</code> (must be globally unique, lowercase, 3-24 chars)</li>
+            <li>Region: East US</li>
+            <li>Performance: Standard</li>
+            <li>Redundancy: LRS (for testing — cheapest)</li>
+            <li>Go to Advanced tab: note "Enable blob public access" — DISABLE for production</li>
+            <li>Go to Networking tab: choose "Public endpoint (all networks)" for lab, "Selected VNets" for production</li>
+            <li>Review + Create → Create</li>
+            <li>After creation, note the endpoints: blob, file, queue, table — each has a unique URL</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- M2: Redundancy -->
+    <div class="module" id="m-red">
+      <div class="module-header" onclick="toggleModule('m-red')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-shield-alt"></i></div>
+        <div class="module-title"><h3>Module 2: Storage Redundancy — Protecting Your Data</h3><span>LRS, ZRS, GRS, GZRS, RA-GRS, RA-GZRS explained</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <div class="think">
+          <div class="think-title"><i class="fas fa-brain"></i> THINK OF REDUNDANCY LIKE PHOTOCOPIES</div>
+          <p>Imagine your data is a precious document. Redundancy = how many copies and WHERE you keep them:<br><br>
+          <strong>LRS</strong> = 3 copies in the SAME building (same datacenter). Cheapest, but building burns → all copies gone.<br>
+          <strong>ZRS</strong> = 3 copies across 3 DIFFERENT buildings in the same city (availability zones). One building burns → still safe.<br>
+          <strong>GRS</strong> = 3 copies in Building A (primary) + 3 more copies in Building B in another city (secondary region). City floods → still safe.<br>
+          <strong>GZRS</strong> = 3 copies across 3 buildings in City A + 3 copies in one building in City B. Best of both worlds.</p>
+        </div>
+
+        <table class="tbl">
+          <tr><th>Redundancy</th><th>Copies</th><th>Protects Against</th><th>Replication</th><th>Secondary Read?</th><th>Cost</th></tr>
+          <tr><td><strong>LRS</strong></td><td>3 in 1 datacenter</td><td>Server/rack failure</td><td>Synchronous</td><td>No</td><td>$ (Cheapest)</td></tr>
+          <tr><td><strong>ZRS</strong></td><td>3 across 3 zones</td><td>Datacenter failure</td><td>Synchronous</td><td>No</td><td>$$</td></tr>
+          <tr><td><strong>GRS</strong></td><td>6 (3 primary + 3 secondary region)</td><td>Regional disaster</td><td>Sync local + Async to secondary</td><td>No (only after failover)</td><td>$$$</td></tr>
+          <tr><td><strong>RA-GRS</strong></td><td>6</td><td>Regional disaster</td><td>Sync + Async</td><td>YES — read-only anytime</td><td>$$$$</td></tr>
+          <tr><td><strong>GZRS</strong></td><td>6 (3 zones primary + 3 secondary)</td><td>Zone + Region failure</td><td>Sync zones + Async region</td><td>No</td><td>$$$$</td></tr>
+          <tr><td><strong>RA-GZRS</strong></td><td>6</td><td>Zone + Region failure</td><td>Sync + Async</td><td>YES — read-only anytime</td><td>$$$$$ (Most expensive)</td></tr>
+        </table>
+
+        <div class="diagram"><span class="label">📐 ARCHITECTURE: How GRS Replication Works</span>
+PRIMARY REGION (East US)              SECONDARY REGION (West US)
+┌─────────────────────┐              ┌─────────────────────┐
+│  Datacenter A       │   Async      │  Datacenter X       │
+│  ┌───┐ ┌───┐ ┌───┐ │ ──────────>  │  ┌───┐ ┌───┐ ┌───┐ │
+│  │ 1 │ │ 2 │ │ 3 │ │  Replication │  │ 4 │ │ 5 │ │ 6 │ │
+│  └───┘ └───┘ └───┘ │              │  └───┘ └───┘ └───┘ │
+│  3 copies (sync)    │              │  3 copies           │
+│  Read + Write ✅    │              │  Read-only if RA-*  │
+└─────────────────────┘              └─────────────────────┘
+
+Write to primary → 3 sync copies → then async replicated to secondary
+RPO (Recovery Point Objective) for GRS: ~15 minutes (data could be up to 15 min behind)</div>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP — ARCHIVE TIER RESTRICTION</strong>The Archive access tier is NOT supported with ZRS, GZRS, or RA-GZRS redundancy. It only works with LRS, GRS, or RA-GRS. Any redundancy with a "Z" blocks Archive. Remember: "Z blocks Archive."</div>
+
+        <div class="think">
+          <div class="think-title"><i class="fas fa-lightbulb"></i> DECISION FRAMEWORK: Choosing Redundancy</div>
+          <p><strong>Ask: "What am I protecting against?"</strong><br><br>
+          Server failure only (dev/test) → <strong>LRS</strong> (cheapest)<br>
+          Datacenter failure (production in one region) → <strong>ZRS</strong><br>
+          Regional disaster (business-critical) → <strong>GRS</strong> or <strong>GZRS</strong><br>
+          Need to READ from secondary during normal operations → Add <strong>RA-</strong> prefix (RA-GRS, RA-GZRS)<br><br>
+          <strong>Second question: "Does the exam mention synchronous replication?"</strong><br>
+          Synchronous = LRS or ZRS (within the same region)<br>
+          Asynchronous = anything with G (GRS, GZRS) — the cross-region part is async</p>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: Which redundancy replicates synchronously AND protects against a datacenter failure?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>ZRS</strong> — 3 copies across 3 availability zones, all synchronous. LRS is also synchronous but only within one datacenter.</div>
+          <div class="quiz-q">Q2: You need to read data from a secondary region WITHOUT triggering a failover. Which redundancy?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>RA-GRS or RA-GZRS</strong> — the "RA" (Read-Access) prefix means you can read from the secondary endpoint anytime (e.g., mystorageaccount-secondary.blob.core.windows.net).</div>
+          <div class="quiz-q">Q3: Can you move a blob to the Archive tier in a ZRS storage account?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>No.</strong> Archive tier is NOT supported with ZRS, GZRS, or RA-GZRS. Only LRS, GRS, and RA-GRS support Archive. Remember: "Z blocks Archive."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- M3: Blob Storage -->
+    <div class="module" id="m-blob">
+      <div class="module-header" onclick="toggleModule('m-blob')">
+        <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-cubes"></i></div>
+        <div class="module-title"><h3>Module 3: Blob Storage — Objects, Tiers & Lifecycle</h3><span>Containers, access tiers, lifecycle management, soft delete, versioning</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>Blob Storage Hierarchy</h4>
+        <div class="diagram"><span class="label">📐 STRUCTURE: Storage Account → Container → Blob</span>
+Storage Account: myaz104storage
+  │
+  ├── Container: "images"          (like a folder)
+  │     ├── photo1.jpg             (blob = the actual file)
+  │     ├── photo2.png
+  │     └── vacation/sunset.jpg    (virtual folders using / in name)
+  │
+  ├── Container: "backups"
+  │     ├── db-backup-2026-03.sql
+  │     └── db-backup-2026-02.sql
+  │
+  └── Container: "$logs"           (system container — auto-created)
+
+URL format: https://myaz104storage.blob.core.windows.net/images/photo1.jpg
+                 ├── account ──┤    ├── container ┤├── blob name ─┤</div>
+
+        <h4>Blob Types</h4>
+        <table class="tbl">
+          <tr><th>Blob Type</th><th>What It Is</th><th>Use Case</th><th>Max Size</th></tr>
+          <tr><td><strong>Block Blob</strong></td><td>Made of blocks that can be uploaded/managed individually</td><td>Files, images, videos, backups — most common</td><td>~190 TB</td></tr>
+          <tr><td><strong>Append Blob</strong></td><td>Optimized for append operations only</td><td>Log files, audit trails — write-only at the end</td><td>~195 GB</td></tr>
+          <tr><td><strong>Page Blob</strong></td><td>Random read/write access, 512-byte pages</td><td>VM disks (VHD files) — mostly legacy</td><td>8 TB</td></tr>
+        </table>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP</strong>Access tiers (Hot/Cool/Cold/Archive) only apply to BLOCK BLOBS. Not append blobs. Not page blobs. This is one of the most common exam mistakes.</div>
+
+        <h4>Access Tiers — The Cost Optimization Engine</h4>
+        <table class="tbl">
+          <tr><th>Tier</th><th>Storage Cost</th><th>Access Cost</th><th>Min Retention</th><th>Retrieval Time</th><th>Best For</th></tr>
+          <tr><td><strong>Hot</strong></td><td>Highest $/GB</td><td>Lowest $/read</td><td>None</td><td>Immediate</td><td>Frequently accessed data (websites, active apps)</td></tr>
+          <tr><td><strong>Cool</strong></td><td>Lower</td><td>Higher</td><td>30 days</td><td>Immediate</td><td>Infrequent access (monthly reports, short-term backup)</td></tr>
+          <tr><td><strong>Cold</strong></td><td>Even lower</td><td>Even higher</td><td>90 days</td><td>Immediate</td><td>Rarely accessed (quarterly data)</td></tr>
+          <tr><td><strong>Archive</strong></td><td>Lowest $/GB</td><td>Highest $/read</td><td>180 days</td><td>1–15 HOURS</td><td>Long-term retention (compliance, legal holds)</td></tr>
+        </table>
+
+        <div class="think">
+          <div class="think-title"><i class="fas fa-brain"></i> THINK ABOUT TIERS LIKE A WAREHOUSE</div>
+          <p><strong>Hot</strong> = Items on your desk — instant access, but desk space is expensive<br>
+          <strong>Cool</strong> = Items in a nearby filing cabinet — takes a few seconds to get, cheaper to store<br>
+          <strong>Cold</strong> = Items in the basement storage room — takes a walk to get, much cheaper rent<br>
+          <strong>Archive</strong> = Items in an offsite warehouse across town — takes HOURS to retrieve, but storage is almost free<br><br>
+          <strong>Key insight:</strong> Storage cost goes DOWN as you go colder. Access cost goes UP. So archive is perfect for data you rarely need but must keep (compliance, legal). Hot is for your active website images.</p>
+        </div>
+
+        <h4>Lifecycle Management — Automating Tier Changes</h4>
+        <p>Lifecycle policies automatically move or delete blobs based on age. This is critical for cost optimization in production.</p>
+        <div class="diagram"><span class="label">📐 FLOW: Typical Lifecycle Policy</span>
+Day 0: Blob created in HOT tier (active use)
+   │
+Day 30: ──► Auto-move to COOL tier (accessed less often)
+   │
+Day 90: ──► Auto-move to COLD tier (rarely accessed)
+   │
+Day 180: ──► Auto-move to ARCHIVE tier (compliance retention)
+   │
+Day 365: ──► Auto-DELETE blob (retention period over)
+
+This entire lifecycle runs AUTOMATICALLY — zero human intervention needed!</div>
+
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Lifecycle Management Policy</div>
+          <ol>
+            <li>Go to your storage account → Data management → Lifecycle management</li>
+            <li>Click + Add a rule</li>
+            <li>Rule name: "auto-tier-and-cleanup"</li>
+            <li>Rule scope: "Apply rule to all blobs"</li>
+            <li>Blob type: Block blobs</li>
+            <li>Click Next (Base blobs tab):</li>
+            <li>✅ "Move to cool storage" → 30 days after last modification</li>
+            <li>✅ "Move to cold storage" → 90 days after last modification</li>
+            <li>✅ "Move to archive storage" → 180 days after last modification</li>
+            <li>✅ "Delete the blob" → 365 days after last modification</li>
+            <li>Click Add → the policy is now active</li>
+          </ol>
+        </div>
+
+        <h4>Soft Delete & Versioning</h4>
+        <p><strong>Soft Delete</strong> = When you delete a blob, it's not actually gone — it goes to a "recycle bin" for a configurable period (1-365 days). You can recover it during this period.</p>
+        <p><strong>Blob Versioning</strong> = Every time a blob is modified, Azure saves the previous version. You can restore any historical version. Think of it like Git version history for your files.</p>
+        <p><strong>Snapshots</strong> = A read-only copy of a blob at a specific point in time. Unlike versioning (automatic), snapshots are created manually.</p>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP</strong>Soft delete protects against accidental DELETION. Versioning protects against accidental OVERWRITE. They solve different problems. Enable BOTH in production. Soft delete can be enabled for blobs, containers, AND file shares (each separately).</div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: Which blob types support access tiers (Hot/Cool/Archive)?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Block blobs only.</strong> Append blobs and page blobs do NOT support access tiers.</div>
+          <div class="quiz-q">Q2: A blob was moved to Cool tier 15 days ago. If you delete it now, will you pay an early deletion fee?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Yes.</strong> Cool tier has a 30-day minimum retention. Deleting or moving before 30 days incurs an early deletion charge for the remaining days (15 days of charges).</div>
+          <div class="quiz-q">Q3: How long does it take to retrieve data from the Archive tier?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>1–15 hours</strong> depending on retrieval priority (Standard = up to 15 hours, High priority = under 1 hour at extra cost). Archive data must be "rehydrated" before access.</div>
+          <div class="quiz-q">Q4: What protects against accidental file overwrite?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Blob Versioning.</strong> Soft delete protects against deletion, versioning protects against overwrite by keeping all previous versions.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- M4: Security -->
+    <div class="module" id="m-sec">
+      <div class="module-header" onclick="toggleModule('m-sec')">
+        <div class="module-icon" style="background:rgba(239,68,68,.15);color:var(--red)"><i class="fas fa-lock"></i></div>
+        <div class="module-title"><h3>Module 4: Storage Security — Keys, SAS, RBAC, Encryption</h3><span>Access keys, shared access signatures, identity-based access, encryption</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>The 3 Ways to Access Storage Data</h4>
+        <table class="tbl">
+          <tr><th>Method</th><th>How It Works</th><th>Security Level</th><th>Use Case</th></tr>
+          <tr><td><strong>Access Keys</strong></td><td>2 master keys per account — full access to everything</td><td>⚠️ Lowest — like giving someone your house master key</td><td>Admin tools, legacy apps. Rotate regularly!</td></tr>
+          <tr><td><strong>SAS Tokens</strong></td><td>Time-limited, scoped tokens you generate from a key</td><td>✅ Medium — limited time, limited permissions</td><td>Temporary access for external users/apps</td></tr>
+          <tr><td><strong>Azure AD / RBAC</strong></td><td>Assign roles like "Storage Blob Data Reader" to users/groups</td><td>✅✅ Highest — identity-based, no keys shared</td><td>Production — Microsoft's recommended approach</td></tr>
+        </table>
+
+        <div class="think">
+          <div class="think-title"><i class="fas fa-brain"></i> THINK OF STORAGE KEYS LIKE HOTEL ACCESS</div>
+          <p><strong>Access Key</strong> = The hotel master key. Opens EVERY room, gym, pool, restaurant. If someone steals it, they own the whole hotel. Never share it. You have 2 keys so you can rotate one while the other is active.<br><br>
+          <strong>SAS Token</strong> = A temporary guest card. Valid from March 1–March 3, opens only Room 204 and the gym, read-only. If stolen, damage is limited (expires soon, limited scope).<br><br>
+          <strong>Azure AD RBAC</strong> = The fingerprint scanner. Each person is identified individually. You can see who accessed what, revoke anyone's access instantly, and nobody shares keys.</p>
+        </div>
+
+        <h4>SAS Token Types</h4>
+        <table class="tbl">
+          <tr><th>SAS Type</th><th>Created From</th><th>Scope</th><th>Best For</th></tr>
+          <tr><td><strong>Account SAS</strong></td><td>Account access key</td><td>One or more services (blob, file, queue, table)</td><td>Broad access to multiple services</td></tr>
+          <tr><td><strong>Service SAS</strong></td><td>Account access key</td><td>Single service (e.g., blob only)</td><td>Scoped to one service</td></tr>
+          <tr><td><strong>User Delegation SAS</strong></td><td>Azure AD credentials</td><td>Blob and Data Lake only</td><td>✅ Most secure — no keys involved</td></tr>
+        </table>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP</strong>User Delegation SAS is the MOST SECURE type because it's created with Azure AD credentials (no access key involved). It only works for Blob storage. If a question asks about the most secure SAS type, the answer is User Delegation SAS.</div>
+
+        <h4>Storage Encryption</h4>
+        <p><strong>SSE (Storage Service Encryption)</strong> — ALL data in Azure Storage is encrypted at rest by default using 256-bit AES encryption. You cannot disable this. You have two options for managing encryption keys:</p>
+        <div class="list-item"><strong>Microsoft-managed keys (MMK)</strong> — Default. Microsoft handles everything. Zero effort.</div>
+        <div class="list-item"><strong>Customer-managed keys (CMK)</strong> — You manage keys in Azure Key Vault. Required for compliance in some industries.</div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: Which is the most secure SAS token type?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>User Delegation SAS</strong> — uses Azure AD credentials instead of account keys. No keys are exposed.</div>
+          <div class="quiz-q">Q2: Is data encrypted at rest by default in Azure Storage?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Yes.</strong> 256-bit AES encryption is always on and cannot be disabled. You only choose who manages the keys.</div>
+          <div class="quiz-q">Q3: How many access keys does a storage account have? Why two?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Two keys (key1, key2).</strong> Two keys allow rotation without downtime — switch apps to key2, regenerate key1, then switch back.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- M5: Azure Files & Tools -->
+    <div class="module" id="m-files">
+      <div class="module-header" onclick="toggleModule('m-files')">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);color:var(--orange)"><i class="fas fa-folder-open"></i></div>
+        <div class="module-title"><h3>Module 5: Azure Files, AzCopy & Storage Explorer</h3><span>SMB file shares, data migration tools</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>Azure Files</h4>
+        <p>Azure Files provides fully managed cloud file shares accessible via SMB (Server Message Block) or NFS protocols. Think of it as a network drive (like \\server\share) but in the cloud.</p>
+
+        <table class="tbl">
+          <tr><th>Feature</th><th>Azure Files (Standard)</th><th>Azure Files (Premium)</th></tr>
+          <tr><td>Backed by</td><td>HDD</td><td>SSD</td></tr>
+          <tr><td>Protocols</td><td>SMB 3.0, REST</td><td>SMB 3.0, NFS 4.1, REST</td></tr>
+          <tr><td>Max size</td><td>100 TiB (with large file shares enabled)</td><td>100 TiB</td></tr>
+          <tr><td>IOPS</td><td>Up to 10,000</td><td>Up to 100,000</td></tr>
+          <tr><td>Use case</td><td>General file shares, lift-and-shift</td><td>Databases, high-performance workloads</td></tr>
+        </table>
+
+        <div class="box box-orange"><strong>🔧 KEY DIFFERENCE: Azure Files vs Blob Storage</strong>Azure Files = you mount it like a drive (F:\docs\report.docx) and use it with normal file operations. Blob Storage = you access via REST API (https://account.blob.core.windows.net/container/file). Azure Files for file shares. Blob for object/API access.</div>
+
+        <h4>Data Migration Tools</h4>
+        <table class="tbl">
+          <tr><th>Tool</th><th>What It Does</th><th>Use Case</th></tr>
+          <tr><td><strong>AzCopy</strong></td><td>Command-line tool for fast bulk data transfer</td><td>Migrate large datasets, copy between accounts, sync folders</td></tr>
+          <tr><td><strong>Storage Explorer</strong></td><td>GUI desktop app for managing storage visually</td><td>Browse blobs/files, upload/download, manage SAS tokens</td></tr>
+          <tr><td><strong>Azure Import/Export</strong></td><td>Ship physical hard drives to Azure</td><td>Massive datasets (TB+) where network upload is too slow</td></tr>
+          <tr><td><strong>Azure Data Box</strong></td><td>Microsoft ships you a rugged device to fill with data</td><td>Very large migrations (40-120 TB per device)</td></tr>
+        </table>
+
+        <div class="cli"><span class="comment"># AzCopy: Copy all files from local to blob container</span>
+<span class="cmd">azcopy copy "C:\Data\*" "https://myaccount.blob.core.windows.net/mycontainer?SAS_TOKEN" --recursive</span>
+
+<span class="comment"># AzCopy: Sync a local folder to blob (like rsync)</span>
+<span class="cmd">azcopy sync "C:\Data" "https://myaccount.blob.core.windows.net/mycontainer?SAS_TOKEN"</span>
+
+<span class="comment"># AzCopy: Copy between two storage accounts (server-side, super fast)</span>
+<span class="cmd">azcopy copy "https://source.blob.core.windows.net/src?SAS" "https://dest.blob.core.windows.net/dst?SAS" --recursive</span></div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: You need to copy 50 TB of data to Azure. Network upload would take weeks. What should you use?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Azure Data Box</strong> — Microsoft ships you a physical device, you fill it with data, ship it back. For really large offline migrations.</div>
+          <div class="quiz-q">Q2: What protocol does Azure Files use for mounting as a network drive?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>SMB (Server Message Block) 3.0</strong> for Windows/Linux, or NFS 4.1 for Linux (Premium tier only).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ VMs SECTION ══════════════════ -->
+  <div class="section" id="vms">
+    <div class="think">
+      <div class="think-title"><i class="fas fa-brain"></i> HOW TO THINK ABOUT AZURE VMs</div>
+      <p>A Virtual Machine is a "computer inside a computer." It has everything a physical computer has — CPU, RAM, disk, network card — but it runs as software on Azure's physical hardware.<br><br>
+      Think of Azure VMs like <strong>renting an apartment</strong>:<br>
+      <strong>VM Size</strong> = the apartment size (studio, 1BR, 3BR — determines CPU/RAM)<br>
+      <strong>OS Disk</strong> = the building's foundation (where the OS lives — can't remove it)<br>
+      <strong>Data Disk</strong> = extra closets/storage units you add on (for your app data)<br>
+      <strong>NIC</strong> = your mailbox/internet connection (how you connect to the network)<br>
+      <strong>Availability Set/Zone</strong> = which building you're in (affects whether you survive disasters)</p>
+    </div>
+
+    <!-- VM Creation -->
+    <div class="module open" id="m-vm1">
+      <div class="module-header" onclick="toggleModule('m-vm1')">
+        <div class="module-icon" style="background:rgba(59,130,246,.15);color:var(--blue)"><i class="fas fa-server"></i></div>
+        <div class="module-title"><h3>Module 6: Creating & Configuring VMs</h3><span>VM sizes, disks, images, creation process</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>VM Size Families</h4>
+        <table class="tbl">
+          <tr><th>Series</th><th>Optimized For</th><th>Use Case</th><th>Example Size</th></tr>
+          <tr><td><strong>B-series</strong></td><td>Burstable (low-cost)</td><td>Dev/test, small web servers</td><td>B2s (2 vCPU, 4 GB RAM)</td></tr>
+          <tr><td><strong>D-series</strong></td><td>General purpose</td><td>Most production workloads</td><td>D4s_v5 (4 vCPU, 16 GB)</td></tr>
+          <tr><td><strong>E-series</strong></td><td>Memory optimized</td><td>Databases, in-memory caching</td><td>E8s_v5 (8 vCPU, 64 GB)</td></tr>
+          <tr><td><strong>F-series</strong></td><td>Compute optimized</td><td>Gaming, batch processing</td><td>F4s_v2 (4 vCPU, 8 GB)</td></tr>
+          <tr><td><strong>L-series</strong></td><td>Storage optimized</td><td>Big data, data warehousing</td><td>L8s_v3 (8 vCPU, 64 GB)</td></tr>
+          <tr><td><strong>N-series</strong></td><td>GPU</td><td>AI/ML, video rendering</td><td>NC6s_v3 (6 vCPU + GPU)</td></tr>
+        </table>
+
+        <div class="think">
+          <div class="think-title"><i class="fas fa-lightbulb"></i> MEMORIZATION TRICK: VM Size Letters</div>
+          <p><strong>B</strong> = Budget/Burstable, <strong>D</strong> = Default/general, <strong>E</strong> = Extra memory, <strong>F</strong> = Fast compute, <strong>L</strong> = Large storage, <strong>N</strong> = Neural/GPU<br><br>
+          The suffix letters matter too: <strong>s</strong> = supports Premium SSD, <strong>v5</strong> = generation 5 hardware</p>
+        </div>
+
+        <h4>VM Disks — Detailed Breakdown</h4>
+        <table class="tbl">
+          <tr><th>Disk Type</th><th>Backed By</th><th>Max IOPS</th><th>Cost</th><th>Use Case</th></tr>
+          <tr><td>Standard HDD</td><td>Hard disk</td><td>500</td><td>$</td><td>Dev/test, backups, infrequent access</td></tr>
+          <tr><td>Standard SSD</td><td>SSD</td><td>6,000</td><td>$$</td><td>Web servers, light production</td></tr>
+          <tr><td><strong>Premium SSD</strong></td><td>SSD</td><td>20,000</td><td>$$$</td><td>✅ Production — databases, enterprise apps</td></tr>
+          <tr><td>Ultra Disk</td><td>NVMe SSD</td><td>160,000</td><td>$$$$</td><td>SAP HANA, top-tier databases</td></tr>
+        </table>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP</strong>A VM has an OS disk (where Windows/Linux is installed) and can have 0 or more DATA disks. The number of data disks you can attach depends on the VM size. A Temporary disk exists on most VMs — it is local SSD storage but DATA IS LOST on deallocation. Never store important data on the temp disk!</div>
+
+        <h4>VM States & Billing</h4>
+        <div class="diagram"><span class="label">📐 FLOW: VM States and What You Pay</span>
+┌──────────┐     ┌──────────┐     ┌──────────────┐     ┌──────────┐
+│ Creating │ ──> │ Running  │ ──> │   Stopped    │ ──> │ Stopped  │
+│          │     │ (Pay $)  │     │ (Still Pay!) │     │(Deallocated)│
+└──────────┘     └──────────┘     └──────────────┘     └──────────┘
+                  Compute ✅        Compute ✅           Compute ❌
+                  Disk    ✅        Disk    ✅           Disk    ✅
+                  Network ✅        Network ✅           Network ❌
+
+⚠ CRITICAL: "Stopped" from INSIDE the VM still bills compute!
+   You MUST "Stop (Deallocate)" from the Azure Portal or CLI to stop billing.
+   Even deallocated, you still pay for disks and static IPs.</div>
+
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Create a Windows VM</div>
+          <ol>
+            <li>Portal → Virtual machines → + Create → Azure virtual machine</li>
+            <li>RG: RG-Compute-Lab, Name: web-vm1, Region: East US</li>
+            <li>Image: Windows Server 2022 Datacenter</li>
+            <li>Size: B2s (2 vCPUs, 4 GB — cheapest for testing)</li>
+            <li>Admin: Set username and password</li>
+            <li>Inbound ports: Allow RDP (3389) — for lab only, use Bastion in production</li>
+            <li>Disks tab: OS disk type = Standard SSD. Add a 128 GB data disk (Premium SSD)</li>
+            <li>Networking tab: Select your VNet and subnet, note the NSG being auto-created</li>
+            <li>Review + Create → Create</li>
+            <li>After deploy: Connect → RDP → sign in → open Disk Management → initialize the data disk</li>
+          </ol>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: A VM is stopped from inside Windows (shutdown command). Are you still being billed?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Yes!</strong> The VM is "Stopped" but NOT deallocated. You still pay for compute. You must Stop (Deallocate) from the portal/CLI to stop compute billing.</div>
+          <div class="quiz-q">Q2: What VM series is best for a database that needs lots of RAM?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>E-series</strong> (Memory optimized). E = Extra memory. High memory-to-CPU ratio.</div>
+          <div class="quiz-q">Q3: Can you store important data on a VM's temporary disk?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>No!</strong> Temp disk data is LOST when the VM is deallocated or moved. Only use it for page files, swap, or temp caches.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Availability -->
+    <div class="module" id="m-avail">
+      <div class="module-header" onclick="toggleModule('m-avail')">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);color:var(--green)"><i class="fas fa-layer-group"></i></div>
+        <div class="module-title"><h3>Module 7: High Availability — Sets, Zones & Scale Sets</h3><span>Availability sets, availability zones, VMSS auto-scaling</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <div class="think">
+          <div class="think-title"><i class="fas fa-brain"></i> THINK ABOUT AVAILABILITY LIKE EGG BASKETS</div>
+          <p><strong>No availability strategy</strong> = All eggs in ONE basket. Basket drops → all eggs break.<br>
+          <strong>Availability Set</strong> = Eggs spread across multiple baskets on the SAME table (same datacenter, different racks). One rack loses power → some eggs safe.<br>
+          <strong>Availability Zone</strong> = Eggs spread across baskets in DIFFERENT buildings (different datacenters in a region). Building burns → other buildings safe.<br>
+          <strong>VMSS</strong> = A machine that automatically creates MORE baskets and fills them with eggs when demand is high, and removes baskets when demand is low.</p>
+        </div>
+
+        <h4>Availability Sets</h4>
+        <table class="tbl">
+          <tr><th>Concept</th><th>What It Is</th><th>Max</th></tr>
+          <tr><td><strong>Fault Domain (FD)</strong></td><td>Physical rack in the datacenter. VMs in different FDs are on different racks with separate power and network.</td><td>3 FDs</td></tr>
+          <tr><td><strong>Update Domain (UD)</strong></td><td>Logical group rebooted together during Azure maintenance. VMs in different UDs aren't rebooted simultaneously.</td><td>20 UDs</td></tr>
+        </table>
+
+        <div class="diagram"><span class="label">📐 ARCHITECTURE: Availability Set (2 FD, 5 UD)</span>
+          Fault Domain 0 (Rack A)     Fault Domain 1 (Rack B)
+          ┌─────────────────┐         ┌─────────────────┐
+          │ UD0: [VM1]      │         │ UD0: [VM2]      │
+          │ UD1: [VM3]      │         │ UD1: [VM4]      │
+          │ UD2: [VM5]      │         │ UD2: [VM6]      │
+          └─────────────────┘         └─────────────────┘
+          
+          If Rack A loses power: VM1, VM3, VM5 go down
+          BUT VM2, VM4, VM6 on Rack B keep running!
+          
+          During Azure maintenance: Only 1 UD rebooted at a time
+          UD0 reboots → VM1, VM2 down, rest keeps running
+          Then UD1 → VM3, VM4 down, etc.</div>
+
+        <h4>Availability Zones vs Availability Sets</h4>
+        <table class="tbl">
+          <tr><th>Feature</th><th>Availability Set</th><th>Availability Zone</th></tr>
+          <tr><td>Protection Level</td><td>Rack/hardware failure</td><td>Entire datacenter failure</td></tr>
+          <tr><td>Location</td><td>VMs in same datacenter, different racks</td><td>VMs in different datacenters within same region</td></tr>
+          <tr><td>SLA</td><td>99.95%</td><td>99.99%</td></tr>
+          <tr><td>Configuration</td><td>Must be set at VM creation time</td><td>Select zone (1, 2, or 3) at creation</td></tr>
+          <tr><td>Use Case</td><td>Legacy, regions without zones</td><td>✅ Recommended for production</td></tr>
+        </table>
+
+        <h4>VM Scale Sets (VMSS)</h4>
+        <p>A VMSS creates and manages a group of identical, auto-scaling VMs. You define a template (image, size, config) and VMSS automatically creates/deletes instances based on demand.</p>
+
+        <div class="diagram"><span class="label">📐 FLOW: VMSS Auto-Scaling</span>
+Morning (low traffic):        Evening (peak traffic):
+┌───┐ ┌───┐                  ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐
+│VM1│ │VM2│  (2 instances)    │VM1│ │VM2│ │VM3│ │VM4│ │VM5│  (5 instances)
+└───┘ └───┘                  └───┘ └───┘ └───┘ └───┘ └───┘
+
+Rule: If avg CPU > 75% for 5 min → add 1 VM (scale OUT)
+Rule: If avg CPU < 25% for 5 min → remove 1 VM (scale IN)
+Min: 2 instances    Max: 10 instances</div>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP</strong>Scale OUT = add more VMs (horizontal). Scale UP = make VM bigger (vertical, requires reboot). VMSS does scale OUT/IN automatically. Scale UP/DOWN must be done manually and causes downtime. Availability Sets CANNOT be changed after VM creation — plan ahead!</div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: What SLA do Availability Zones provide vs Availability Sets?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a">Availability Zones = <strong>99.99%</strong>. Availability Sets = <strong>99.95%</strong>. Zones provide higher availability because VMs are in different datacenters.</div>
+          <div class="quiz-q">Q2: What is the difference between Scale Out and Scale Up?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Scale Out</strong> = add more identical VMs (horizontal, no downtime). <strong>Scale Up</strong> = make existing VM bigger/more powerful (vertical, requires reboot/downtime).</div>
+          <div class="quiz-q">Q3: Can you add a VM to an Availability Set after the VM is created?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>No.</strong> Availability Set must be specified at VM creation time. You cannot change it later. You'd need to delete and recreate the VM.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ APP SERVICE SECTION ══════════════════ -->
+  <div class="section" id="appservice">
+    <div class="think">
+      <div class="think-title"><i class="fas fa-brain"></i> HOW TO THINK ABOUT APP SERVICE</div>
+      <p>If a VM is like renting an apartment (you manage everything — furniture, plumbing, locks), then <strong>App Service is like staying at a hotel</strong>. The hotel (Microsoft) manages the building, electricity, security, cleaning. You just show up with your suitcase (your code) and check in.<br><br>
+      <strong>App Service Plan</strong> = The hotel tier you choose (basic room, suite, penthouse) — determines resources and features<br>
+      <strong>App Service (Web App)</strong> = Your actual reservation/room — where your application runs<br>
+      <strong>Deployment Slots</strong> = Having a second room to test-furnish before swapping guests into it (zero-downtime deployment)</p>
+    </div>
+
+    <!-- App Service Basics -->
+    <div class="module open" id="m-app1">
+      <div class="module-header" onclick="toggleModule('m-app1')">
+        <div class="module-icon" style="background:rgba(6,182,212,.15);color:var(--cyan)"><i class="fas fa-globe"></i></div>
+        <div class="module-title"><h3>Module 8: App Service Plans & Web Apps</h3><span>Plans, pricing tiers, scaling, configuration</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>App Service Plan Tiers</h4>
+        <table class="tbl">
+          <tr><th>Tier</th><th>Features</th><th>Scaling</th><th>Use Case</th></tr>
+          <tr><td><strong>Free (F1)</strong></td><td>Shared compute, 1 GB disk, no custom domain SSL</td><td>None</td><td>Testing only</td></tr>
+          <tr><td><strong>Shared (D1)</strong></td><td>Shared compute, custom domains</td><td>None</td><td>Dev/test with custom domain</td></tr>
+          <tr><td><strong>Basic (B1-B3)</strong></td><td>Dedicated compute, custom domains, SSL</td><td>Manual scale up to 3 instances</td><td>Low-traffic production</td></tr>
+          <tr><td><strong>Standard (S1-S3)</strong></td><td>Everything in Basic + auto-scale, deployment slots (5), daily backups</td><td>Auto-scale up to 10 instances</td><td>✅ Production</td></tr>
+          <tr><td><strong>Premium (P1-P3v3)</strong></td><td>Standard + more slots (20), more instances, VNet integration</td><td>Auto-scale up to 30 instances</td><td>High-performance production</td></tr>
+          <tr><td><strong>Isolated (I1-I3v2)</strong></td><td>Runs in your own App Service Environment (ASE), max isolation</td><td>Up to 100 instances</td><td>Compliance, max security</td></tr>
+        </table>
+
+        <div class="box box-red"><strong>⚠️ EXAM TIP — FEATURE GATES</strong>
+          Deployment Slots require <strong>Standard (S1) or higher</strong>.<br>
+          Auto-scaling requires <strong>Standard (S1) or higher</strong>.<br>
+          VNet Integration requires <strong>Premium or Isolated</strong>.<br>
+          Custom domain + SSL requires <strong>Basic or higher</strong>.<br>
+          Free and Shared tiers run on SHARED infrastructure — your app shares CPU with others.</div>
+
+        <h4>What Runs Inside an App Service?</h4>
+        <div class="list-item"><strong>Web Apps</strong> — .NET, Java, Node.js, Python, PHP, Ruby websites</div>
+        <div class="list-item"><strong>API Apps</strong> — RESTful APIs for mobile/web backends</div>
+        <div class="list-item"><strong>WebJobs</strong> — Background tasks that run alongside your web app</div>
+        <div class="list-item"><strong>Function Apps</strong> — Serverless event-driven functions (separate but related)</div>
+
+        <div class="lab">
+          <div class="lab-title"><i class="fas fa-flask"></i> LAB: Deploy a Web App</div>
+          <ol>
+            <li>Portal → App Services → + Create</li>
+            <li>RG: RG-AppService-Lab, Name: myaz104webapp (must be globally unique)</li>
+            <li>Publish: Code, Runtime stack: .NET 8 (or Node 20 / Python 3.12)</li>
+            <li>Region: East US</li>
+            <li>App Service Plan: Create new → Standard S1</li>
+            <li>Review + Create → Create</li>
+            <li>After deployment, click "Browse" — you'll see the default Azure web page</li>
+            <li>Go to Deployment Center → choose GitHub / Local Git / ZIP Deploy</li>
+            <li>Deploy a simple "Hello World" app and verify it's live at https://myaz104webapp.azurewebsites.net</li>
+          </ol>
+        </div>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: What is the minimum App Service Plan tier that supports deployment slots?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Standard (S1).</strong> Free, Shared, and Basic do NOT support deployment slots.</div>
+          <div class="quiz-q">Q2: Can multiple web apps share the same App Service Plan?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Yes!</strong> Multiple apps can run in the same plan and share the compute resources. This is cost-efficient for low-traffic apps.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deployment Slots -->
+    <div class="module" id="m-slots">
+      <div class="module-header" onclick="toggleModule('m-slots')">
+        <div class="module-icon" style="background:rgba(139,92,246,.15);color:var(--purple)"><i class="fas fa-exchange-alt"></i></div>
+        <div class="module-title"><h3>Module 9: Deployment Slots & Custom Domains</h3><span>Zero-downtime deployment, slot swaps, TLS/SSL, custom DNS</span></div>
+        <i class="fas fa-chevron-down module-chevron"></i>
+      </div>
+      <div class="module-body">
+        <h4>Deployment Slots — The Zero-Downtime Trick</h4>
+        <p>Deployment slots let you deploy a new version of your app to a "staging" slot, test it, then SWAP it with production — instantly, with zero downtime.</p>
+
+        <div class="diagram"><span class="label">📐 FLOW: Slot Swap for Zero-Downtime Deployment</span>
+BEFORE SWAP:
+  Production Slot: v1.0 (live to users at myapp.azurewebsites.net)
+  Staging Slot:    v2.0 (being tested at myapp-staging.azurewebsites.net)
+
+SWAP OPERATION: (takes seconds, zero downtime)
+  Azure swaps the routing — staging becomes production and vice versa
+
+AFTER SWAP:
+  Production Slot: v2.0 (now live — users see new version instantly!)
+  Staging Slot:    v1.0 (old version — instant rollback if v2.0 has bugs!)
+
+If v2.0 has issues? Just SWAP AGAIN to roll back to v1.0 instantly!</div>
+
+        <h4>What Swaps and What Doesn't</h4>
+        <table class="tbl">
+          <tr><th>Swapped (moves with slot)</th><th>NOT Swapped (stays with slot)</th></tr>
+          <tr><td>App code and content</td><td>Publishing endpoints</td></tr>
+          <tr><td>App settings (unless marked "slot setting")</td><td>Custom domain names</td></tr>
+          <tr><td>Connection strings (unless marked "slot setting")</td><td>TLS/SSL certificates and bindings</td></tr>
+          <tr><td>Handler mappings</td><td>Scale settings (auto-scale rules)</td></tr>
+          <tr><td>General settings (framework, websockets, etc.)</td><td>IP restrictions</td></tr>
+        </table>
+
+        <div class="box box-purple"><strong>💡 SLOT SETTINGS EXPLAINED</strong>When you mark an app setting or connection string as a "slot setting" (also called "sticky"), it STAYS with that slot during a swap. Example: Your staging slot connects to a test database. Mark the DB connection string as a "slot setting" so staging always points to the test DB, even after swap. Without this, your staging slot would start pointing to the production database after swap — bad!</div>
+
+        <h4>Custom Domains & TLS/SSL</h4>
+        <div class="list-item"><strong>Custom Domain</strong>: Map your own domain (www.company.com) to the App Service using a CNAME record (subdomains) or A record (root domain) + TXT for verification</div>
+        <div class="list-item"><strong>Free Managed Certificate</strong>: Azure provides free SSL certificates for custom domains (auto-renewed, Standard tier+)</div>
+        <div class="list-item"><strong>App Service Managed Certificate</strong>: Free but limited — doesn't support wildcard or export</div>
+        <div class="list-item"><strong>Bring Your Own Certificate</strong>: Upload a PFX certificate from a certificate authority</div>
+
+        <h4>Backup & Restore</h4>
+        <p>App Service can back up your app configuration, content, and linked databases. Requires <strong>Standard tier or higher</strong> and a storage account for the backup files.</p>
+
+        <div class="quiz">
+          <div class="quiz-title"><i class="fas fa-question-circle"></i> QUICK RECAP QUIZ</div>
+          <div class="quiz-q">Q1: You deploy v2.0 to staging and swap to production. v2.0 has a critical bug. How do you fix it fastest?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Swap again!</strong> The old v1.0 is still in the staging slot. Swapping back puts v1.0 into production instantly. This is why slots are powerful — instant rollback.</div>
+          <div class="quiz-q">Q2: Your staging slot connects to a test database. After swapping, you want it to STILL connect to the test database. What should you do?</div>
+          <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+          <div class="quiz-a"><strong>Mark the connection string as a "slot setting" (sticky).</strong> Sticky settings stay with the slot and don't move during a swap.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCENARIOS SECTION ══════════════════ -->
+  <div class="section" id="scenarios">
+    <h2>🏢 Real-World Production Scenarios</h2>
+
+    <div class="scenario">
+      <div class="scenario-title"><i class="fas fa-building"></i> SCENARIO 1: E-Commerce Company — Storage Architecture</div>
+      <p style="color:#67e8f9;font-size:13px;margin-bottom:10px"><strong>Requirement:</strong> An e-commerce company stores product images (accessed frequently), monthly sales reports (accessed occasionally), and 7-year compliance data (rarely accessed).</p>
+      <h4 style="color:#67e8f9">Solution:</h4>
+      <div class="list-item">Create a GPv2 storage account with GRS redundancy (business-critical data)</div>
+      <div class="list-item">Container "product-images" → Hot tier (accessed every page load)</div>
+      <div class="list-item">Container "reports" → Cool tier (accessed monthly)</div>
+      <div class="list-item">Container "compliance" → Archive tier (accessed once in 7 years)</div>
+      <div class="list-item">Lifecycle Policy: Move reports from Hot→Cool after 30 days, Cool→Archive after 180 days</div>
+      <div class="list-item">Enable soft delete (14 days) and blob versioning for accidental deletion protection</div>
+      <div class="list-item">Security: Azure AD RBAC for employees, User Delegation SAS for external partners, Private Endpoint for VNet access</div>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-title"><i class="fas fa-building"></i> SCENARIO 2: SaaS Company — VM High Availability</div>
+      <p style="color:#67e8f9;font-size:13px;margin-bottom:10px"><strong>Requirement:</strong> A SaaS company runs a customer-facing API that must have 99.99% uptime. Traffic varies from 100 req/s at night to 10,000 req/s during business hours.</p>
+      <h4 style="color:#67e8f9">Solution:</h4>
+      <div class="list-item">Deploy API VMs across 3 Availability Zones (99.99% SLA)</div>
+      <div class="list-item">Use a VM Scale Set with auto-scaling: min 3 VMs, max 15 VMs</div>
+      <div class="list-item">Auto-scale rules: Scale out when CPU > 70%, Scale in when CPU < 30%</div>
+      <div class="list-item">Standard Load Balancer distributes traffic across all instances</div>
+      <div class="list-item">Premium SSD managed disks for low-latency database queries</div>
+      <div class="list-item">Azure Backup with daily snapshots, 30-day retention</div>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-title"><i class="fas fa-building"></i> SCENARIO 3: Startup — App Service with CI/CD</div>
+      <p style="color:#67e8f9;font-size:13px;margin-bottom:10px"><strong>Requirement:</strong> A startup deploys their Node.js web app multiple times per day. They need zero-downtime deployments and instant rollback capability.</p>
+      <h4 style="color:#67e8f9">Solution:</h4>
+      <div class="list-item">App Service Plan: Standard S1 (supports deployment slots + auto-scale)</div>
+      <div class="list-item">Create a "staging" deployment slot</div>
+      <div class="list-item">GitHub Actions CI/CD deploys to staging slot automatically on merge to main</div>
+      <div class="list-item">Team tests on staging URL (myapp-staging.azurewebsites.net)</div>
+      <div class="list-item">When approved: Swap staging → production (zero downtime)</div>
+      <div class="list-item">If bugs found: Swap again to rollback instantly</div>
+      <div class="list-item">Mark database connection strings as "slot settings" so staging always uses test DB</div>
+      <div class="list-item">Custom domain: www.startup.com with free managed SSL certificate</div>
+      <div class="list-item">Auto-scale: 1-5 instances based on HTTP queue length</div>
+    </div>
+
+    <div class="think">
+      <div class="think-title"><i class="fas fa-brain"></i> THE DECISION FRAMEWORK: VM vs App Service vs Container</div>
+      <p>When the exam asks "what should you use?", ask yourself:<br><br>
+      <strong>Do you need full OS control?</strong> (install custom software, configure OS settings, specific OS version) → <strong>VM</strong><br>
+      <strong>Just need to run web code?</strong> (focus on code, not infrastructure) → <strong>App Service</strong><br>
+      <strong>Need to run containerized apps?</strong> → <strong>Azure Container Instances</strong> (simple) or <strong>AKS</strong> (orchestration)<br>
+      <strong>Need max isolation for compliance?</strong> → <strong>App Service Environment (Isolated tier)</strong> or <strong>Dedicated Host VM</strong><br><br>
+      <strong>Cost rule of thumb:</strong> App Service < Container Instances < VMs < Dedicated Hosts</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PRACTICE EXAM SECTION ══════════════════ -->
+  <div class="section" id="practice">
+    <h2>📝 Day 3 Comprehensive Practice Exam (15 Questions)</h2>
+    <p style="margin-bottom:20px">Test yourself — try answering before clicking "Show Answer"</p>
+
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q1: You need a storage account that replicates synchronously and remains available if a single datacenter fails. Which redundancy and account type?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>ZRS + General-purpose v2.</strong> ZRS replicates synchronously across 3 availability zones. GPv2 is the only standard account type that supports ZRS.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q2: A blob in Cool tier was created 10 days ago. You move it to Hot tier. Are there extra charges?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Yes — early deletion fee.</strong> Cool tier has a 30-day minimum. Moving before 30 days incurs charges for the remaining 20 days.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q3: You need to give a contractor read-only access to a specific blob container for 24 hours using the most secure method. What should you use?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>User Delegation SAS.</strong> It's the most secure SAS type (uses Azure AD credentials, no access key exposure), can be scoped to a container, and time-limited to 24 hours.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q4: Your storage account uses ZRS. Can you set up a lifecycle policy to move blobs to the Archive tier?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>No.</strong> Archive tier is not supported with ZRS, GZRS, or RA-GZRS. You can run lifecycle management for tier changes to Cool/Cold, but not Archive. Only LRS/GRS/RA-GRS support Archive.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q5: A VM was stopped using the "Shut down" button inside Windows. Is compute billing still active?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Yes!</strong> Shutting down from inside the OS puts the VM in "Stopped" state — you still pay for compute. You must "Stop (Deallocate)" from the Azure portal or CLI to stop compute billing.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q6: You need 99.99% SLA for your VMs. Should you use Availability Sets or Availability Zones?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Availability Zones</strong> — they provide 99.99% SLA. Availability Sets provide only 99.95%. Zones spread VMs across different datacenters in the region.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q7: Traffic to your web app increases 10x during Black Friday. You want it to automatically handle the load without manual intervention. What should you configure?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>VM Scale Set with auto-scaling rules</strong> (if using VMs) or <strong>App Service auto-scale</strong> (if using App Service, Standard tier+). Both scale OUT (add instances) automatically based on metrics like CPU or HTTP queue length.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q8: Your App Service uses the Basic (B1) tier. A developer asks to create a deployment slot for staging. Can they?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>No.</strong> Deployment slots require Standard (S1) tier or higher. Basic tier does not support slots. You must upgrade the App Service Plan to Standard first.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q9: You swap your staging slot to production. The staging slot had a connection string pointing to a test database. After the swap, production is now connecting to the test database. How do you prevent this?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Mark the connection string as a "slot setting" (sticky).</strong> Sticky settings stay with their slot and don't move during swaps. The production connection string would stay pointing to the production database.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q10: You need to copy 500 GB of data from an on-premises server to Azure Blob Storage as fast as possible via the internet. What tool should you use?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>AzCopy.</strong> It's a command-line tool optimized for high-speed bulk data transfer to Azure. For 500 GB over internet, AzCopy is the best tool. For 50+ TB, consider Azure Data Box (physical device).</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q11: What is the difference between a block blob, append blob, and page blob?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Block blob</strong> = general files, most common. <strong>Append blob</strong> = optimized for append-only operations (logs). <strong>Page blob</strong> = random read/write, used for VM disks (VHD files). Only block blobs support access tiers.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q12: You have a web application that requires full OS-level control, custom drivers, and a specific Windows Server version. Should you use App Service or VMs?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>VMs.</strong> App Service doesn't provide OS-level access. If you need to install custom drivers, configure OS settings, or use a specific OS version, you need a VM.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q13: What happens to data on a VM's temporary disk when the VM is deallocated?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Data is LOST.</strong> The temporary disk is local SSD on the physical host. It's cleared on deallocation, host maintenance, or VM move. Never store important data on it.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q14: You deploy v2.0 via slot swap. It has a critical bug. What's the fastest way to rollback?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Swap again.</strong> The old version (v1.0) is still sitting in the staging slot. Swapping back puts v1.0 into production instantly — zero downtime rollback.</div>
+    </div>
+    <div class="quiz" style="margin-bottom:12px">
+      <div class="quiz-q">Q15: A GPv1 storage account needs zone-redundant storage. What should you do first?</div>
+      <div class="quiz-toggle" onclick="this.nextElementSibling.classList.toggle('show')">Show Answer ▾</div>
+      <div class="quiz-a"><strong>Upgrade to GPv2 first.</strong> GPv1 does not support ZRS. Upgrade to GPv2 (no downtime, no data loss), then change redundancy to ZRS.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.section).classList.add('active');
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+  });
+});
+
+// Module toggle
+function toggleModule(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+
+<footer style="text-align:center; padding:20px 0; border-top: 1px solid #334155;">
+  <p style="color:#67e8f9;font-size:13px; text-align:Center; margin-bottom:10px"><strong>© 2026 Mohan Juriyani | Cloud infrastructure Engineer</strong></p>
+</footer>
+
+</body>
+</html>

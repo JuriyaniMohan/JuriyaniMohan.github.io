@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Infrastructure Deep Dive</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e17;
+  --surface: #111827;
+  --surface2: #1a2236;
+  --border: #1e2d4a;
+  --text: #e2e8f0;
+  --text-dim: #8892a8;
+  --accent-vpc: #f59e0b;
+  --accent-subnet: #10b981;
+  --accent-route: #6366f1;
+  --accent-gw: #ec4899;
+  --accent-sg: #06b6d4;
+  --accent-ec2: #f97316;
+  --accent-iam: #a78bfa;
+  --glow-vpc: rgba(245,158,11,0.15);
+  --glow-subnet: rgba(16,185,129,0.15);
+  --glow-route: rgba(99,102,241,0.15);
+  --glow-gw: rgba(236,72,153,0.15);
+  --glow-sg: rgba(6,182,212,0.15);
+  --glow-ec2: rgba(249,115,22,0.15);
+  --glow-iam: rgba(167,139,250,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #2a3654; border-radius: 3px; }
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(ellipse at 30% 20%, rgba(245,158,11,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(99,102,241,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(236,72,153,0.05) 0%, transparent 50%);
+  animation: drift 20s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  33% { transform: translate(2%,-1%) rotate(1deg); }
+  66% { transform: translate(-1%,2%) rotate(-1deg); }
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #f59e0b, #ec4899, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2rem;
+}
+
+/* Grid pattern background */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(30,45,74,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,45,74,0.3) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.4;
+}
+
+/* Navigation */
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  max-width: 900px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-btn {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(17,24,39,0.8);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.nav-btn:hover { transform: translateY(-3px); }
+.nav-btn[data-topic="vpc"]:hover { border-color: var(--accent-vpc); box-shadow: 0 8px 30px var(--glow-vpc); }
+.nav-btn[data-topic="subnets"]:hover { border-color: var(--accent-subnet); box-shadow: 0 8px 30px var(--glow-subnet); }
+.nav-btn[data-topic="routes"]:hover { border-color: var(--accent-route); box-shadow: 0 8px 30px var(--glow-route); }
+.nav-btn[data-topic="gateways"]:hover { border-color: var(--accent-gw); box-shadow: 0 8px 30px var(--glow-gw); }
+.nav-btn[data-topic="security"]:hover { border-color: var(--accent-sg); box-shadow: 0 8px 30px var(--glow-sg); }
+.nav-btn[data-topic="ec2"]:hover { border-color: var(--accent-ec2); box-shadow: 0 8px 30px var(--glow-ec2); }
+.nav-btn[data-topic="iam"]:hover { border-color: var(--accent-iam); box-shadow: 0 8px 30px var(--glow-iam); }
+
+.nav-btn .icon { font-size: 1.5rem; display: block; margin-bottom: 0.4rem; }
+
+/* Content */
+.content-area {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.topic-section {
+  display: none;
+  animation: fadeSlideIn 0.5s ease;
+}
+
+.topic-section.active { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section header */
+.section-header {
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.section-header .subtitle {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s;
+}
+
+.card:hover { border-color: #2a3f6a; }
+
+.card h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.card h3 .tag {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.card p, .card li {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+.card ul { list-style: none; padding-left: 0; }
+.card ul li::before {
+  content: '▸ ';
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* Diagram container */
+.diagram {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.diagram svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Code blocks */
+.code-block {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #c9d1d9;
+  overflow-x: auto;
+  margin: 1rem 0;
+  line-height: 1.6;
+}
+
+.code-block .comment { color: #6e7681; }
+.code-block .keyword { color: #ff7b72; }
+.code-block .string { color: #a5d6ff; }
+.code-block .value { color: #79c0ff; }
+
+/* Comparison table */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.compare-table th, .compare-table td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.compare-table td { color: var(--text-dim); }
+
+/* Analogy box */
+.analogy {
+  border-left: 3px solid;
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: rgba(255,255,255,0.02);
+  border-radius: 0 8px 8px 0;
+}
+
+.analogy .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+/* Tab system inside topics */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  padding: 0.8rem 1.2rem;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--text); border-bottom-color: currentColor; }
+
+.tab-content { display: none; padding-top: 1.5rem; }
+.tab-content.active { display: block; animation: fadeSlideIn 0.3s ease; }
+
+/* Back button */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s;
+}
+
+.back-btn:hover { border-color: #4a5568; color: var(--text); }
+
+/* Issue box */
+.issue-box {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0;
+}
+
+.issue-box h4 {
+  color: #f87171;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.issue-box p, .issue-box li { color: #d4a0a0; font-size: 0.9rem; }
+
+/* Solution box */
+.solution-box {
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0;
+}
+
+.solution-box h4 {
+  color: #34d399;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+/* Quiz */
+.quiz-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.quiz-box h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.quiz-option {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.quiz-option:hover { border-color: #4a5568; }
+.quiz-option.correct { border-color: #10b981; background: rgba(16,185,129,0.1); color: #34d399; }
+.quiz-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #f87171; }
+
+.quiz-feedback {
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-grid { grid-template-columns: repeat(2, 1fr); }
+  .section-header h2 { font-size: 1.8rem; }
+  .card { padding: 1.5rem; }
+  .tabs { flex-wrap: nowrap; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero" id="hero">
+  <div class="grid-bg"></div>
+  <h1>AWS Infrastructure</h1>
+  <p>A deep-dive interactive guide covering VPC, Subnets, Route Tables, Gateways, Security Groups, NACLs, EC2, and IAM — with diagrams, real-world analogies, and quizzes.</p>
+  <div class="nav-grid">
+    <button class="nav-btn" data-topic="vpc" onclick="showTopic('vpc')">
+      <span class="icon">🏗️</span> VPC
+    </button>
+    <button class="nav-btn" data-topic="subnets" onclick="showTopic('subnets')">
+      <span class="icon">🧱</span> Subnets
+    </button>
+    <button class="nav-btn" data-topic="routes" onclick="showTopic('routes')">
+      <span class="icon">🗺️</span> Route Tables
+    </button>
+    <button class="nav-btn" data-topic="gateways" onclick="showTopic('gateways')">
+      <span class="icon">🚪</span> IGW / NAT GW
+    </button>
+    <button class="nav-btn" data-topic="security" onclick="showTopic('security')">
+      <span class="icon">🛡️</span> SG vs NACL
+    </button>
+    <button class="nav-btn" data-topic="ec2" onclick="showTopic('ec2')">
+      <span class="icon">🖥️</span> EC2 Deep Dive
+    </button>
+    <button class="nav-btn" data-topic="iam" onclick="showTopic('iam')">
+      <span class="icon">🔑</span> IAM
+    </button>
+  </div>
+</div>
+
+<div class="content-area">
+
+<!-- ======================== VPC ======================== -->
+<div class="topic-section" id="topic-vpc">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.03)); border: 1px solid rgba(245,158,11,0.2);">
+    <h2 style="color: var(--accent-vpc);">VPC — Virtual Private Cloud</h2>
+    <p class="subtitle">Your own isolated network inside AWS</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'vpc-what')">What Is It?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'vpc-why')">What It Does</button>
+    <button class="tab-btn" onclick="switchTab(this, 'vpc-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'vpc-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'vpc-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'vpc-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'vpc-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="vpc-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-vpc);color:#000;">Definition</span> What is a VPC?</h3>
+      <p>A <strong>Virtual Private Cloud (VPC)</strong> is a logically isolated virtual network within the AWS cloud. It's your own private section of the AWS infrastructure where you define the IP address range, create subnets, configure route tables, and set up security rules. Think of it as renting an entire floor of a building — you control the rooms, hallways, locks, and who enters.</p>
+      <p>Every VPC is defined by a <strong>CIDR block</strong> (Classless Inter-Domain Routing), for example <code>10.0.0.0/16</code>, which gives you 65,536 IP addresses. AWS reserves 5 IPs per subnet from this range. The VPC spans an entire AWS Region but you carve it into subnets across Availability Zones.</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- AWS Cloud -->
+        <rect x="20" y="20" width="760" height="360" rx="16" fill="none" stroke="#374151" stroke-width="1.5" stroke-dasharray="8,4"/>
+        <text x="40" y="52" fill="#6b7280" font-family="JetBrains Mono" font-size="12">AWS CLOUD (Region: us-east-1)</text>
+
+        <!-- VPC Box -->
+        <rect x="60" y="70" width="680" height="280" rx="12" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="2"/>
+        <text x="80" y="100" fill="#f59e0b" font-family="JetBrains Mono" font-size="14" font-weight="bold">VPC: 10.0.0.0/16</text>
+
+        <!-- AZ 1 -->
+        <rect x="90" y="120" width="280" height="210" rx="8" fill="rgba(99,102,241,0.06)" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="110" y="145" fill="#818cf8" font-family="JetBrains Mono" font-size="11">AZ: us-east-1a</text>
+
+        <!-- Public Subnet AZ1 -->
+        <rect x="110" y="160" width="120" height="60" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="125" y="185" fill="#34d399" font-family="JetBrains Mono" font-size="10">Public</text>
+        <text x="118" y="200" fill="#6b7280" font-family="JetBrains Mono" font-size="9">10.0.1.0/24</text>
+
+        <!-- Private Subnet AZ1 -->
+        <rect x="110" y="240" width="120" height="60" rx="6" fill="rgba(239,68,68,0.08)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="122" y="265" fill="#f87171" font-family="JetBrains Mono" font-size="10">Private</text>
+        <text x="118" y="280" fill="#6b7280" font-family="JetBrains Mono" font-size="9">10.0.2.0/24</text>
+
+        <!-- AZ 2 -->
+        <rect x="420" y="120" width="280" height="210" rx="8" fill="rgba(99,102,241,0.06)" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="440" y="145" fill="#818cf8" font-family="JetBrains Mono" font-size="11">AZ: us-east-1b</text>
+
+        <!-- Public Subnet AZ2 -->
+        <rect x="440" y="160" width="120" height="60" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="455" y="185" fill="#34d399" font-family="JetBrains Mono" font-size="10">Public</text>
+        <text x="448" y="200" fill="#6b7280" font-family="JetBrains Mono" font-size="9">10.0.3.0/24</text>
+
+        <!-- Private Subnet AZ2 -->
+        <rect x="440" y="240" width="120" height="60" rx="6" fill="rgba(239,68,68,0.08)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="452" y="265" fill="#f87171" font-family="JetBrains Mono" font-size="10">Private</text>
+        <text x="448" y="280" fill="#6b7280" font-family="JetBrains Mono" font-size="9">10.0.4.0/24</text>
+
+        <!-- EC2 icons -->
+        <rect x="260" y="170" width="80" height="40" rx="5" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1"/>
+        <text x="274" y="195" fill="#fb923c" font-family="JetBrains Mono" font-size="9">EC2 Web</text>
+
+        <rect x="260" y="250" width="80" height="40" rx="5" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1"/>
+        <text x="280" y="275" fill="#fb923c" font-family="JetBrains Mono" font-size="9">RDS DB</text>
+
+        <rect x="590" y="170" width="80" height="40" rx="5" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1"/>
+        <text x="604" y="195" fill="#fb923c" font-family="JetBrains Mono" font-size="9">EC2 Web</text>
+
+        <rect x="590" y="250" width="80" height="40" rx="5" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1"/>
+        <text x="610" y="275" fill="#fb923c" font-family="JetBrains Mono" font-size="9">RDS DB</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="vpc-why">
+    <div class="card">
+      <h3>What Does a VPC Do?</h3>
+      <p><strong>Network Isolation:</strong> Every resource you launch (EC2, RDS, Lambda, etc.) lives inside a VPC. Without a VPC, all AWS customers' resources would share the same flat network — a security nightmare. The VPC creates a boundary: traffic inside stays inside, traffic from outside must pass through controlled entry points.</p>
+      <p><strong>IP Address Management:</strong> You define the CIDR block (e.g., 10.0.0.0/16), then subdivide it into subnets. This mirrors how on-premises networks use private IP ranges.</p>
+      <p><strong>Traffic Control:</strong> Route tables decide where packets go. Security groups and NACLs filter what's allowed in and out. Internet Gateways and NAT Gateways control internet access.</p>
+      <p><strong>Hybrid Connectivity:</strong> VPCs can connect to your on-premises data center via VPN or AWS Direct Connect, making hybrid cloud architectures possible.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="vpc-problems">
+    <div class="card">
+      <h3>What Problems Does VPC Solve?</h3>
+      <p><strong>1. Multi-tenant security:</strong> Without VPCs, all AWS customers' resources would be on the same network. VPC provides hard isolation — Customer A can never see Customer B's traffic.</p>
+      <p><strong>2. Regulatory compliance:</strong> Industries like healthcare (HIPAA) and finance (PCI-DSS) require network segmentation. VPC provides this natively.</p>
+      <p><strong>3. IP conflict avoidance:</strong> You choose your own CIDR range. If connecting to on-prem, you pick a range that doesn't overlap with your corporate network.</p>
+      <p><strong>4. Blast radius containment:</strong> If one application is compromised, VPC boundaries prevent lateral movement to other applications in different VPCs.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="vpc-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues</h4>
+        <ul>
+          <li><strong>CIDR overlap:</strong> If your VPC uses 10.0.0.0/16 and your office also uses 10.0.0.0/16, VPN/peering won't work. Plan ranges early.</li>
+          <li><strong>CIDR too small:</strong> Choosing /24 (256 IPs) initially feels fine, then you run out. VPCs can add secondary CIDRs but it's messy.</li>
+          <li><strong>Default VPC confusion:</strong> AWS creates a default VPC per region. Production workloads on the default VPC lack proper segmentation.</li>
+          <li><strong>Peering limitations:</strong> VPC peering is not transitive. If VPC-A peers with VPC-B, and VPC-B peers with VPC-C, VPC-A cannot reach VPC-C through VPC-B. Use Transit Gateway instead.</li>
+          <li><strong>ENI/IP exhaustion:</strong> Each Lambda, ECS task, or EKS pod consumes an IP. At scale, you can run out of IPs in your subnet.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="vpc-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-vpc);">
+        <div class="label" style="color: var(--accent-vpc);">🏠 Daily Life Analogy</div>
+        <p>A VPC is like a <strong>gated residential community</strong>. The entire community has a boundary wall (the CIDR range). Inside, there are streets (subnets), houses (EC2 instances), a main gate (Internet Gateway), a back service gate (NAT Gateway), and security guards (Security Groups / NACLs). Visitors can only enter through the gate after being checked. Residents can go out freely.</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux Analogy</div>
+        <p>A VPC is like creating a <strong>network namespace</strong> in Linux (<code>ip netns add myvpc</code>). Each namespace has its own routing table, interfaces, and firewall rules — completely isolated from the host's main network stack. Just as you'd use <code>veth</code> pairs to connect namespaces, AWS uses ENIs to connect resources to VPC subnets.</p>
+      </div>
+      <div class="analogy" style="border-color: #a78bfa;">
+        <div class="label" style="color: #a78bfa;">🪟 Windows Analogy</div>
+        <p>Think of a VPC like a <strong>Hyper-V Virtual Switch</strong> set to "Private" mode. VMs connected to that switch can talk to each other but are invisible to the outside network. You then add a NAT virtual switch to selectively give some VMs internet access, which is exactly how public vs private subnets work.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="vpc-deep">
+    <div class="card">
+      <h3>Deep Theory & Internals</h3>
+      <p><strong>CIDR Blocks:</strong> When you create a VPC with <code>10.0.0.0/16</code>, the "/16" means the first 16 bits are the network portion. That leaves 16 bits for hosts = 2^16 = 65,536 addresses. Common choices:</p>
+      <div class="code-block">
+<span class="comment"># CIDR Examples</span>
+10.0.0.0/16   → 65,536 IPs  (large VPC)
+10.0.0.0/20   → 4,096 IPs   (medium VPC)
+10.0.0.0/24   → 256 IPs     (small VPC, often too small)
+10.0.0.0/28   → 16 IPs      (minimum subnet size in AWS)
+
+<span class="comment"># AWS reserves 5 IPs per subnet:</span>
+10.0.1.0   → Network address
+10.0.1.1   → VPC router
+10.0.1.2   → DNS server
+10.0.1.3   → Future use
+10.0.1.255 → Broadcast (not supported but reserved)
+      </div>
+      <p><strong>VPC Flow Logs:</strong> You can enable flow logs to capture IP traffic metadata (src IP, dst IP, port, protocol, action: ACCEPT/REJECT). These go to CloudWatch Logs, S3, or Kinesis Firehose. Essential for debugging "why can't my EC2 reach the database?" problems.</p>
+      <p><strong>DNS in VPC:</strong> AWS provides a DNS server at the VPC base +2 address (e.g., 10.0.0.2). This resolves both public DNS names and private hosted zone records. You can enable <code>enableDnsHostnames</code> and <code>enableDnsSupport</code> on the VPC for private DNS resolution.</p>
+      <p><strong>VPC Peering vs Transit Gateway:</strong> Peering is a 1-to-1 connection between two VPCs. Transit Gateway is a hub — connect 100+ VPCs and on-prem networks through a single hub. At scale, Transit Gateway is cheaper and simpler than managing hundreds of peering connections.</p>
+      <div class="code-block">
+<span class="comment"># AWS CLI: Create a VPC</span>
+<span class="keyword">aws</span> ec2 create-vpc \
+  --cidr-block <span class="string">10.0.0.0/16</span> \
+  --tag-specifications <span class="string">'ResourceType=vpc,Tags=[{Key=Name,Value=prod-vpc}]'</span>
+
+<span class="comment"># Enable DNS hostnames</span>
+<span class="keyword">aws</span> ec2 modify-vpc-attribute \
+  --vpc-id vpc-abc123 \
+  --enable-dns-hostnames <span class="string">'{"Value": true}'</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="vpc-quiz">
+    <div class="quiz-box">
+      <h4>🧠 Quick Check: What is the maximum CIDR block size for an AWS VPC?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">/8 (16 million IPs)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">/16 (65,536 IPs)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">/20 (4,096 IPs)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">/24 (256 IPs)</button>
+      <div class="quiz-feedback" id="quiz-vpc-fb">The largest VPC CIDR is /16 (65,536 IPs). While AWS supports secondary CIDRs, a single primary block maxes at /16.</div>
+    </div>
+    <div class="quiz-box">
+      <h4>🧠 How many IPs does AWS reserve per subnet?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">2</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">3</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">5</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">10</button>
+      <div class="quiz-feedback">AWS reserves 5 IPs: network address, VPC router, DNS, future use, and broadcast.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SUBNETS ======================== -->
+<div class="topic-section" id="topic-subnets">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.03)); border: 1px solid rgba(16,185,129,0.2);">
+    <h2 style="color: var(--accent-subnet);">Subnets — Public & Private</h2>
+    <p class="subtitle">Carving your VPC into functional zones</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'sub-what')">What Is It?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sub-does')">What It Does</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sub-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sub-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sub-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sub-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sub-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="sub-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-subnet);color:#000;">Definition</span> What is a Subnet?</h3>
+      <p>A <strong>subnet</strong> (subnetwork) is a range of IP addresses within your VPC. Each subnet resides in exactly <strong>one Availability Zone</strong> and cannot span AZs. Subnets are where you actually place your AWS resources — EC2, RDS, Lambda (in VPC mode), etc.</p>
+      <p><strong>Public Subnet:</strong> A subnet whose route table has a route to an Internet Gateway (IGW). Resources here can receive a public IP and be directly accessible from the internet.</p>
+      <p><strong>Private Subnet:</strong> A subnet with no route to an IGW. Resources here cannot be reached from the internet. They may have outbound internet access via a NAT Gateway, but no inbound from outside.</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+        <!-- Internet -->
+        <ellipse cx="400" cy="40" rx="100" ry="25" fill="none" stroke="#6b7280" stroke-width="1.5"/>
+        <text x="370" y="45" fill="#9ca3af" font-family="JetBrains Mono" font-size="12">INTERNET</text>
+
+        <!-- IGW -->
+        <rect x="365" y="85" width="70" height="35" rx="6" fill="rgba(236,72,153,0.15)" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="380" y="107" fill="#f472b6" font-family="JetBrains Mono" font-size="10">IGW</text>
+        <line x1="400" y1="65" x2="400" y2="85" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- VPC -->
+        <rect x="50" y="140" width="700" height="290" rx="12" fill="rgba(245,158,11,0.04)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="70" y="165" fill="#f59e0b" font-family="JetBrains Mono" font-size="11">VPC: 10.0.0.0/16</text>
+
+        <!-- Public Subnet -->
+        <rect x="80" y="185" width="280" height="220" rx="8" fill="rgba(16,185,129,0.06)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="100" y="210" fill="#34d399" font-family="JetBrains Mono" font-size="12" font-weight="bold">PUBLIC SUBNET</text>
+        <text x="100" y="228" fill="#6b7280" font-family="JetBrains Mono" font-size="10">10.0.1.0/24 | AZ-1a</text>
+
+        <!-- Route table public -->
+        <rect x="100" y="245" width="240" height="55" rx="6" fill="rgba(99,102,241,0.08)" stroke="#6366f1" stroke-width="1"/>
+        <text x="115" y="262" fill="#818cf8" font-family="JetBrains Mono" font-size="9">Route Table:</text>
+        <text x="115" y="278" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">10.0.0.0/16 → local</text>
+        <text x="115" y="292" fill="#34d399" font-family="JetBrains Mono" font-size="9">0.0.0.0/0 → igw-xxx ✓</text>
+
+        <!-- EC2 in public -->
+        <rect x="120" y="315" width="90" height="40" rx="5" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="1"/>
+        <text x="132" y="335" fill="#fb923c" font-family="JetBrains Mono" font-size="9">Web Server</text>
+        <text x="130" y="349" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Public IP ✓</text>
+
+        <!-- Arrow from IGW to public subnet -->
+        <line x1="400" y1="120" x2="220" y2="185" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+        <!-- Private Subnet -->
+        <rect x="430" y="185" width="290" height="220" rx="8" fill="rgba(239,68,68,0.05)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="450" y="210" fill="#f87171" font-family="JetBrains Mono" font-size="12" font-weight="bold">PRIVATE SUBNET</text>
+        <text x="450" y="228" fill="#6b7280" font-family="JetBrains Mono" font-size="10">10.0.2.0/24 | AZ-1a</text>
+
+        <!-- Route table private -->
+        <rect x="450" y="245" width="240" height="55" rx="6" fill="rgba(99,102,241,0.08)" stroke="#6366f1" stroke-width="1"/>
+        <text x="465" y="262" fill="#818cf8" font-family="JetBrains Mono" font-size="9">Route Table:</text>
+        <text x="465" y="278" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">10.0.0.0/16 → local</text>
+        <text x="465" y="292" fill="#fbbf24" font-family="JetBrains Mono" font-size="9">0.0.0.0/0 → nat-xxx</text>
+
+        <!-- NAT GW -->
+        <rect x="460" y="315" width="70" height="35" rx="5" fill="rgba(236,72,153,0.12)" stroke="#ec4899" stroke-width="1"/>
+        <text x="468" y="337" fill="#f472b6" font-family="JetBrains Mono" font-size="9">NAT GW</text>
+
+        <!-- DB in private -->
+        <rect x="570" y="315" width="90" height="40" rx="5" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="1"/>
+        <text x="586" y="335" fill="#fb923c" font-family="JetBrains Mono" font-size="9">Database</text>
+        <text x="584" y="349" fill="#6b7280" font-family="JetBrains Mono" font-size="8">No Public IP ✗</text>
+
+        <!-- Arrow def -->
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="#6b7280"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sub-does">
+    <div class="card">
+      <h3>What Subnets Do</h3>
+      <p><strong>Segment your network:</strong> Just like VLANs in traditional networking, subnets let you separate workloads. Web servers go in public subnets; databases, caches, and internal services go in private subnets.</p>
+      <p><strong>Enable high availability:</strong> By placing subnets across multiple AZs, you survive data center failures. An Application Load Balancer requires subnets in at least 2 AZs.</p>
+      <p><strong>Control routing per zone:</strong> Each subnet has its own route table association. Public subnets route to IGW; private subnets route to NAT GW or nowhere.</p>
+      <p><strong>IP allocation:</strong> AWS assigns private IPs from the subnet's CIDR to resources launched in that subnet. Public subnets can auto-assign public IPs.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sub-problems">
+    <div class="card">
+      <h3>Problems Solved by Subnets</h3>
+      <p><strong>1. Security by architecture:</strong> Databases in private subnets are unreachable from the internet by design — no misconfiguration of a firewall rule can expose them because there's no route.</p>
+      <p><strong>2. Compliance zoning:</strong> PCI-DSS requires the cardholder data environment (CDE) to be in its own network segment. Private subnets provide this.</p>
+      <p><strong>3. Failure domain isolation:</strong> If AZ-1a goes down, resources in AZ-1b subnets continue serving traffic.</p>
+      <p><strong>4. Cost optimization:</strong> NAT Gateway charges per GB. By having some subnets route through NAT and others not, you control costs.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sub-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues</h4>
+        <ul>
+          <li><strong>Insufficient IPs:</strong> A /24 subnet only gives 251 usable IPs. EKS pods, Lambda functions, and ECS tasks each consume an IP. You hit limits fast.</li>
+          <li><strong>"My EC2 can't reach the internet":</strong> 90% of the time, the subnet's route table is missing the 0.0.0.0/0 route to IGW (public) or NAT GW (private).</li>
+          <li><strong>Forgetting multi-AZ:</strong> Putting all subnets in one AZ means a single AZ outage takes down everything.</li>
+          <li><strong>Public subnet without auto-assign public IP:</strong> The subnet routes to IGW but instances don't get public IPs. Traffic flows out but nothing can respond back.</li>
+          <li><strong>Subnet group confusion:</strong> RDS requires a DB subnet group with subnets in at least 2 AZs even for single-AZ deployments.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sub-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-subnet);">
+        <div class="label" style="color: var(--accent-subnet);">🏠 Daily Life</div>
+        <p><strong>Public subnet</strong> = the reception area of an office building. Anyone can walk in from the street. <strong>Private subnet</strong> = the server room in the basement. No door leads to the street — you can only reach it through internal hallways. The basement can call out (via NAT) for deliveries, but nobody from outside can walk in directly.</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux</div>
+        <p>Subnets are like <strong>VLANs on a Linux bridge</strong>. You create <code>br0</code> (the VPC), then assign tagged interfaces: <code>br0.10</code> (public VLAN 10) and <code>br0.20</code> (private VLAN 20). Each VLAN has its own IP range and iptables rules. The public VLAN has MASQUERADE (NAT) for outbound + port forwarding for inbound. The private VLAN only has MASQUERADE for outbound.</p>
+      </div>
+      <div class="analogy" style="border-color: #a78bfa;">
+        <div class="label" style="color: #a78bfa;">🪟 Windows</div>
+        <p>Think of it as different <strong>network profiles</strong> in Windows Firewall: the "Public" profile (stricter rules for untrusted networks) and the "Private/Domain" profile (more open for internal trusted networks). Each subnet is like assigning a NIC to a different profile with its own set of firewall rules and routing.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sub-deep">
+    <div class="card">
+      <h3>Deep Theory: Subnet Sizing & Design</h3>
+      <p><strong>The Golden Rule:</strong> Always plan for 2x the IPs you think you need. EKS, ECS, and Lambda VPC functions consume IPs aggressively.</p>
+      <div class="code-block">
+<span class="comment"># Recommended multi-AZ layout for a /16 VPC</span>
+VPC:          10.0.0.0/16     (65,536 IPs)
+
+<span class="comment"># Public subnets (small — only load balancers and bastion hosts)</span>
+Public-1a:    10.0.0.0/24     (251 usable)
+Public-1b:    10.0.1.0/24     (251 usable)
+Public-1c:    10.0.2.0/24     (251 usable)
+
+<span class="comment"># Private subnets (large — app servers, containers, lambdas)</span>
+Private-1a:   10.0.16.0/20    (4,091 usable)
+Private-1b:   10.0.32.0/20    (4,091 usable)
+Private-1c:   10.0.48.0/20    (4,091 usable)
+
+<span class="comment"># Data subnets (medium — RDS, ElastiCache)</span>
+Data-1a:      10.0.64.0/22    (1,019 usable)
+Data-1b:      10.0.68.0/22    (1,019 usable)
+Data-1c:      10.0.72.0/22    (1,019 usable)
+      </div>
+      <p><strong>What makes a subnet "public"?</strong> It's not a magic flag — it's purely determined by the route table. If the associated route table has <code>0.0.0.0/0 → igw-xxx</code>, the subnet is public. Remove that route, and it becomes private instantly.</p>
+      <div class="code-block">
+<span class="comment"># Create subnets via AWS CLI</span>
+<span class="keyword">aws</span> ec2 create-subnet \
+  --vpc-id vpc-abc123 \
+  --cidr-block <span class="string">10.0.1.0/24</span> \
+  --availability-zone <span class="string">us-east-1a</span> \
+  --tag-specifications <span class="string">'ResourceType=subnet,Tags=[{Key=Name,Value=public-1a}]'</span>
+
+<span class="comment"># Enable auto-assign public IP for public subnet</span>
+<span class="keyword">aws</span> ec2 modify-subnet-attribute \
+  --subnet-id subnet-xyz789 \
+  --map-public-ip-on-launch
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sub-quiz">
+    <div class="quiz-box">
+      <h4>🧠 What makes a subnet "public"?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">It has a tag called "public"</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">Its route table has a route to an Internet Gateway</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">It's in Availability Zone "a"</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">AWS marks it public during creation</button>
+      <div class="quiz-feedback">A subnet is public solely because its route table contains a 0.0.0.0/0 route pointing to an IGW.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ROUTE TABLES ======================== -->
+<div class="topic-section" id="topic-routes">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.03)); border: 1px solid rgba(99,102,241,0.2);">
+    <h2 style="color: var(--accent-route);">Route Tables</h2>
+    <p class="subtitle">The GPS of your VPC — directing every packet</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'rt-what')">What Is It?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'rt-does')">What It Does</button>
+    <button class="tab-btn" onclick="switchTab(this, 'rt-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'rt-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'rt-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'rt-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'rt-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="rt-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-route);color:#fff;">Definition</span> What is a Route Table?</h3>
+      <p>A <strong>Route Table</strong> is a set of rules (called routes) that determine where network traffic from your subnet is directed. Every subnet MUST be associated with exactly one route table. If you don't explicitly associate one, AWS uses the VPC's <strong>Main Route Table</strong> (a default that's created with the VPC).</p>
+      <p>Each route has two components: a <strong>Destination</strong> (a CIDR range like 0.0.0.0/0) and a <strong>Target</strong> (where to send matching traffic, like an IGW, NAT GW, VPC peering connection, or "local").</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+        <!-- Route Table Visual -->
+        <rect x="150" y="20" width="500" height="310" rx="12" fill="rgba(99,102,241,0.06)" stroke="#6366f1" stroke-width="2"/>
+        <text x="310" y="50" fill="#818cf8" font-family="JetBrains Mono" font-size="14" font-weight="bold">ROUTE TABLE</text>
+
+        <!-- Headers -->
+        <rect x="180" y="70" width="220" height="30" rx="4" fill="rgba(99,102,241,0.15)"/>
+        <text x="240" y="90" fill="#c7d2fe" font-family="JetBrains Mono" font-size="11">DESTINATION</text>
+        <rect x="410" y="70" width="210" height="30" rx="4" fill="rgba(99,102,241,0.15)"/>
+        <text x="475" y="90" fill="#c7d2fe" font-family="JetBrains Mono" font-size="11">TARGET</text>
+
+        <!-- Row 1: local -->
+        <rect x="180" y="110" width="220" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="200" y="133" fill="#9ca3af" font-family="JetBrains Mono" font-size="11">10.0.0.0/16</text>
+        <rect x="410" y="110" width="210" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="430" y="133" fill="#34d399" font-family="JetBrains Mono" font-size="11">local</text>
+        <text x="635" y="133" fill="#6b7280" font-family="JetBrains Mono" font-size="9">← auto, can't delete</text>
+
+        <!-- Row 2: IGW -->
+        <rect x="180" y="155" width="220" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="200" y="178" fill="#9ca3af" font-family="JetBrains Mono" font-size="11">0.0.0.0/0</text>
+        <rect x="410" y="155" width="210" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="430" y="178" fill="#f472b6" font-family="JetBrains Mono" font-size="11">igw-0abc123</text>
+        <text x="635" y="178" fill="#6b7280" font-family="JetBrains Mono" font-size="9">← internet route</text>
+
+        <!-- Row 3: Peering -->
+        <rect x="180" y="200" width="220" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="200" y="223" fill="#9ca3af" font-family="JetBrains Mono" font-size="11">172.16.0.0/16</text>
+        <rect x="410" y="200" width="210" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="430" y="223" fill="#fbbf24" font-family="JetBrains Mono" font-size="11">pcx-peer456</text>
+        <text x="635" y="223" fill="#6b7280" font-family="JetBrains Mono" font-size="9">← VPC peering</text>
+
+        <!-- Row 4: VPN -->
+        <rect x="180" y="245" width="220" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="200" y="268" fill="#9ca3af" font-family="JetBrains Mono" font-size="11">192.168.0.0/16</text>
+        <rect x="410" y="245" width="210" height="35" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1e2d4a" stroke-width="1"/>
+        <text x="430" y="268" fill="#a78bfa" font-family="JetBrains Mono" font-size="11">vgw-vpn789</text>
+        <text x="635" y="268" fill="#6b7280" font-family="JetBrains Mono" font-size="9">← on-prem VPN</text>
+
+        <!-- Note -->
+        <text x="200" y="310" fill="#4b5563" font-family="JetBrains Mono" font-size="10">Most specific route wins (longest prefix match)</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="rt-does">
+    <div class="card">
+      <h3>What Route Tables Do</h3>
+      <p><strong>Packet routing decisions:</strong> When an EC2 instance sends a packet, the VPC router looks at the route table associated with that instance's subnet. It finds the most specific matching route (longest prefix match) and forwards the packet to that target.</p>
+      <p><strong>Traffic segregation:</strong> Different subnets can have different route tables. Public subnets route to IGW, private subnets route to NAT GW, isolated subnets have only the local route.</p>
+      <p><strong>Hybrid cloud routing:</strong> Routes can point to a Virtual Private Gateway (VPN), Transit Gateway, or VPC peering connection to reach other networks.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="rt-problems">
+    <div class="card">
+      <h3>Problems Solved</h3>
+      <p><strong>1. Controlled internet access:</strong> Without a 0.0.0.0/0 route, a subnet simply cannot reach the internet — defense in depth by architecture, not just firewall rules.</p>
+      <p><strong>2. Multi-network routing:</strong> A single VPC can route to the internet (via IGW), to on-prem (via VPN), to another VPC (via peering), and to AWS services (via VPC endpoints) — all managed through route tables.</p>
+      <p><strong>3. Traffic inspection:</strong> You can route traffic through a network appliance (like a firewall EC2) by pointing routes to that instance's ENI, enabling deep packet inspection.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="rt-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues</h4>
+        <ul>
+          <li><strong>Missing default route:</strong> Forgetting to add 0.0.0.0/0 to a public subnet's route table. Everything in that subnet silently fails to reach the internet.</li>
+          <li><strong>Main route table trap:</strong> New subnets auto-associate with the Main route table. If someone adds an IGW route to the Main RT, all new subnets become public by default — a security risk.</li>
+          <li><strong>Route propagation overlap:</strong> VPN route propagation can add routes that conflict with existing static routes, causing unpredictable routing.</li>
+          <li><strong>Asymmetric routing:</strong> Traffic goes out via NAT GW but response comes back via a different path, causing drops.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="rt-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-route);">
+        <div class="label" style="color: var(--accent-route);">🏠 Daily Life</div>
+        <p>A route table is like the <strong>directory sign in a hospital</strong>. "Radiology → Floor 2 Left", "Emergency → Ground Floor Right", "Everything else → Main Reception." Each floor (subnet) can have a different directory sign. Without it, patients (packets) wander aimlessly and never reach their destination.</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux</div>
+        <p>This is the Linux <code>ip route</code> table. <code>ip route show</code> gives you the same structure: <code>default via 10.0.1.1 dev eth0</code> (= 0.0.0.0/0 → IGW), <code>10.0.0.0/16 dev eth0 scope link</code> (= local route). You can even have multiple routing tables with <code>ip rule</code> — policy-based routing, just like multiple route tables in AWS.</p>
+      </div>
+      <div class="analogy" style="border-color: #a78bfa;">
+        <div class="label" style="color: #a78bfa;">🪟 Windows</div>
+        <p>Run <code>route print</code> in cmd — you'll see the same structure: network destination, netmask, gateway, interface. AWS route tables are the cloud equivalent of what Windows manages in its IPv4 Route Table, but per-subnet instead of per-machine.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="rt-deep">
+    <div class="card">
+      <h3>Deep Theory</h3>
+      <p><strong>Longest Prefix Match:</strong> If you have routes for both 10.0.0.0/16 and 10.0.1.0/24, a packet destined for 10.0.1.50 matches both — but the /24 route wins because it's more specific. This is how you can override general routes for specific subnets.</p>
+      <p><strong>Local route:</strong> Every route table automatically has a "local" route matching the VPC CIDR. This enables all subnets in the VPC to communicate. You cannot delete this route.</p>
+      <p><strong>Route priority:</strong> AWS routes follow this priority: local routes > static routes > propagated routes. Static routes always beat BGP-propagated routes from VPN.</p>
+      <div class="code-block">
+<span class="comment"># Create a custom route table</span>
+<span class="keyword">aws</span> ec2 create-route-table --vpc-id vpc-abc123
+
+<span class="comment"># Add a route to IGW (makes subnet public)</span>
+<span class="keyword">aws</span> ec2 create-route \
+  --route-table-id rtb-xyz789 \
+  --destination-cidr-block <span class="string">0.0.0.0/0</span> \
+  --gateway-id igw-123abc
+
+<span class="comment"># Associate with a subnet</span>
+<span class="keyword">aws</span> ec2 associate-route-table \
+  --route-table-id rtb-xyz789 \
+  --subnet-id subnet-abc456
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="rt-quiz">
+    <div class="quiz-box">
+      <h4>🧠 If a route table has routes for both 10.0.0.0/16 and 10.0.1.0/24, which wins for 10.0.1.50?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">10.0.0.0/16 (broader match)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">10.0.1.0/24 (longest prefix match)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Whichever was added first</button>
+      <div class="quiz-feedback">Longest prefix match wins. /24 is more specific than /16, so it takes priority.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== GATEWAYS ======================== -->
+<div class="topic-section" id="topic-gateways">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(236,72,153,0.03)); border: 1px solid rgba(236,72,153,0.2);">
+    <h2 style="color: var(--accent-gw);">Internet Gateway & NAT Gateway</h2>
+    <p class="subtitle">The doors between your VPC and the world</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'gw-what')">What Are They?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'gw-does')">What They Do</button>
+    <button class="tab-btn" onclick="switchTab(this, 'gw-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'gw-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'gw-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'gw-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'gw-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="gw-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-gw);color:#fff;">IGW</span> Internet Gateway</h3>
+      <p>An <strong>Internet Gateway (IGW)</strong> is a horizontally scaled, redundant, highly available VPC component that enables communication between your VPC and the internet. It performs two functions: it acts as a target in route tables for internet-routable traffic, and it performs <strong>Network Address Translation (NAT)</strong> for instances with public IPv4 addresses.</p>
+      <p>There is no bandwidth constraint on an IGW. It's fully managed, HA by default, and costs nothing (you pay for data transfer, not the gateway itself).</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag" style="background:#fbbf24;color:#000;">NAT GW</span> NAT Gateway</h3>
+      <p>A <strong>NAT Gateway</strong> enables instances in <strong>private subnets</strong> to initiate outbound connections to the internet (e.g., download patches, call APIs) while preventing the internet from initiating inbound connections to those instances.</p>
+      <p>The NAT Gateway lives in a <strong>public subnet</strong>, has an Elastic IP, and translates private source IPs to its own public IP for outbound traffic. It costs ~$0.045/hour + $0.045/GB processed.</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="#6b7280"/>
+          </marker>
+          <marker id="arrGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="#10b981"/>
+          </marker>
+          <marker id="arrPink" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="#ec4899"/>
+          </marker>
+        </defs>
+
+        <!-- Internet -->
+        <ellipse cx="400" cy="35" rx="110" ry="25" fill="none" stroke="#6b7280" stroke-width="1.5"/>
+        <text x="362" y="40" fill="#9ca3af" font-family="JetBrains Mono" font-size="12">INTERNET</text>
+
+        <!-- IGW -->
+        <rect x="350" y="80" width="100" height="45" rx="8" fill="rgba(236,72,153,0.15)" stroke="#ec4899" stroke-width="2"/>
+        <text x="360" y="100" fill="#f472b6" font-family="JetBrains Mono" font-size="10" font-weight="bold">Internet</text>
+        <text x="360" y="115" fill="#f472b6" font-family="JetBrains Mono" font-size="10" font-weight="bold">Gateway</text>
+        <line x1="400" y1="60" x2="400" y2="80" stroke="#ec4899" stroke-width="1.5" marker-end="url(#arrPink)"/>
+
+        <!-- Bidirectional arrows from IGW -->
+        <line x1="350" y1="125" x2="200" y2="175" stroke="#10b981" stroke-width="2" marker-end="url(#arrGreen)"/>
+        <text x="230" y="150" fill="#34d399" font-family="JetBrains Mono" font-size="9">inbound + outbound</text>
+
+        <line x1="450" y1="125" x2="550" y2="175" stroke="#fbbf24" stroke-width="2" marker-end="url(#arr2)"/>
+
+        <!-- VPC -->
+        <rect x="40" y="160" width="720" height="240" rx="12" fill="rgba(245,158,11,0.04)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="60" y="182" fill="#f59e0b" font-family="JetBrains Mono" font-size="10">VPC</text>
+
+        <!-- Public Subnet -->
+        <rect x="70" y="195" width="280" height="180" rx="8" fill="rgba(16,185,129,0.05)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="90" y="218" fill="#34d399" font-family="JetBrains Mono" font-size="11" font-weight="bold">PUBLIC SUBNET</text>
+
+        <!-- Web Server -->
+        <rect x="100" y="240" width="110" height="50" rx="6" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="1"/>
+        <text x="112" y="260" fill="#fb923c" font-family="JetBrains Mono" font-size="9">Web Server</text>
+        <text x="108" y="278" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Private: 10.0.1.10</text>
+
+        <!-- NAT GW in public subnet -->
+        <rect x="100" y="310" width="110" height="45" rx="6" fill="rgba(236,72,153,0.12)" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="118" y="330" fill="#f472b6" font-family="JetBrains Mono" font-size="9" font-weight="bold">NAT Gateway</text>
+        <text x="108" y="348" fill="#6b7280" font-family="JetBrains Mono" font-size="8">EIP: 54.x.x.x</text>
+
+        <!-- Private Subnet -->
+        <rect x="450" y="195" width="280" height="180" rx="8" fill="rgba(239,68,68,0.05)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="470" y="218" fill="#f87171" font-family="JetBrains Mono" font-size="11" font-weight="bold">PRIVATE SUBNET</text>
+
+        <!-- DB Server -->
+        <rect x="490" y="240" width="110" height="50" rx="6" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="1"/>
+        <text x="510" y="260" fill="#fb923c" font-family="JetBrains Mono" font-size="9">App Server</text>
+        <text x="498" y="278" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Private: 10.0.2.20</text>
+
+        <!-- Arrow from private to NAT -->
+        <line x1="490" y1="290" x2="210" y2="310" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr2)"/>
+        <text x="310" y="305" fill="#fbbf24" font-family="JetBrains Mono" font-size="8">outbound only via NAT</text>
+
+        <!-- X mark for no inbound to private -->
+        <text x="620" y="260" fill="#ef4444" font-family="JetBrains Mono" font-size="20" font-weight="bold">✗</text>
+        <text x="610" y="280" fill="#f87171" font-family="JetBrains Mono" font-size="8">No inbound</text>
+        <text x="610" y="292" fill="#f87171" font-family="JetBrains Mono" font-size="8">from internet</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="gw-does">
+    <div class="card">
+      <h3>What They Do</h3>
+      <p><strong>IGW performs 1:1 NAT:</strong> When an EC2 with private IP 10.0.1.10 and public IP 54.1.2.3 sends a packet, the IGW translates 10.0.1.10 → 54.1.2.3 in the source. On response, it translates 54.1.2.3 → 10.0.1.10 in the destination. The instance never "sees" its public IP — check <code>ifconfig</code> and you'll only see the private IP.</p>
+      <p><strong>NAT GW performs many:1 NAT:</strong> Multiple private instances (10.0.2.20, 10.0.2.21, 10.0.2.22) all appear as the NAT GW's single Elastic IP (54.x.x.x) to the outside world. The NAT GW tracks connection state to route responses back to the correct private instance.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="gw-problems">
+    <div class="card">
+      <h3>Problems Solved</h3>
+      <p><strong>IGW solves:</strong> How do users on the internet reach my web server? How does my web server respond? The IGW provides the bridge between public internet and VPC.</p>
+      <p><strong>NAT GW solves:</strong> My database server needs to download security patches from the internet, but I don't want anyone from the internet to reach it. NAT GW provides <strong>outbound-only</strong> internet access for private resources.</p>
+      <p><strong>Both solve:</strong> The fundamental tension between "I need internet connectivity" and "I need security isolation." IGW for resources that MUST be publicly reachable; NAT GW for resources that need outbound access but must remain private.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="gw-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues</h4>
+        <ul>
+          <li><strong>NAT GW cost surprise:</strong> At $0.045/GB, a server downloading 1TB/month through NAT costs $45 in processing fees alone. Consider VPC endpoints for S3/DynamoDB access to bypass NAT.</li>
+          <li><strong>NAT GW single AZ:</strong> A NAT GW lives in one AZ. If that AZ goes down, all private subnets routing through it lose internet access. Best practice: one NAT GW per AZ.</li>
+          <li><strong>Port exhaustion:</strong> NAT GW supports 55,000 simultaneous connections per destination. High-throughput applications can hit this limit, causing dropped connections.</li>
+          <li><strong>IGW without public IP:</strong> An instance in a public subnet (route to IGW exists) but without a public IP or Elastic IP can't reach the internet — the IGW has nothing to NAT to.</li>
+        </ul>
+      </div>
+      <div class="solution-box">
+        <h4>✅ Cost Optimization Tip</h4>
+        <p>Use <strong>VPC Gateway Endpoints</strong> (free!) for S3 and DynamoDB traffic. This bypasses NAT GW entirely, saving both the $0.045/GB processing fee and the data transfer cost. For other AWS services, use <strong>Interface Endpoints</strong> (PrivateLink).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="gw-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-gw);">
+        <div class="label" style="color: var(--accent-gw);">🏠 Daily Life</div>
+        <p><strong>IGW</strong> = the front door of your house. It has your house number (public IP) so mail carriers (internet traffic) can find it. Traffic flows both ways.<br/>
+        <strong>NAT GW</strong> = a P.O. Box service. Your private address stays hidden. You can send letters out (the P.O. Box number appears as the return address), and replies come back to the P.O. Box, which forwards them to your real address. But nobody can send you unsolicited mail because they don't know your real address.</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux</div>
+        <p><strong>IGW</strong> = a Linux box acting as a router with IP forwarding enabled (<code>echo 1 > /proc/sys/net/ipv4/ip_forward</code>) and a public IP on eth0.<br/>
+        <strong>NAT GW</strong> = the same box but with iptables MASQUERADE: <code>iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</code>. This rewrites private source IPs to the box's public IP for outbound traffic, exactly what NAT GW does.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="gw-deep">
+    <div class="card">
+      <h3>Deep Theory</h3>
+      <table class="compare-table">
+        <tr><th>Feature</th><th>Internet Gateway</th><th>NAT Gateway</th></tr>
+        <tr><td>Direction</td><td>Bidirectional (in + out)</td><td>Outbound only</td></tr>
+        <tr><td>Where it lives</td><td>Attached to VPC (not subnet)</td><td>In a public subnet</td></tr>
+        <tr><td>HA</td><td>Fully managed, HA by default</td><td>HA within an AZ only</td></tr>
+        <tr><td>Cost</td><td>Free (pay for data transfer)</td><td>$0.045/hr + $0.045/GB</td></tr>
+        <tr><td>NAT type</td><td>1:1 (public IP ↔ private IP)</td><td>Many:1 (PAT)</td></tr>
+        <tr><td>Bandwidth</td><td>Unlimited</td><td>Up to 100 Gbps</td></tr>
+        <tr><td>Requires</td><td>Public IP on instance</td><td>Elastic IP on NAT GW</td></tr>
+      </table>
+      <div class="code-block">
+<span class="comment"># Create and attach IGW</span>
+<span class="keyword">aws</span> ec2 create-internet-gateway
+<span class="keyword">aws</span> ec2 attach-internet-gateway \
+  --internet-gateway-id igw-abc \
+  --vpc-id vpc-xyz
+
+<span class="comment"># Create NAT GW (needs EIP + public subnet)</span>
+<span class="keyword">aws</span> ec2 allocate-address --domain vpc
+<span class="keyword">aws</span> ec2 create-nat-gateway \
+  --subnet-id subnet-public-1a \
+  --allocation-id eipalloc-abc123
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="gw-quiz">
+    <div class="quiz-box">
+      <h4>🧠 Where does a NAT Gateway reside?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">In a private subnet</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">In a public subnet</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Attached to the VPC (no subnet)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">In a different AWS account</button>
+      <div class="quiz-feedback">NAT GW must be in a public subnet (with a route to IGW) so it can reach the internet on behalf of private instances.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SECURITY GROUPS vs NACLs ======================== -->
+<div class="topic-section" id="topic-security">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(6,182,212,0.03)); border: 1px solid rgba(6,182,212,0.2);">
+    <h2 style="color: var(--accent-sg);">Security Groups vs NACLs</h2>
+    <p class="subtitle">Two layers of firewall — instance-level vs subnet-level</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'sg-what')">What Are They?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sg-compare')">Head-to-Head</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sg-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sg-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sg-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sg-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'sg-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="sg-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-sg);color:#000;">SG</span> Security Group</h3>
+      <p>A <strong>Security Group</strong> acts as a virtual firewall at the <strong>instance level</strong> (technically, at the ENI level). It controls inbound and outbound traffic. Security Groups are <strong>stateful</strong> — if you allow inbound traffic on port 80, the response traffic is automatically allowed out, regardless of outbound rules.</p>
+      <p>Key characteristic: Security Groups are <strong>allow-only</strong>. You can only write rules that allow traffic. There are no deny rules. Anything not explicitly allowed is implicitly denied.</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag" style="background:#fbbf24;color:#000;">NACL</span> Network Access Control List</h3>
+      <p>A <strong>NACL</strong> acts as a firewall at the <strong>subnet level</strong>. It evaluates traffic entering or leaving the subnet boundary. NACLs are <strong>stateless</strong> — you must explicitly allow both inbound AND outbound traffic. If you allow inbound port 80, you must also allow outbound ephemeral ports (1024-65535) for the response.</p>
+      <p>Key characteristic: NACLs support both <strong>ALLOW and DENY</strong> rules, evaluated in order of rule number (lowest first). First match wins.</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+        <!-- Traffic flow -->
+        <text x="50" y="30" fill="#9ca3af" font-family="JetBrains Mono" font-size="11">TRAFFIC FLOW: Internet → NACL → Security Group → Instance</text>
+
+        <!-- Incoming traffic -->
+        <rect x="30" y="60" width="100" height="40" rx="6" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="1.5"/>
+        <text x="42" y="85" fill="#fb923c" font-family="JetBrains Mono" font-size="10">Incoming</text>
+        <line x1="130" y1="80" x2="170" y2="80" stroke="#6b7280" stroke-width="2" marker-end="url(#arr2)"/>
+
+        <!-- NACL (first wall) -->
+        <rect x="180" y="45" width="160" height="280" rx="10" fill="rgba(251,191,36,0.06)" stroke="#fbbf24" stroke-width="2"/>
+        <text x="200" y="75" fill="#fbbf24" font-family="JetBrains Mono" font-size="12" font-weight="bold">NACL</text>
+        <text x="200" y="95" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">Subnet boundary</text>
+        <text x="200" y="115" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">STATELESS</text>
+        <text x="200" y="140" fill="#ef4444" font-family="JetBrains Mono" font-size="9">✓ ALLOW rules</text>
+        <text x="200" y="158" fill="#ef4444" font-family="JetBrains Mono" font-size="9">✗ DENY rules</text>
+        <text x="200" y="182" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">Rule # order</text>
+        <text x="200" y="200" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">(lowest first)</text>
+
+        <!-- Rules in NACL -->
+        <rect x="195" y="218" width="130" height="90" rx="4" fill="rgba(0,0,0,0.3)"/>
+        <text x="205" y="237" fill="#34d399" font-family="JetBrains Mono" font-size="8">100 ALLOW :80 IN</text>
+        <text x="205" y="253" fill="#34d399" font-family="JetBrains Mono" font-size="8">110 ALLOW :443 IN</text>
+        <text x="205" y="269" fill="#f87171" font-family="JetBrains Mono" font-size="8">120 DENY  :22 IN</text>
+        <text x="205" y="285" fill="#f87171" font-family="JetBrains Mono" font-size="8">*   DENY  ALL</text>
+        <text x="205" y="300" fill="#6b7280" font-family="JetBrains Mono" font-size="7">(default deny)</text>
+
+        <!-- Arrow between -->
+        <line x1="340" y1="180" x2="420" y2="180" stroke="#6b7280" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="355" y="172" fill="#6b7280" font-family="JetBrains Mono" font-size="8">passes?</text>
+
+        <!-- Security Group (second wall) -->
+        <rect x="430" y="45" width="160" height="280" rx="10" fill="rgba(6,182,212,0.06)" stroke="#06b6d4" stroke-width="2"/>
+        <text x="440" y="75" fill="#06b6d4" font-family="JetBrains Mono" font-size="12" font-weight="bold">Security Group</text>
+        <text x="440" y="95" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">Instance/ENI level</text>
+        <text x="440" y="115" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">STATEFUL</text>
+        <text x="440" y="140" fill="#34d399" font-family="JetBrains Mono" font-size="9">✓ ALLOW rules only</text>
+        <text x="440" y="158" fill="#6b7280" font-family="JetBrains Mono" font-size="9">No deny rules</text>
+        <text x="440" y="182" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">All rules evaluated</text>
+
+        <!-- Rules in SG -->
+        <rect x="445" y="218" width="130" height="70" rx="4" fill="rgba(0,0,0,0.3)"/>
+        <text x="455" y="237" fill="#34d399" font-family="JetBrains Mono" font-size="8">ALLOW :80 0.0.0.0/0</text>
+        <text x="455" y="253" fill="#34d399" font-family="JetBrains Mono" font-size="8">ALLOW :443 0.0.0.0/0</text>
+        <text x="455" y="269" fill="#34d399" font-family="JetBrains Mono" font-size="8">ALLOW :22 my-ip</text>
+        <text x="455" y="282" fill="#6b7280" font-family="JetBrains Mono" font-size="7">(implicit deny all)</text>
+
+        <!-- Arrow to instance -->
+        <line x1="590" y1="180" x2="650" y2="180" stroke="#6b7280" stroke-width="2" marker-end="url(#arr2)"/>
+
+        <!-- Instance -->
+        <rect x="660" y="150" width="110" height="60" rx="8" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="2"/>
+        <text x="680" y="178" fill="#fb923c" font-family="JetBrains Mono" font-size="11">EC2 Instance</text>
+        <text x="692" y="196" fill="#6b7280" font-family="JetBrains Mono" font-size="8">10.0.1.10</text>
+
+        <!-- Labels -->
+        <text x="220" y="355" fill="#fbbf24" font-family="JetBrains Mono" font-size="10">1st checkpoint</text>
+        <text x="460" y="355" fill="#06b6d4" font-family="JetBrains Mono" font-size="10">2nd checkpoint</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sg-compare">
+    <div class="card">
+      <h3>Head-to-Head Comparison</h3>
+      <table class="compare-table">
+        <tr><th>Feature</th><th>Security Group</th><th>NACL</th></tr>
+        <tr><td>Operates at</td><td>Instance / ENI level</td><td>Subnet level</td></tr>
+        <tr><td>State</td><td>Stateful (return traffic auto-allowed)</td><td>Stateless (must allow both directions)</td></tr>
+        <tr><td>Rules</td><td>Allow only</td><td>Allow AND Deny</td></tr>
+        <tr><td>Rule evaluation</td><td>All rules evaluated together</td><td>Rules evaluated in number order (first match)</td></tr>
+        <tr><td>Default</td><td>Deny all inbound, allow all outbound</td><td>Allow all inbound + outbound (default NACL)</td></tr>
+        <tr><td>Applied to</td><td>Only if associated with instance</td><td>All instances in the subnet automatically</td></tr>
+        <tr><td>Can reference SGs</td><td>Yes (sg-xxx as source)</td><td>No (CIDR only)</td></tr>
+        <tr><td>Typical use</td><td>Primary firewall (used always)</td><td>Extra layer / block specific IPs</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sg-problems">
+    <div class="card">
+      <h3>Problems Solved</h3>
+      <p><strong>Security Groups solve:</strong> "Which specific ports should this instance accept traffic on, and from whom?" — per-instance granular control. The killer feature is <strong>SG-to-SG referencing</strong>: instead of allowing IP 10.0.1.10, you allow "sg-webservers" — so any instance in that group can communicate, regardless of IP changes.</p>
+      <p><strong>NACLs solve:</strong> "I need to block a specific malicious IP address" or "I need an explicit deny rule." Since SGs are allow-only, NACLs provide the deny capability. They also provide a subnet-wide safety net — even if someone misconfigures a Security Group, the NACL can catch it.</p>
+      <p><strong>Together they solve:</strong> Defense in depth. Two independent firewall layers that an attacker must bypass both of.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sg-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues</h4>
+        <ul>
+          <li><strong>NACL ephemeral port trap:</strong> You allow inbound :80 but forget to allow outbound :1024-65535 (ephemeral ports). Since NACLs are stateless, responses get blocked. This is the #1 NACL mistake.</li>
+          <li><strong>SG rule limit:</strong> Default 60 inbound + 60 outbound rules per SG, max 5 SGs per ENI. At scale, you hit limits. Use prefix lists or SG references to consolidate.</li>
+          <li><strong>Circular SG references:</strong> SG-A references SG-B, SG-B references SG-A. This works but can create debugging nightmares.</li>
+          <li><strong>Default NACL is permissive:</strong> The default NACL allows all traffic. People assume they have protection but they don't. Custom NACLs default to deny-all.</li>
+          <li><strong>"Why can't I connect?" debugging:</strong> When both SG and NACL block traffic, VPC Flow Logs show REJECT but don't tell you which layer rejected it. Check both.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sg-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-sg);">
+        <div class="label" style="color: var(--accent-sg);">🏠 Daily Life</div>
+        <p><strong>NACL</strong> = the security gate at the entrance of your apartment building. The guard checks IDs against a list. Everyone entering or leaving must show ID separately (stateless).<br/>
+        <strong>Security Group</strong> = the lock on your apartment door. If you let someone in (allowed inbound), you know they're allowed to leave too (stateful). But you can only add people to the "allowed" list — you can't write "block apartment 3B" on your own door.</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux</div>
+        <p><strong>Security Group</strong> = <code>iptables</code> with connection tracking (<code>-m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</code>). Once a connection is established, return traffic is automatically allowed.<br/>
+        <strong>NACL</strong> = <code>iptables</code> WITHOUT conntrack — raw rules applied to every packet independently. You need explicit rules for both request and response traffic, and rules are matched in order (like iptables chain processing).</p>
+      </div>
+      <div class="analogy" style="border-color: #a78bfa;">
+        <div class="label" style="color: #a78bfa;">🪟 Windows</div>
+        <p><strong>Security Group</strong> = Windows Firewall with Advanced Security per-application rules (stateful by default). <strong>NACL</strong> = a hardware firewall appliance sitting in front of your network switch — inspects every packet independently, both directions, no state memory.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sg-deep">
+    <div class="card">
+      <h3>Deep Theory: SG Chaining</h3>
+      <p><strong>SG-to-SG referencing</strong> is the most powerful and underused feature. Instead of maintaining IP-based rules, you reference other security groups:</p>
+      <div class="code-block">
+<span class="comment"># Web tier SG: allow internet on 80/443</span>
+sg-web:
+  Inbound:  TCP :80  from 0.0.0.0/0
+  Inbound:  TCP :443 from 0.0.0.0/0
+
+<span class="comment"># App tier SG: allow traffic ONLY from web tier</span>
+sg-app:
+  Inbound:  TCP :8080 from <span class="value">sg-web</span>   ← not an IP, a security group!
+
+<span class="comment"># DB tier SG: allow traffic ONLY from app tier</span>
+sg-db:
+  Inbound:  TCP :3306 from <span class="value">sg-app</span>
+
+<span class="comment"># Result: Internet → Web → App → DB (no skipping layers)</span>
+      </div>
+      <p>This means if you add 10 new web servers to sg-web, they instantly get access to the app tier — no rule changes needed. If you remove a server from sg-web, it instantly loses access.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="sg-quiz">
+    <div class="quiz-box">
+      <h4>🧠 You allow inbound HTTP (:80) in a NACL but forget outbound rules. What happens?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">It works — NACLs are stateful</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">Requests arrive but responses are blocked</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">The Security Group handles it</button>
+      <div class="quiz-feedback">NACLs are stateless. Without an outbound rule for ephemeral ports (1024-65535), response traffic is silently dropped.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== EC2 DEEP DIVE ======================== -->
+<div class="topic-section" id="topic-ec2">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(249,115,22,0.12), rgba(249,115,22,0.03)); border: 1px solid rgba(249,115,22,0.2);">
+    <h2 style="color: var(--accent-ec2);">EC2 — Deep Dive</h2>
+    <p class="subtitle">Far beyond "it's a virtual machine in the cloud"</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'ec2-what')">What Is It?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'ec2-does')">What It Does</button>
+    <button class="tab-btn" onclick="switchTab(this, 'ec2-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'ec2-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'ec2-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'ec2-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'ec2-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="ec2-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-ec2);color:#000;">Definition</span> What is EC2?</h3>
+      <p><strong>Elastic Compute Cloud (EC2)</strong> provides resizable compute capacity as virtual machines (called instances) on AWS's physical servers. But calling EC2 "just a VM" is like calling an F1 car "just a vehicle." EC2 is a deep ecosystem:</p>
+      <p><strong>Instance types</strong> (200+): Optimized for compute (C-series), memory (R-series), storage (I/D-series), GPU/ML (P/G-series), general purpose (M/T-series).</p>
+      <p><strong>Purchasing models:</strong> On-Demand (pay per second), Reserved (1-3 year commitment, up to 72% off), Spot (up to 90% off, but can be terminated with 2 min notice), Savings Plans, Dedicated Hosts.</p>
+      <p><strong>Key components per instance:</strong> AMI (OS image), instance type, key pair (SSH), Security Group, subnet placement, EBS volumes, IAM role, user data script, metadata service.</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- EC2 Instance anatomy -->
+        <text x="280" y="25" fill="#fb923c" font-family="JetBrains Mono" font-size="14" font-weight="bold">EC2 INSTANCE ANATOMY</text>
+
+        <!-- Main instance box -->
+        <rect x="200" y="40" width="400" height="340" rx="12" fill="rgba(249,115,22,0.06)" stroke="#f97316" stroke-width="2"/>
+        <text x="320" y="68" fill="#fb923c" font-family="JetBrains Mono" font-size="11">m5.2xlarge</text>
+
+        <!-- AMI -->
+        <rect x="230" y="85" width="150" height="40" rx="6" fill="rgba(167,139,250,0.1)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="250" y="110" fill="#c4b5fd" font-family="JetBrains Mono" font-size="10">AMI (OS Image)</text>
+
+        <!-- vCPU -->
+        <rect x="420" y="85" width="150" height="40" rx="6" fill="rgba(6,182,212,0.1)" stroke="#06b6d4" stroke-width="1"/>
+        <text x="445" y="105" fill="#67e8f9" font-family="JetBrains Mono" font-size="10">8 vCPUs</text>
+        <text x="445" y="118" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Intel Xeon</text>
+
+        <!-- Memory -->
+        <rect x="230" y="140" width="150" height="40" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1"/>
+        <text x="260" y="165" fill="#34d399" font-family="JetBrains Mono" font-size="10">32 GB RAM</text>
+
+        <!-- Network -->
+        <rect x="420" y="140" width="150" height="40" rx="6" fill="rgba(236,72,153,0.1)" stroke="#ec4899" stroke-width="1"/>
+        <text x="438" y="158" fill="#f472b6" font-family="JetBrains Mono" font-size="10">ENI (Network)</text>
+        <text x="438" y="172" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Up to 10 Gbps</text>
+
+        <!-- EBS Root -->
+        <rect x="230" y="200" width="150" height="55" rx="6" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="248" y="222" fill="#fbbf24" font-family="JetBrains Mono" font-size="10">EBS Root Vol</text>
+        <text x="248" y="238" fill="#6b7280" font-family="JetBrains Mono" font-size="8">gp3 | 30GB</text>
+        <text x="248" y="250" fill="#6b7280" font-family="JetBrains Mono" font-size="8">3000 IOPS</text>
+
+        <!-- EBS Data -->
+        <rect x="420" y="200" width="150" height="55" rx="6" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="438" y="222" fill="#fbbf24" font-family="JetBrains Mono" font-size="10">EBS Data Vol</text>
+        <text x="438" y="238" fill="#6b7280" font-family="JetBrains Mono" font-size="8">io2 | 500GB</text>
+        <text x="438" y="250" fill="#6b7280" font-family="JetBrains Mono" font-size="8">64000 IOPS</text>
+
+        <!-- IAM Role -->
+        <rect x="230" y="275" width="150" height="40" rx="6" fill="rgba(167,139,250,0.1)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="258" y="300" fill="#c4b5fd" font-family="JetBrains Mono" font-size="10">IAM Role</text>
+
+        <!-- SG -->
+        <rect x="420" y="275" width="150" height="40" rx="6" fill="rgba(6,182,212,0.1)" stroke="#06b6d4" stroke-width="1"/>
+        <text x="445" y="300" fill="#67e8f9" font-family="JetBrains Mono" font-size="10">Security Group</text>
+
+        <!-- User Data -->
+        <rect x="300" y="335" width="200" height="30" rx="6" fill="rgba(99,102,241,0.1)" stroke="#6366f1" stroke-width="1"/>
+        <text x="325" y="355" fill="#818cf8" font-family="JetBrains Mono" font-size="9">User Data (bootstrap)</text>
+
+        <!-- External labels -->
+        <text x="20" y="110" fill="#6b7280" font-family="JetBrains Mono" font-size="9">Defines the</text>
+        <text x="20" y="122" fill="#6b7280" font-family="JetBrains Mono" font-size="9">operating system</text>
+        <line x1="120" y1="105" x2="228" y2="105" stroke="#4b5563" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <text x="20" y="220" fill="#6b7280" font-family="JetBrains Mono" font-size="9">Persistent storage</text>
+        <text x="20" y="232" fill="#6b7280" font-family="JetBrains Mono" font-size="9">survives stop/start</text>
+        <line x1="130" y1="225" x2="228" y2="225" stroke="#4b5563" stroke-width="1" stroke-dasharray="3,2"/>
+
+        <text x="20" y="300" fill="#6b7280" font-family="JetBrains Mono" font-size="9">Permissions to call</text>
+        <text x="20" y="312" fill="#6b7280" font-family="JetBrains Mono" font-size="9">AWS APIs (no keys!)</text>
+        <line x1="140" y1="300" x2="228" y2="295" stroke="#4b5563" stroke-width="1" stroke-dasharray="3,2"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="ec2-does">
+    <div class="card">
+      <h3>What EC2 Does (Beyond Basic)</h3>
+      <p><strong>Instance Store vs EBS:</strong> Instance store is physically attached NVMe — blazing fast but EPHEMERAL (data lost on stop/terminate). EBS is network-attached — persistent, snapshottable, but limited by network throughput. Know the tradeoff.</p>
+      <p><strong>Placement Groups:</strong> Cluster (same rack, lowest latency, for HPC), Spread (across hardware, for HA), Partition (for large distributed systems like Hadoop/Kafka).</p>
+      <p><strong>Instance Metadata Service (IMDS):</strong> Every EC2 can query <code>http://169.254.169.254/latest/meta-data/</code> to discover its own ID, public IP, IAM role credentials, etc. IMDSv2 requires a PUT to get a session token first (more secure).</p>
+      <p><strong>User Data:</strong> A bash script (or cloud-init config) that runs on first boot. Used to install packages, pull code, configure services. Runs as root.</p>
+      <p><strong>Elastic Network Interface (ENI):</strong> A virtual NIC. Each instance has a primary ENI (eth0) but can have additional ENIs in different subnets — useful for multi-homed instances, management networks, or failover.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="ec2-problems">
+    <div class="card">
+      <h3>Problems Solved</h3>
+      <p><strong>1. Capacity on demand:</strong> Need 100 servers for Black Friday? Launch them. Need 5 on Tuesday? Terminate the rest. No hardware procurement cycles.</p>
+      <p><strong>2. Right-sizing:</strong> Start with t3.micro (free tier), realize you need more CPU, resize to c5.2xlarge in minutes. Try doing that with physical servers.</p>
+      <p><strong>3. Global deployment:</strong> Launch instances in 30+ regions worldwide. Your users in Tokyo get a server in Tokyo, not Virginia.</p>
+      <p><strong>4. Spot for batch processing:</strong> Run ML training, video encoding, or data analysis at 90% discount. If the instance is reclaimed, checkpoint and resume on another.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="ec2-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues (Deep)</h4>
+        <ul>
+          <li><strong>Instance type obsolescence:</strong> Running m4.large in 2024? m7i.large is cheaper AND faster. AWS doesn't auto-upgrade you — you must track new instance families.</li>
+          <li><strong>EBS throughput bottleneck:</strong> gp2 volumes burst IOPS then throttle. Symptoms: high latency, application slowness that "comes and goes." Switch to gp3 with provisioned IOPS.</li>
+          <li><strong>IMDSv1 security risk:</strong> IMDSv1 allows simple GET requests. An SSRF vulnerability in your app can leak IAM credentials. Always enforce IMDSv2 (requires session token).</li>
+          <li><strong>Spot termination handling:</strong> Your app must handle the 2-minute termination notice. Check <code>http://169.254.169.254/latest/meta-data/spot/termination-time</code> and gracefully shut down.</li>
+          <li><strong>"I lost my key pair":</strong> You can't SSH in. Solution: stop instance, detach root volume, attach to another instance, add your public key to ~/.ssh/authorized_keys, reattach, start.</li>
+          <li><strong>T-series CPU credit exhaustion:</strong> T3/T3a are burstable. If you consistently use >20% CPU, you burn through credits and get throttled to baseline. Use M-series for sustained workloads.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="ec2-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-ec2);">
+        <div class="label" style="color: var(--accent-ec2);">🏠 Daily Life</div>
+        <p><strong>On-Demand</strong> = staying at a hotel. Pay per night, leave whenever you want. Expensive but flexible.<br/>
+        <strong>Reserved</strong> = signing a 1-year apartment lease. Cheaper per month because you committed. <br/>
+        <strong>Spot</strong> = booking a last-minute Airbnb. Amazing price, but the host can cancel with 2 minutes' notice if someone pays full price.<br/>
+        <strong>Dedicated Host</strong> = buying the entire building. You control every floor. Needed for licensing requirements (Oracle, Windows Server).</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux</div>
+        <p>EC2 is a <strong>KVM/QEMU virtual machine</strong> on steroids. AWS uses a custom hypervisor called <strong>Nitro</strong> (based on KVM). The Nitro System offloads networking, storage, and security to dedicated hardware cards — your vCPU does only your workload, not hypervisor overhead. <code>lscpu</code> on a Nitro instance shows the bare CPU without hypervisor tax.</p>
+      </div>
+      <div class="analogy" style="border-color: #a78bfa;">
+        <div class="label" style="color: #a78bfa;">🪟 Windows</div>
+        <p>Think of EC2 as <strong>Hyper-V VMs in Azure</strong>'s competitor. AMIs are like <strong>.vhdx templates</strong>. User Data is like <strong>Unattend.xml</strong> or a PowerShell DSC script that runs at first boot. Instance metadata is like querying WMI for system info, but over HTTP at a link-local address.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="ec2-deep">
+    <div class="card">
+      <h3>Instance Type Naming Decoded</h3>
+      <div class="code-block">
+<span class="comment"># m5a.2xlarge — let's decode it:</span>
+ m  →  Family   (General Purpose)
+ 5  →  Generation (5th gen)
+ a  →  Processor  (AMD EPYC, cheaper than Intel)
+ .  →  separator
+ 2xlarge → Size  (8 vCPU, 32 GB RAM)
+
+<span class="comment"># Common families:</span>
+ T = Burstable (dev/test, small workloads)
+ M = General Purpose (balanced CPU/memory)
+ C = Compute Optimized (high-CPU: encoding, gaming, ML inference)
+ R = Memory Optimized (in-memory DBs, caching)
+ I = Storage Optimized (high IOPS: NoSQL, data warehousing)
+ P = GPU (ML training with NVIDIA A100/H100)
+ G = Graphics (video rendering, game streaming)
+
+<span class="comment"># Processor suffixes:</span>
+ (none) = Intel
+ a = AMD (10-15% cheaper)
+ g = Graviton (ARM, 20-40% cheaper, best price/performance)
+      </div>
+      <h3>EBS Volume Types</h3>
+      <table class="compare-table">
+        <tr><th>Type</th><th>Use Case</th><th>Max IOPS</th><th>Max Throughput</th></tr>
+        <tr><td>gp3</td><td>General purpose (default)</td><td>16,000</td><td>1,000 MB/s</td></tr>
+        <tr><td>io2</td><td>Critical DBs (Oracle, SAP)</td><td>256,000</td><td>4,000 MB/s</td></tr>
+        <tr><td>st1</td><td>Big data, log processing</td><td>500</td><td>500 MB/s</td></tr>
+        <tr><td>sc1</td><td>Cold archival, infrequent</td><td>250</td><td>250 MB/s</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="ec2-quiz">
+    <div class="quiz-box">
+      <h4>🧠 What happens to data on an EC2 Instance Store when the instance is stopped?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">Data is lost permanently</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Data persists until termination</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Data is backed up to S3</button>
+      <div class="quiz-feedback">Instance Store is ephemeral. Stop, terminate, or hardware failure = data gone. Use EBS for persistence.</div>
+    </div>
+    <div class="quiz-box">
+      <h4>🧠 Which instance family suffix means ARM-based (Graviton)?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">a (AMD)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">g (Graviton)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">n (Nitro)</button>
+      <div class="quiz-feedback">The 'g' suffix (e.g., m7g.large) indicates AWS Graviton (ARM) processors — typically 20-40% better price/performance.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== IAM ======================== -->
+<div class="topic-section" id="topic-iam">
+  <button class="back-btn" onclick="goHome()">← Back to Topics</button>
+
+  <div class="section-header" style="background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(167,139,250,0.03)); border: 1px solid rgba(167,139,250,0.2);">
+    <h2 style="color: var(--accent-iam);">IAM — Identity & Access Management</h2>
+    <p class="subtitle">Who can do what, on which resources, under what conditions</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this, 'iam-what')">What Is It?</button>
+    <button class="tab-btn" onclick="switchTab(this, 'iam-does')">What It Does</button>
+    <button class="tab-btn" onclick="switchTab(this, 'iam-problems')">Problems Solved</button>
+    <button class="tab-btn" onclick="switchTab(this, 'iam-issues')">Common Issues</button>
+    <button class="tab-btn" onclick="switchTab(this, 'iam-analogy')">Real-World Analogy</button>
+    <button class="tab-btn" onclick="switchTab(this, 'iam-deep')">Deep Theory</button>
+    <button class="tab-btn" onclick="switchTab(this, 'iam-quiz')">Quiz</button>
+  </div>
+
+  <div class="tab-content active" id="iam-what">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--accent-iam);color:#000;">Definition</span> What is IAM?</h3>
+      <p><strong>IAM (Identity and Access Management)</strong> is the global AWS service that controls authentication (who are you?) and authorization (what can you do?). It's the backbone of every single AWS API call — every request to AWS must include valid IAM credentials and pass policy evaluation.</p>
+      <p>IAM has four core entities:</p>
+      <p><strong>Users:</strong> Represent individual people or applications. Have permanent long-term credentials (access keys, passwords).</p>
+      <p><strong>Groups:</strong> Collections of users. Attach policies to groups, not individual users — much easier to manage.</p>
+      <p><strong>Roles:</strong> Identities that can be assumed temporarily. No permanent credentials. Used by EC2 instances, Lambda functions, cross-account access, and federated users.</p>
+      <p><strong>Policies:</strong> JSON documents that define permissions. Attached to users, groups, or roles.</p>
+    </div>
+
+    <div class="diagram">
+      <svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+        <text x="300" y="25" fill="#c4b5fd" font-family="JetBrains Mono" font-size="14" font-weight="bold">IAM ARCHITECTURE</text>
+
+        <!-- Users -->
+        <rect x="30" y="50" width="160" height="150" rx="10" fill="rgba(167,139,250,0.06)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="70" y="75" fill="#c4b5fd" font-family="JetBrains Mono" font-size="12" font-weight="bold">USERS</text>
+        <text x="50" y="100" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">👤 alice (admin)</text>
+        <text x="50" y="118" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">👤 bob (dev)</text>
+        <text x="50" y="136" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">👤 carol (readonly)</text>
+        <text x="50" y="160" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Long-term credentials</text>
+        <text x="50" y="174" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Password + Access Keys</text>
+
+        <!-- Groups -->
+        <rect x="30" y="230" width="160" height="120" rx="10" fill="rgba(16,185,129,0.06)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="65" y="255" fill="#34d399" font-family="JetBrains Mono" font-size="12" font-weight="bold">GROUPS</text>
+        <text x="50" y="280" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">📁 Admins</text>
+        <text x="50" y="298" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">📁 Developers</text>
+        <text x="50" y="316" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">📁 ReadOnly</text>
+        <text x="50" y="340" fill="#6b7280" font-family="JetBrains Mono" font-size="8">Users inherit group policies</text>
+
+        <!-- Arrow user to group -->
+        <line x1="110" y1="200" x2="110" y2="228" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+        <!-- Roles -->
+        <rect x="240" y="50" width="200" height="160" rx="10" fill="rgba(249,115,22,0.06)" stroke="#f97316" stroke-width="1.5"/>
+        <text x="300" y="75" fill="#fb923c" font-family="JetBrains Mono" font-size="12" font-weight="bold">ROLES</text>
+        <text x="260" y="100" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">🔄 EC2-S3-Access</text>
+        <text x="260" y="118" fill="#6b7280" font-family="JetBrains Mono" font-size="8">  (assumed by EC2)</text>
+        <text x="260" y="140" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">🔄 Lambda-DynamoDB</text>
+        <text x="260" y="158" fill="#6b7280" font-family="JetBrains Mono" font-size="8">  (assumed by Lambda)</text>
+        <text x="260" y="180" fill="#9ca3af" font-family="JetBrains Mono" font-size="9">🔄 CrossAccount-Audit</text>
+        <text x="260" y="198" fill="#6b7280" font-family="JetBrains Mono" font-size="8">  (assumed by ext acct)</text>
+
+        <!-- Policies -->
+        <rect x="500" y="50" width="270" height="300" rx="10" fill="rgba(6,182,212,0.06)" stroke="#06b6d4" stroke-width="1.5"/>
+        <text x="580" y="75" fill="#67e8f9" font-family="JetBrains Mono" font-size="12" font-weight="bold">POLICIES (JSON)</text>
+
+        <!-- Policy document -->
+        <rect x="520" y="90" width="230" height="240" rx="6" fill="rgba(0,0,0,0.4)"/>
+        <text x="535" y="112" fill="#6b7280" font-family="JetBrains Mono" font-size="9">{</text>
+        <text x="545" y="130" fill="#c4b5fd" font-family="JetBrains Mono" font-size="9">"Effect": "Allow",</text>
+        <text x="545" y="150" fill="#34d399" font-family="JetBrains Mono" font-size="9">"Action": [</text>
+        <text x="560" y="168" fill="#34d399" font-family="JetBrains Mono" font-size="9">"s3:GetObject",</text>
+        <text x="560" y="186" fill="#34d399" font-family="JetBrains Mono" font-size="9">"s3:PutObject"</text>
+        <text x="545" y="204" fill="#34d399" font-family="JetBrains Mono" font-size="9">],</text>
+        <text x="545" y="224" fill="#fbbf24" font-family="JetBrains Mono" font-size="9">"Resource":</text>
+        <text x="555" y="242" fill="#fbbf24" font-family="JetBrains Mono" font-size="9">"arn:aws:s3:::my-</text>
+        <text x="555" y="258" fill="#fbbf24" font-family="JetBrains Mono" font-size="9">  bucket/*",</text>
+        <text x="545" y="278" fill="#f87171" font-family="JetBrains Mono" font-size="9">"Condition": {</text>
+        <text x="560" y="296" fill="#f87171" font-family="JetBrains Mono" font-size="8">"IpAddress": {...}</text>
+        <text x="545" y="310" fill="#f87171" font-family="JetBrains Mono" font-size="9">}</text>
+        <text x="535" y="325" fill="#6b7280" font-family="JetBrains Mono" font-size="9">}</text>
+
+        <!-- Arrows: roles/groups to policies -->
+        <line x1="440" y1="130" x2="498" y2="130" stroke="#f97316" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="190" y1="290" x2="498" y2="290" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr2)"/>
+
+        <!-- Labels -->
+        <text x="240" y="395" fill="#6b7280" font-family="JetBrains Mono" font-size="10">Policy = Effect + Action + Resource + Condition</text>
+        <text x="240" y="415" fill="#6b7280" font-family="JetBrains Mono" font-size="10">Explicit DENY always wins over ALLOW</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tab-content" id="iam-does">
+    <div class="card">
+      <h3>What IAM Does</h3>
+      <p><strong>Authentication:</strong> Verifies identity. For console: username + password + optional MFA. For API/CLI: Access Key ID + Secret Access Key. For roles: STS (Security Token Service) issues temporary credentials.</p>
+      <p><strong>Authorization:</strong> Evaluates policies to determine if the authenticated identity is allowed to perform the requested action. The evaluation logic: start with implicit deny → check all applicable policies → if any explicit deny exists, deny → if any allow exists, allow → otherwise deny.</p>
+      <p><strong>Federation:</strong> IAM integrates with external identity providers (Active Directory, Okta, Google) via SAML 2.0 or OIDC. Users authenticate with their corporate credentials and receive temporary AWS credentials.</p>
+      <p><strong>Cross-account access:</strong> Account A creates a role, Account B's users assume that role. No need to create IAM users in every account.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="iam-problems">
+    <div class="card">
+      <h3>Problems Solved</h3>
+      <p><strong>1. Principle of least privilege:</strong> Without IAM, everyone has root access. IAM lets you give a developer EC2 access but not the ability to delete the production database.</p>
+      <p><strong>2. No hardcoded credentials:</strong> IAM Roles for EC2 = no access keys in code or environment variables. The instance automatically gets temporary credentials rotated every hour via the instance metadata service.</p>
+      <p><strong>3. Audit trail:</strong> Every IAM API call is logged in CloudTrail. "Who deleted the S3 bucket at 3am?" → CloudTrail shows the IAM user, the IP address, and the exact API call.</p>
+      <p><strong>4. Multi-account governance:</strong> With AWS Organizations + Service Control Policies (SCPs), you can set guardrails across 100+ accounts: "No account can launch instances outside us-east-1" — enforced at the organization level, unoverridable by account admins.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="iam-issues">
+    <div class="card">
+      <div class="issue-box">
+        <h4>⚠️ Common Issues</h4>
+        <ul>
+          <li><strong>Overly permissive policies:</strong> Using <code>"Action": "*", "Resource": "*"</code> (admin access) for everything. One compromised credential = entire account compromised.</li>
+          <li><strong>Long-lived access keys:</strong> Access keys that haven't been rotated in months/years. Keys get leaked in git repos, Slack messages, Stack Overflow posts.</li>
+          <li><strong>IAM policy limit confusion:</strong> Managed policy max size is 6,144 characters. Inline policy max 2,048. At scale, you hit these limits and must refactor.</li>
+          <li><strong>Confused deputy problem:</strong> A service acting on behalf of one customer accidentally accesses another customer's resources. Solved with <code>aws:SourceArn</code> and <code>aws:SourceAccount</code> conditions.</li>
+          <li><strong>Root account without MFA:</strong> The root account bypasses all IAM policies. Without MFA, a leaked root password = total account takeover.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="iam-analogy">
+    <div class="card">
+      <div class="analogy" style="border-color: var(--accent-iam);">
+        <div class="label" style="color: var(--accent-iam);">🏠 Daily Life</div>
+        <p><strong>IAM User</strong> = a named employee badge. Your name, your photo, always yours.<br/>
+        <strong>IAM Group</strong> = department badge access. Everyone in "Engineering" can access the lab.<br/>
+        <strong>IAM Role</strong> = a visitor badge. It's not assigned to anyone permanently. You "assume" it when needed, and it expires. An EC2 instance is like a contractor who wears a visitor badge — it gets temporary access that auto-renews.<br/>
+        <strong>Policy</strong> = the list of doors each badge can open.</p>
+      </div>
+      <div class="analogy" style="border-color: #06b6d4;">
+        <div class="label" style="color: #06b6d4;">🐧 Linux</div>
+        <p><strong>IAM Users</strong> = Linux users in <code>/etc/passwd</code>. <strong>IAM Groups</strong> = Linux groups in <code>/etc/group</code>. <strong>IAM Policies</strong> = a combination of file permissions (rwx), ACLs (<code>setfacl</code>), and sudoers rules. <strong>IAM Roles</strong> = <code>sudo -u serviceuser</code> — you temporarily become another identity with different permissions. <strong>STS temporary credentials</strong> = Kerberos tickets that expire.</p>
+      </div>
+      <div class="analogy" style="border-color: #a78bfa;">
+        <div class="label" style="color: #a78bfa;">🪟 Windows</div>
+        <p><strong>IAM</strong> = Active Directory (AD). Users, groups, Group Policy Objects (GPOs = IAM Policies). <strong>IAM Roles</strong> = "Run As" different accounts or gMSA (group Managed Service Accounts) for services. <strong>Cross-account roles</strong> = AD forest trusts between domains.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="iam-deep">
+    <div class="card">
+      <h3>Deep Theory: Policy Evaluation Logic</h3>
+      <div class="code-block">
+<span class="comment"># The IAM evaluation flow (simplified):</span>
+
+1. Start with <span class="keyword">IMPLICIT DENY</span> (default)
+2. Evaluate all applicable policies:
+   - Identity-based policies (attached to user/group/role)
+   - Resource-based policies (on the S3 bucket, SQS queue, etc.)
+   - Permission boundaries (max permissions ceiling)
+   - Session policies (for assumed roles)
+   - SCPs (organization-wide guardrails)
+3. If ANY policy has an <span class="keyword">EXPLICIT DENY</span> → <span class="keyword">DENIED</span> (game over)
+4. If ANY policy has an <span class="value">ALLOW</span> → <span class="value">ALLOWED</span>
+5. Otherwise → <span class="keyword">DENIED</span> (implicit deny)
+
+<span class="comment"># Critical insight: DENY always beats ALLOW</span>
+      </div>
+      <h3>Policy Examples</h3>
+      <div class="code-block">
+<span class="comment"># Allow reading from a specific S3 bucket only from a specific VPC</span>
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "<span class="value">Allow</span>",
+    "Action": ["<span class="string">s3:GetObject</span>"],
+    "Resource": "<span class="string">arn:aws:s3:::prod-data/*</span>",
+    "Condition": {
+      "StringEquals": {
+        "<span class="keyword">aws:SourceVpc</span>": "vpc-abc123"
+      }
+    }
+  }]
+}
+
+<span class="comment"># Deny everything except in us-east-1 (SCP)</span>
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "<span class="keyword">Deny</span>",
+    "Action": "*",
+    "Resource": "*",
+    "Condition": {
+      "StringNotEquals": {
+        "<span class="keyword">aws:RequestedRegion</span>": "us-east-1"
+      }
+    }
+  }]
+}
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="iam-quiz">
+    <div class="quiz-box">
+      <h4>🧠 If a policy allows s3:* and another policy explicitly denies s3:DeleteBucket, what happens when you try to delete?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Allowed — Allow overrides Deny</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">Denied — Explicit Deny always wins</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Depends on policy order</button>
+      <div class="quiz-feedback">Explicit Deny ALWAYS wins over Allow in IAM policy evaluation. This is a fundamental AWS security principle.</div>
+    </div>
+    <div class="quiz-box">
+      <h4>🧠 How does an EC2 instance get AWS credentials without access keys?</h4>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">Environment variables set by the admin</button>
+      <button class="quiz-option" onclick="checkQuiz(this, true)">IAM Role attached to the instance (via instance profile)</button>
+      <button class="quiz-option" onclick="checkQuiz(this, false)">It inherits the user's credentials</button>
+      <div class="quiz-feedback">IAM Roles attached via Instance Profiles provide temporary credentials via the Instance Metadata Service, auto-rotated by AWS.</div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- end content-area -->
+
+<script>
+function showTopic(topic) {
+  document.getElementById('hero').style.display = 'none';
+  document.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('topic-' + topic).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goHome() {
+  document.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('hero').style.display = 'flex';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchTab(btn, contentId) {
+  const section = btn.closest('.topic-section');
+  section.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  section.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+
+function checkQuiz(btn, correct) {
+  const quizBox = btn.closest('.quiz-box');
+  const feedback = quizBox.querySelector('.quiz-feedback');
+  
+  // Reset all options in this quiz
+  quizBox.querySelectorAll('.quiz-option').forEach(o => {
+    o.classList.remove('correct', 'wrong');
+    o.disabled = true;
+  });
+  
+  if (correct) {
+    btn.classList.add('correct');
+    feedback.style.display = 'block';
+    feedback.style.background = 'rgba(16,185,129,0.1)';
+    feedback.style.color = '#34d399';
+  } else {
+    btn.classList.add('wrong');
+    // Show correct answer
+    quizBox.querySelectorAll('.quiz-option').forEach(o => {
+      if (o.getAttribute('onclick').includes('true')) o.classList.add('correct');
+    });
+    feedback.style.display = 'block';
+    feedback.style.background = 'rgba(239,68,68,0.1)';
+    feedback.style.color = '#f87171';
+  }
+}
+</script>
+
+</body>
+</html>

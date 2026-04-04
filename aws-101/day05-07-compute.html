@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 5-7 | Compute Services — SAA-C03 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060a10;--s1:#0c1119;--s2:#121a28;--s3:#182030;
+  --bdr:#1e2a3e;--acc:#f97316;--acc2:#6366f1;--acc3:#14b8a6;
+  --acc4:#ef4444;--acc5:#eab308;--acc6:#ec4899;
+  --txt:#dce4f0;--dim:#6b7fa0;--glow:rgba(249,115,22,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);line-height:1.72;overflow-x:hidden}
+::-webkit-scrollbar{width:7px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+
+.hero{position:relative;padding:76px 24px 52px;text-align:center;background:linear-gradient(155deg,#060a10 0%,#0f1528 35%,#1a0f20 65%,#060a10 100%);overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 55% 75%,rgba(249,115,22,.06),transparent 55%),radial-gradient(ellipse at 25% 35%,rgba(99,102,241,.05),transparent 50%);pointer-events:none}
+.hero-i{position:relative;z-index:1;max-width:800px;margin:0 auto}
+.badge{display:inline-block;padding:5px 14px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);border-radius:20px;font-size:.73rem;font-weight:600;color:var(--acc);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-family:'Sora',sans-serif;font-size:clamp(1.9rem,5vw,3.2rem);font-weight:800;letter-spacing:-1px;margin-bottom:12px;background:linear-gradient(135deg,#fff 0%,#f97316 55%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.02rem;color:var(--dim);max-width:600px;margin:0 auto}
+
+.nav{position:sticky;top:0;z-index:100;background:rgba(6,10,16,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);display:flex;overflow-x:auto;gap:2px;padding:0 12px}
+.nav button{flex-shrink:0;background:none;border:none;color:var(--dim);font-family:inherit;font-size:.78rem;font-weight:600;padding:12px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.nav button:hover{color:var(--txt)}.nav button.active{color:var(--acc);border-bottom-color:var(--acc)}
+
+.wrap{max-width:940px;margin:0 auto;padding:32px 22px 80px}
+.sec{display:none;animation:fu .35s ease}.sec.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:14px;padding:26px;margin-bottom:20px;transition:border-color .3s}
+.card:hover{border-color:rgba(249,115,22,.18)}
+.card h2{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.card h3{font-size:1.02rem;font-weight:700;margin:20px 0 10px;color:var(--acc)}
+.card p{margin-bottom:10px}.card ul{padding-left:20px;margin-bottom:10px}.card li{margin-bottom:5px}.card li::marker{color:var(--acc)}
+
+.dia{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:18px;margin:16px 0;overflow-x:auto}
+.dia svg{display:block;margin:0 auto;max-width:100%}
+
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px;margin:13px 0}
+.kv{background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:14px;border-left:3px solid var(--acc)}
+.kv .l{font-size:.68rem;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.kv .v{font-size:.87rem}
+
+.tbl{width:100%;border-collapse:collapse;margin:13px 0;font-size:.85rem}
+.tbl th{background:var(--s2);color:var(--acc);font-weight:700;text-align:left;padding:10px 13px;border:1px solid var(--bdr);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.tbl td{padding:9px 13px;border:1px solid var(--bdr)}.tbl tr:nth-child(even) td{background:rgba(255,255,255,.012)}
+
+.co{border-radius:10px;padding:14px 17px;margin:13px 0;display:flex;gap:11px;align-items:flex-start}
+.co.tip{background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.16)}
+.co.info{background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.16)}
+.co.ok{background:rgba(20,184,166,.05);border:1px solid rgba(20,184,166,.16)}
+.co.danger{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.16)}
+.co .icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}.co .t{font-size:.86rem}.co .t strong{color:#fff}
+
+code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--s2);padding:2px 7px;border-radius:4px;color:var(--acc5)}
+
+.acc-i{margin-bottom:6px}
+.acc-b{width:100%;text-align:left;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;color:#fff;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+.acc-b:hover{background:rgba(249,115,22,.03)}.acc-b .ar{transition:transform .3s;font-size:.72rem}.acc-b.open .ar{transform:rotate(180deg)}
+.acc-p{max-height:0;overflow:hidden;transition:max-height .4s ease;padding:0 16px}
+.acc-p.open{max-height:5000px;padding:13px 16px}
+.acc-p p,.acc-p ul{font-size:.86rem;color:var(--dim)}.acc-p ul{padding-left:18px}
+
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:11px;margin:13px 0}
+.ft{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s}
+.ft:hover{transform:translateY(-3px);border-color:var(--acc)}
+.ft .fi{font-size:1.4rem;margin-bottom:6px}.ft .fn{font-weight:700;color:#fff;font-size:.88rem;margin-bottom:4px}.ft .fd{font-size:.76rem;color:var(--dim);line-height:1.5}
+
+/* Quiz */
+.quiz-q{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:18px;margin-bottom:14px}
+.quiz-q .qn{display:inline-block;background:var(--acc);color:#000;font-size:.66rem;font-weight:800;padding:2px 8px;border-radius:4px;margin-bottom:7px}
+.quiz-q .qt{font-weight:700;color:#fff;margin-bottom:11px;font-size:.9rem;line-height:1.55}
+.qo{display:block;width:100%;text-align:left;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:10px 14px;margin-bottom:6px;color:var(--txt);font-family:inherit;font-size:.85rem;cursor:pointer;transition:.2s}
+.qo:hover{border-color:var(--acc);background:rgba(249,115,22,.03)}
+.qo.correct{border-color:var(--acc3);background:rgba(20,184,166,.1);color:var(--acc3)}
+.qo.wrong{border-color:var(--acc4);background:rgba(239,68,68,.07);color:var(--acc4)}
+.qo.off{pointer-events:none;opacity:.6}
+.qexp{margin-top:9px;padding:10px 14px;background:rgba(20,184,166,.04);border-left:3px solid var(--acc3);border-radius:0 8px 8px 0;font-size:.8rem;color:var(--dim);display:none}
+.qexp.show{display:block}
+.sbar{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:18px;text-align:center;margin:18px 0;display:none}
+.sbar .sv{font-size:1.7rem;font-weight:800;color:var(--acc)}.sbar .sl{font-size:.8rem;color:var(--dim)}
+
+.footer{text-align:center;padding:36px 24px;border-top:1px solid var(--bdr);color:var(--dim);font-size:.76rem}
+</style>
+</head>
+<body>
+
+<div class="hero"><div class="hero-i">
+  <div class="badge">Week 1 · Days 5–7</div>
+  <h1>Compute Services</h1>
+  <p>EC2, Lambda, Containers, Auto Scaling, Elastic Load Balancing & Serverless Patterns</p>
+</div></div>
+
+<div class="nav" id="navTabs">
+  <button class="active" onclick="go('overview')">Overview</button>
+  <button onclick="go('ec2')">EC2 Deep Dive</button>
+  <button onclick="go('pricing')">EC2 Pricing</button>
+  <button onclick="go('storage')">EC2 Storage</button>
+  <button onclick="go('elb')">Load Balancing</button>
+  <button onclick="go('asg')">Auto Scaling</button>
+  <button onclick="go('lambda')">Lambda</button>
+  <button onclick="go('containers')">Containers</button>
+  <button onclick="go('misc')">Other Compute</button>
+  <button onclick="go('quiz')">Quiz (25 Qs)</button>
+</div>
+
+<div class="wrap">
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="sec active" id="sec-overview">
+  <div class="card">
+    <h2>🎯 Learning Objectives (Days 5-7)</h2>
+    <ul>
+      <li>Understand EC2 instance types, families, and pricing models in detail</li>
+      <li>Configure and compare EBS, Instance Store, and AMIs</li>
+      <li>Set up and differentiate ALB, NLB, and GWLB</li>
+      <li>Create Auto Scaling Groups with scaling policies</li>
+      <li>Build serverless applications with Lambda</li>
+      <li>Compare ECS vs EKS vs Fargate container options</li>
+      <li>Choose the right compute service for each scenario</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>🖥️ AWS Compute Landscape</h2>
+    <p>AWS offers compute services ranging from full control (EC2) to fully managed (Lambda). Your job is to pick the right one for each workload.</p>
+    <div class="dia">
+      <svg viewBox="0 0 840 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Spectrum arrow -->
+        <defs>
+          <linearGradient id="specG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#6366f1"/>
+          </linearGradient>
+        </defs>
+        <rect x="60" y="240" width="720" height="8" rx="4" fill="url(#specG)"/>
+        <text x="60" y="270" fill="#f97316" font-family="Sora" font-weight="700" font-size="10">MORE CONTROL</text>
+        <text x="680" y="270" fill="#6366f1" font-family="Sora" font-weight="700" font-size="10">LESS MANAGEMENT</text>
+        <text x="380" y="290" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">You manage ← → AWS manages</text>
+
+        <!-- EC2 -->
+        <rect x="50" y="40" width="130" height="170" rx="10" fill="rgba(249,115,22,.05)" stroke="#f97316" stroke-width="1.5"/>
+        <text x="115" y="68" fill="#f97316" font-family="Sora" font-weight="700" font-size="13" text-anchor="middle">EC2</text>
+        <text x="115" y="88" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Virtual Servers</text>
+        <text x="70" y="112" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Full OS control</text>
+        <text x="70" y="128" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Any language/app</text>
+        <text x="70" y="144" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ You patch OS</text>
+        <text x="70" y="160" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ You manage scaling</text>
+        <text x="70" y="185" fill="#eab308" font-family="DM Sans" font-size="8" font-weight="600">IaaS</text>
+
+        <!-- ECS/EKS -->
+        <rect x="210" y="40" width="130" height="170" rx="10" fill="rgba(236,72,153,.05)" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="275" y="68" fill="#ec4899" font-family="Sora" font-weight="700" font-size="13" text-anchor="middle">ECS / EKS</text>
+        <text x="275" y="88" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Containers on EC2</text>
+        <text x="230" y="112" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Docker containers</text>
+        <text x="230" y="128" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ You manage EC2</text>
+        <text x="230" y="144" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Cluster orchestration</text>
+        <text x="230" y="160" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Task scheduling</text>
+        <text x="230" y="185" fill="#eab308" font-family="DM Sans" font-size="8" font-weight="600">Container (IaaS)</text>
+
+        <!-- Fargate -->
+        <rect x="370" y="40" width="130" height="170" rx="10" fill="rgba(20,184,166,.05)" stroke="#14b8a6" stroke-width="1.5"/>
+        <text x="435" y="68" fill="#14b8a6" font-family="Sora" font-weight="700" font-size="13" text-anchor="middle">Fargate</text>
+        <text x="435" y="88" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Serverless Containers</text>
+        <text x="390" y="112" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ No EC2 to manage</text>
+        <text x="390" y="128" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ AWS runs containers</text>
+        <text x="390" y="144" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Pay per task</text>
+        <text x="390" y="160" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ ECS or EKS launch</text>
+        <text x="390" y="185" fill="#eab308" font-family="DM Sans" font-size="8" font-weight="600">Serverless Container</text>
+
+        <!-- Elastic Beanstalk -->
+        <rect x="530" y="40" width="130" height="170" rx="10" fill="rgba(234,179,8,.05)" stroke="#eab308" stroke-width="1.5"/>
+        <text x="595" y="68" fill="#eab308" font-family="Sora" font-weight="700" font-size="13" text-anchor="middle">Beanstalk</text>
+        <text x="595" y="88" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">PaaS for Web Apps</text>
+        <text x="550" y="112" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Deploy code only</text>
+        <text x="550" y="128" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ AWS handles infra</text>
+        <text x="550" y="144" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Still uses EC2</text>
+        <text x="550" y="160" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Free (pay for resources)</text>
+        <text x="550" y="185" fill="#eab308" font-family="DM Sans" font-size="8" font-weight="600">PaaS</text>
+
+        <!-- Lambda -->
+        <rect x="690" y="40" width="130" height="170" rx="10" fill="rgba(99,102,241,.05)" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="755" y="68" fill="#6366f1" font-family="Sora" font-weight="700" font-size="13" text-anchor="middle">Lambda</text>
+        <text x="755" y="88" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Serverless Functions</text>
+        <text x="710" y="112" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ No servers at all</text>
+        <text x="710" y="128" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Event-driven</text>
+        <text x="710" y="144" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Auto scales to 0</text>
+        <text x="710" y="160" fill="#dce4f0" font-family="DM Sans" font-size="9">✦ Pay per invocation</text>
+        <text x="710" y="185" fill="#eab308" font-family="DM Sans" font-size="8" font-weight="600">FaaS (Serverless)</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EC2 DEEP DIVE ═══ -->
+<div class="sec" id="sec-ec2">
+  <div class="card">
+    <h2>🖥️ EC2 — Elastic Compute Cloud</h2>
+    <p>EC2 provides resizable virtual servers (instances) in the cloud. It's the backbone of AWS compute and the most heavily tested service on the exam.</p>
+
+    <h3>EC2 Instance Naming Convention</h3>
+    <div class="dia">
+      <svg viewBox="0 0 700 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="120" y="40" fill="#fff" font-family="JetBrains Mono" font-weight="700" font-size="32" text-anchor="middle">m</text>
+        <text x="200" y="40" fill="#fff" font-family="JetBrains Mono" font-weight="700" font-size="32" text-anchor="middle">5</text>
+        <text x="280" y="40" fill="#fff" font-family="JetBrains Mono" font-weight="700" font-size="32" text-anchor="middle">a</text>
+        <text x="340" y="40" fill="#fff" font-family="JetBrains Mono" font-weight="700" font-size="32" text-anchor="middle">.</text>
+        <text x="460" y="40" fill="#fff" font-family="JetBrains Mono" font-weight="700" font-size="32" text-anchor="middle">xlarge</text>
+
+        <line x1="120" y1="55" x2="120" y2="80" stroke="#f97316" stroke-width="2"/>
+        <line x1="200" y1="55" x2="200" y2="80" stroke="#6366f1" stroke-width="2"/>
+        <line x1="280" y1="55" x2="280" y2="80" stroke="#14b8a6" stroke-width="2"/>
+        <line x1="460" y1="55" x2="460" y2="80" stroke="#eab308" stroke-width="2"/>
+
+        <text x="120" y="98" fill="#f97316" font-family="DM Sans" font-weight="700" font-size="11" text-anchor="middle">Family</text>
+        <text x="120" y="114" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">(m = General Purpose)</text>
+
+        <text x="200" y="98" fill="#6366f1" font-family="DM Sans" font-weight="700" font-size="11" text-anchor="middle">Generation</text>
+        <text x="200" y="114" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">(5th gen)</text>
+
+        <text x="280" y="98" fill="#14b8a6" font-family="DM Sans" font-weight="700" font-size="11" text-anchor="middle">Attributes</text>
+        <text x="280" y="114" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">(a = AMD)</text>
+
+        <text x="460" y="98" fill="#eab308" font-family="DM Sans" font-weight="700" font-size="11" text-anchor="middle">Size</text>
+        <text x="460" y="114" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">(CPU + Memory)</text>
+      </svg>
+    </div>
+
+    <h3>Instance Family Types (Exam CRITICAL)</h3>
+    <table class="tbl">
+      <tr><th>Family</th><th>Prefix</th><th>Optimized For</th><th>Use Cases</th></tr>
+      <tr><td><strong>General Purpose</strong></td><td><code>t, m</code></td><td>Balanced CPU, memory, networking</td><td>Web servers, dev environments, small DBs</td></tr>
+      <tr><td><strong>Compute Optimized</strong></td><td><code>c</code></td><td>High-performance CPUs</td><td>Batch processing, HPC, ML inference, gaming servers</td></tr>
+      <tr><td><strong>Memory Optimized</strong></td><td><code>r, x, z</code></td><td>Large in-memory datasets</td><td>In-memory DBs (Redis), SAP HANA, real-time analytics</td></tr>
+      <tr><td><strong>Storage Optimized</strong></td><td><code>i, d, h</code></td><td>High sequential read/write (local storage)</td><td>Data warehousing, HDFS, distributed file systems</td></tr>
+      <tr><td><strong>Accelerated Computing</strong></td><td><code>p, g, inf, trn</code></td><td>GPU / hardware accelerators</td><td>ML training, video transcoding, 3D rendering</td></tr>
+    </table>
+
+    <div class="co tip">
+      <span class="icon">🧠</span>
+      <div class="t"><strong>Memory Aid:</strong> Think "Dr. McGiftpx" — the first letters of instance families. Or simpler: <strong>C</strong>=Compute, <strong>M/R</strong>=Memory, <strong>T</strong>=Turbo (burstable), <strong>I/D</strong>=I/O (storage), <strong>P/G</strong>=GPU.</div>
+    </div>
+
+    <h3>T-series Burstable Instances</h3>
+    <p><code>t2</code>, <code>t3</code>, <code>t3a</code> instances have a unique <strong>CPU credit</strong> model:</p>
+    <ul>
+      <li>Baseline CPU performance (e.g., 20% of a vCPU)</li>
+      <li>Earn CPU credits when idle, spend them when bursting</li>
+      <li>If credits run out → performance drops to baseline</li>
+      <li><strong>T2/T3 Unlimited</strong> — pay extra to burst beyond credits (no throttling, but $$)</li>
+    </ul>
+    <div class="co danger">
+      <span class="icon">⚠️</span>
+      <div class="t"><strong>Exam Trap:</strong> If a question says "consistent high CPU" → do NOT pick t-series. Pick <code>m</code> or <code>c</code> family. T-series is for workloads with occasional spikes, not sustained load.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔧 EC2 Launch & Configuration</h2>
+    <h3>What You Configure When Launching EC2</h3>
+    <div class="kg">
+      <div class="kv"><div class="l">AMI</div><div class="v">Amazon Machine Image — the OS template (Amazon Linux 2, Ubuntu, Windows, custom)</div></div>
+      <div class="kv"><div class="l">Instance Type</div><div class="v">CPU + Memory combo (t3.micro, m5.xlarge, etc.)</div></div>
+      <div class="kv" style="border-left-color:var(--acc2)"><div class="l" style="color:var(--acc2)">Key Pair</div><div class="v">SSH key for Linux or RDP password for Windows</div></div>
+      <div class="kv" style="border-left-color:var(--acc3)"><div class="l" style="color:var(--acc3)">Security Group</div><div class="v">Virtual firewall — controls inbound/outbound traffic</div></div>
+      <div class="kv" style="border-left-color:var(--acc5)"><div class="l" style="color:var(--acc5)">User Data</div><div class="v">Bootstrap script that runs ONCE at first launch (install packages, start services)</div></div>
+      <div class="kv" style="border-left-color:var(--acc6)"><div class="l" style="color:var(--acc6)">IAM Role</div><div class="v">Instance Profile — permissions for the EC2 to access other AWS services</div></div>
+    </div>
+
+    <h3>Security Groups (SG) — Key Rules</h3>
+    <ul>
+      <li>Act as a <strong>virtual firewall</strong> at the instance level</li>
+      <li><strong>Stateful</strong> — if inbound is allowed, return traffic is automatically allowed</li>
+      <li>Only <strong>ALLOW</strong> rules — no deny rules. Anything not allowed is implicitly denied</li>
+      <li>Can reference another SG as source/destination (great for multi-tier architectures)</li>
+      <li>One instance can have <strong>up to 5 SGs</strong></li>
+      <li>Default: all inbound BLOCKED, all outbound ALLOWED</li>
+    </ul>
+
+    <div class="co info">
+      <span class="icon">💡</span>
+      <div class="t"><strong>SG vs NACL (Preview):</strong> Security Groups are <strong>stateful + instance-level + allow-only</strong>. NACLs are <strong>stateless + subnet-level + allow AND deny</strong>. You'll get this comparison question on the exam.</div>
+    </div>
+
+    <h3>EC2 Placement Groups</h3>
+    <table class="tbl">
+      <tr><th>Strategy</th><th>How It Works</th><th>Use Case</th><th>Risk</th></tr>
+      <tr><td><strong>Cluster</strong></td><td>All instances on same rack, same AZ</td><td>HPC, low latency (10 Gbps between instances)</td><td>If rack fails, all instances fail</td></tr>
+      <tr><td><strong>Spread</strong></td><td>Each instance on different hardware (max 7/AZ)</td><td>Critical apps needing max isolation</td><td>Limited to 7 instances per AZ</td></tr>
+      <tr><td><strong>Partition</strong></td><td>Instances in partitions on separate racks (up to 7 partitions/AZ)</td><td>Hadoop, HDFS, Cassandra, Kafka</td><td>Partition failure affects multiple instances</td></tr>
+    </table>
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="t"><strong>Exam Pattern:</strong> "Low latency between instances" → <strong>Cluster</strong>. "Isolate critical instances from each other" → <strong>Spread</strong>. "Big data distributed workload" → <strong>Partition</strong>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🖼️ AMI — Amazon Machine Images</h2>
+    <ul>
+      <li>A <strong>template</strong> containing OS, software, configurations</li>
+      <li><strong>Region-specific</strong> — must copy AMI to use in another Region</li>
+      <li>Types: <strong>AWS-provided</strong> (Amazon Linux, Ubuntu), <strong>Marketplace</strong>, <strong>Custom</strong> (you create)</li>
+      <li>Custom AMIs speed up boot time — pre-install all software, then launch from your AMI</li>
+      <li>Backed by <strong>EBS snapshots</strong> (stored in S3 behind the scenes)</li>
+    </ul>
+    <div class="co tip">
+      <span class="icon">💡</span>
+      <div class="t"><strong>Exam Tip:</strong> "Reduce launch time for instances" → Use a custom AMI with everything pre-installed (called "golden AMI" pattern). This is faster than User Data scripts.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EC2 PRICING ═══ -->
+<div class="sec" id="sec-pricing">
+  <div class="card">
+    <h2>💰 EC2 Pricing Models (Exam Heavyweight)</h2>
+    <p>This topic appears in nearly every practice exam. Master the trade-offs.</p>
+
+    <table class="tbl">
+      <tr><th>Model</th><th>Discount</th><th>Commitment</th><th>Interruption?</th><th>Best For</th></tr>
+      <tr><td><strong>On-Demand</strong></td><td>0%</td><td>None</td><td>No</td><td>Short-term, unpredictable workloads, testing</td></tr>
+      <tr><td><strong>Reserved (RI)</strong></td><td>Up to 72%</td><td>1 or 3 years</td><td>No</td><td>Steady-state, predictable (databases, production servers)</td></tr>
+      <tr><td><strong>Savings Plans</strong></td><td>Up to 72%</td><td>1 or 3 years $/hr</td><td>No</td><td>Flexible across families, regions, OS, tenancy</td></tr>
+      <tr><td><strong>Spot Instances</strong></td><td>Up to 90%</td><td>None</td><td><strong>YES</strong> (2-min warning)</td><td>Fault-tolerant: batch, CI/CD, data analysis, HPC</td></tr>
+      <tr><td><strong>Dedicated Instances</strong></td><td>~</td><td>Per-instance billing</td><td>No</td><td>Compliance — no shared hardware</td></tr>
+      <tr><td><strong>Dedicated Hosts</strong></td><td>~</td><td>Per-host billing</td><td>No</td><td>BYOL (Bring Your Own License), compliance, socket-based licensing</td></tr>
+      <tr><td><strong>Capacity Reservations</strong></td><td>0%</td><td>None (but reserves capacity)</td><td>No</td><td>Guarantee capacity in an AZ for critical workloads</td></tr>
+    </table>
+
+    <h3>Reserved Instance Details</h3>
+    <div class="acc-i"><button class="acc-b" onclick="toggleAcc(this)">Standard vs Convertible Reserved Instances <span class="ar">▼</span></button>
+      <div class="acc-p">
+        <p><strong>Standard RI</strong> — Up to 72% discount. Can change AZ, scope, instance size (within same family). Cannot change instance family, OS, or tenancy.</p>
+        <p><strong>Convertible RI</strong> — Up to 66% discount. Can change instance family, OS, scope, tenancy. More flexibility, less discount.</p>
+        <p><strong>Payment options:</strong> All Upfront (biggest discount) > Partial Upfront > No Upfront (least discount)</p>
+        <p><strong>Scope:</strong> Regional (capacity across all AZs) or Zonal (specific AZ, guarantees capacity).</p>
+      </div>
+    </div>
+
+    <h3>Savings Plans Details</h3>
+    <div class="acc-i"><button class="acc-b" onclick="toggleAcc(this)">Compute vs EC2 Instance Savings Plans <span class="ar">▼</span></button>
+      <div class="acc-p">
+        <p><strong>Compute Savings Plans</strong> — Most flexible. Apply to EC2, Fargate, and Lambda. Can change instance family, Region, OS, tenancy. Up to 66% discount.</p>
+        <p><strong>EC2 Instance Savings Plans</strong> — Commit to a specific instance family in a specific Region. Up to 72% discount. Can change size, OS, tenancy within that family.</p>
+        <p>You commit to a $/hr spend for 1 or 3 years. Usage above commitment is billed at On-Demand rates.</p>
+      </div>
+    </div>
+
+    <h3>Spot Instances — Deep Dive</h3>
+    <ul>
+      <li>Define a <strong>max price</strong> you're willing to pay. If spot price exceeds it, instance is terminated or stopped.</li>
+      <li><strong>2-minute warning</strong> before interruption via instance metadata</li>
+      <li><strong>Spot Fleets</strong> — collection of Spot + optionally On-Demand instances. Auto-selects cheapest instance types.</li>
+      <li><strong>Spot Block</strong> (deprecated for new) — reserved Spot for 1-6 hours without interruption</li>
+    </ul>
+
+    <div class="co danger">
+      <span class="icon">🚫</span>
+      <div class="t"><strong>NEVER use Spot for:</strong> Databases, critical applications, or anything that can't handle interruption. Use for: batch processing, image rendering, big data analytics, CI/CD builds, stateless web servers behind a load balancer.</div>
+    </div>
+
+    <h3>Dedicated Host vs Dedicated Instance</h3>
+    <table class="tbl">
+      <tr><th>Feature</th><th>Dedicated Instance</th><th>Dedicated Host</th></tr>
+      <tr><td>Billing</td><td>Per-instance</td><td>Per-host (entire physical server)</td></tr>
+      <tr><td>Visibility of hardware</td><td>No</td><td>Yes (sockets, cores, host ID)</td></tr>
+      <tr><td>BYOL support</td><td>No</td><td>Yes (server-bound licenses)</td></tr>
+      <tr><td>Affinity/placement</td><td>No</td><td>Yes (instance placement control)</td></tr>
+    </table>
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="t"><strong>Exam Key:</strong> "Bring Your Own License" or "per-socket licensing" → <strong>Dedicated Host</strong>. "Compliance — no shared tenancy" → <strong>Dedicated Instance OR Host</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EC2 STORAGE ═══ -->
+<div class="sec" id="sec-storage">
+  <div class="card">
+    <h2>💾 EC2 Storage Options</h2>
+
+    <h3>EBS (Elastic Block Store) — Network-Attached</h3>
+    <ul>
+      <li>Persistent block storage, like a virtual hard drive</li>
+      <li><strong>Locked to one AZ</strong> — can't attach to instances in another AZ directly</li>
+      <li>Can be detached and reattached to another instance in the same AZ</li>
+      <li><strong>Snapshots</strong> — backup an EBS volume to S3. Can copy snapshot to another Region.</li>
+      <li><strong>Delete on Termination</strong> — root volume deletes by default; additional volumes don't</li>
+    </ul>
+
+    <h3>EBS Volume Types (Exam Favorite!)</h3>
+    <table class="tbl">
+      <tr><th>Type</th><th>Name</th><th>Max IOPS</th><th>Max Throughput</th><th>Use Case</th></tr>
+      <tr><td><code>gp3</code></td><td>General Purpose SSD</td><td>16,000</td><td>1,000 MB/s</td><td>Default for most workloads. IOPS & throughput set independently.</td></tr>
+      <tr><td><code>gp2</code></td><td>General Purpose SSD</td><td>16,000</td><td>250 MB/s</td><td>Legacy default. IOPS linked to volume size (3 IOPS/GB).</td></tr>
+      <tr><td><code>io2/io2 Block Express</code></td><td>Provisioned IOPS SSD</td><td>64,000 / 256,000</td><td>1,000 / 4,000 MB/s</td><td>Databases, critical apps needing sustained high IOPS. Multi-attach capable.</td></tr>
+      <tr><td><code>io1</code></td><td>Provisioned IOPS SSD</td><td>64,000</td><td>1,000 MB/s</td><td>Older gen of io2. Multi-attach capable (up to 16 instances).</td></tr>
+      <tr><td><code>st1</code></td><td>Throughput Optimized HDD</td><td>500</td><td>500 MB/s</td><td>Big data, data warehousing, log processing. NOT bootable.</td></tr>
+      <tr><td><code>sc1</code></td><td>Cold HDD</td><td>250</td><td>250 MB/s</td><td>Infrequently accessed data. Cheapest EBS. NOT bootable.</td></tr>
+    </table>
+
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="t"><strong>Exam Decision Tree:</strong> Need boot volume? → gp3/gp2/io2. Need >16,000 IOPS? → io2. Need cheap throughput? → st1. Need cheapest archive? → sc1. Can't boot from HDD types (st1/sc1)!</div>
+    </div>
+
+    <h3>EBS Multi-Attach</h3>
+    <p>Only available for <code>io1</code> and <code>io2</code> volumes. Attach a single EBS volume to <strong>up to 16 EC2 instances</strong> in the same AZ. Use case: clustered applications that need shared storage.</p>
+
+    <h3>Instance Store — Ephemeral Storage</h3>
+    <ul>
+      <li><strong>Physically attached</strong> to the host server (not network-attached like EBS)</li>
+      <li><strong>Highest I/O performance</strong> — millions of IOPS</li>
+      <li><strong>EPHEMERAL</strong> — data is LOST when instance stops, terminates, or hardware fails</li>
+      <li>Use for: temporary data, caches, buffers, scratch data</li>
+      <li>Cannot be detached or reattached</li>
+    </ul>
+    <div class="co danger">
+      <span class="icon">⚠️</span>
+      <div class="t"><strong>Exam Pattern:</strong> "Highest possible disk I/O" → <strong>Instance Store</strong>. "Data must persist after instance stop" → <strong>EBS</strong>. "Data lost on termination is acceptable" → Instance Store is fine.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📸 EBS Snapshots</h2>
+    <ul>
+      <li>Point-in-time backup of an EBS volume, stored in S3</li>
+      <li>Incremental — only changed blocks are backed up</li>
+      <li>Can create volumes from snapshots in <strong>any AZ</strong> (migrate data across AZs!)</li>
+      <li>Can copy snapshots <strong>cross-Region</strong> for DR</li>
+      <li><strong>EBS Snapshot Archive</strong> — move to cheaper tier (75% cheaper), 24-72h restore time</li>
+      <li><strong>Recycle Bin</strong> — protect against accidental deletion (set retention 1 day to 1 year)</li>
+      <li><strong>Fast Snapshot Restore (FSR)</strong> — no latency on first access ($$$)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ LOAD BALANCING ═══ -->
+<div class="sec" id="sec-elb">
+  <div class="card">
+    <h2>⚖️ Elastic Load Balancing (ELB)</h2>
+    <p>ELB distributes incoming traffic across multiple targets (EC2, containers, IPs, Lambda). It's a <strong>managed service</strong> — AWS handles scaling, availability, and maintenance.</p>
+
+    <div class="dia">
+      <svg viewBox="0 0 800 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Users -->
+        <text x="50" y="110" fill="#6b7fa0" font-family="DM Sans" font-size="28" text-anchor="middle">👥</text>
+        <text x="50" y="135" fill="#6b7fa0" font-family="DM Sans" font-size="10" text-anchor="middle">Users</text>
+
+        <!-- Arrow -->
+        <line x1="90" y1="105" x2="180" y2="105" stroke="#f97316" stroke-width="2"/>
+
+        <!-- ELB -->
+        <rect x="180" y="60" width="160" height="90" rx="12" fill="rgba(249,115,22,.06)" stroke="#f97316" stroke-width="2"/>
+        <text x="260" y="95" fill="#f97316" font-family="Sora" font-weight="700" font-size="14" text-anchor="middle">⚖️ ELB</text>
+        <text x="260" y="115" fill="#6b7fa0" font-family="DM Sans" font-size="10" text-anchor="middle">Health checks → routes</text>
+        <text x="260" y="130" fill="#6b7fa0" font-family="DM Sans" font-size="10" text-anchor="middle">to healthy targets only</text>
+
+        <!-- Arrows to targets -->
+        <line x1="340" y1="80" x2="440" y2="45" stroke="#14b8a6" stroke-width="1.5"/>
+        <line x1="340" y1="105" x2="440" y2="105" stroke="#14b8a6" stroke-width="1.5"/>
+        <line x1="340" y1="130" x2="440" y2="165" stroke="#14b8a6" stroke-width="1.5"/>
+
+        <!-- Targets -->
+        <rect x="440" y="20" width="120" height="45" rx="8" fill="#121a28" stroke="#14b8a6"/>
+        <text x="500" y="47" fill="#14b8a6" font-family="DM Sans" font-size="11" text-anchor="middle">EC2 (AZ-1a)</text>
+        <rect x="440" y="80" width="120" height="45" rx="8" fill="#121a28" stroke="#14b8a6"/>
+        <text x="500" y="107" fill="#14b8a6" font-family="DM Sans" font-size="11" text-anchor="middle">EC2 (AZ-1b)</text>
+        <rect x="440" y="140" width="120" height="45" rx="8" fill="#121a28" stroke="#14b8a6"/>
+        <text x="500" y="167" fill="#14b8a6" font-family="DM Sans" font-size="11" text-anchor="middle">EC2 (AZ-1c)</text>
+
+        <!-- Unhealthy -->
+        <text x="580" y="165" fill="#ef4444" font-family="DM Sans" font-size="9">✕ unhealthy</text>
+        <line x1="440" y1="162" x2="560" y2="162" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Cross-zone label -->
+        <text x="660" y="105" fill="#eab308" font-family="DM Sans" font-size="10" font-weight="600">Cross-zone</text>
+        <text x="660" y="120" fill="#eab308" font-family="DM Sans" font-size="10" font-weight="600">balancing</text>
+      </svg>
+    </div>
+
+    <h3>ELB Types Comparison (Must Know)</h3>
+    <table class="tbl">
+      <tr><th>Feature</th><th>ALB (Application)</th><th>NLB (Network)</th><th>GWLB (Gateway)</th></tr>
+      <tr><td><strong>Layer</strong></td><td>Layer 7 (HTTP/S)</td><td>Layer 4 (TCP/UDP)</td><td>Layer 3 (IP)</td></tr>
+      <tr><td><strong>Performance</strong></td><td>Good</td><td>Ultra-high (millions rps)</td><td>High</td></tr>
+      <tr><td><strong>Static IP</strong></td><td>No (use with Global Accelerator)</td><td>Yes (Elastic IP per AZ)</td><td>No</td></tr>
+      <tr><td><strong>Routing</strong></td><td>URL path, hostname, headers, query strings</td><td>Port-based</td><td>IP-based</td></tr>
+      <tr><td><strong>SSL Termination</strong></td><td>Yes</td><td>Yes (TLS)</td><td>No</td></tr>
+      <tr><td><strong>WebSocket</strong></td><td>Yes</td><td>Yes</td><td>No</td></tr>
+      <tr><td><strong>Target Types</strong></td><td>EC2, IP, Lambda, containers</td><td>EC2, IP, ALB</td><td>EC2, IP</td></tr>
+      <tr><td><strong>Use Case</strong></td><td>HTTP APIs, microservices, web apps</td><td>Gaming, IoT, real-time, extreme perf</td><td>3rd-party firewalls, intrusion detection</td></tr>
+      <tr><td><strong>Sticky Sessions</strong></td><td>Yes</td><td>Yes</td><td>Yes (flow hash)</td></tr>
+    </table>
+
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="t"><strong>Quick Decision:</strong> HTTP/microservices → <strong>ALB</strong>. Ultra-low latency / static IP / TCP → <strong>NLB</strong>. Third-party security appliances → <strong>GWLB</strong>. "Least operational overhead for web app" → <strong>ALB</strong>.</div>
+    </div>
+
+    <h3>ALB Key Features</h3>
+    <ul>
+      <li><strong>Target Groups</strong> — route to groups of targets based on rules</li>
+      <li><strong>Path-based routing</strong> — <code>/api/*</code> → backend, <code>/images/*</code> → image servers</li>
+      <li><strong>Host-based routing</strong> — <code>app.example.com</code> vs <code>api.example.com</code></li>
+      <li><strong>Sticky sessions</strong> — route same client to same target (cookie-based)</li>
+      <li><strong>Cross-zone load balancing</strong> — enabled by default (free for ALB)</li>
+      <li><strong>Connection draining</strong> (deregistration delay) — completes in-flight requests before removing target</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ AUTO SCALING ═══ -->
+<div class="sec" id="sec-asg">
+  <div class="card">
+    <h2>📈 Auto Scaling Groups (ASG)</h2>
+    <p>ASG automatically adjusts the number of EC2 instances based on demand. Combined with ELB, it creates self-healing, elastic architectures.</p>
+
+    <div class="dia">
+      <svg viewBox="0 0 800 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="20" width="740" height="200" rx="14" fill="rgba(249,115,22,.03)" stroke="#f97316" stroke-width="1.5"/>
+        <text x="50" y="48" fill="#f97316" font-family="Sora" font-weight="700" font-size="13">Auto Scaling Group</text>
+
+        <!-- Min -->
+        <rect x="60" y="70" width="160" height="130" rx="10" fill="rgba(99,102,241,.04)" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="140" y="92" fill="#6366f1" font-family="DM Sans" font-weight="700" font-size="10" text-anchor="middle">MIN CAPACITY = 2</text>
+        <rect x="80" y="105" width="50" height="40" rx="6" fill="#121a28" stroke="#14b8a6"/><text x="105" y="130" fill="#14b8a6" font-family="DM Sans" font-size="9" text-anchor="middle">EC2</text>
+        <rect x="145" y="105" width="50" height="40" rx="6" fill="#121a28" stroke="#14b8a6"/><text x="170" y="130" fill="#14b8a6" font-family="DM Sans" font-size="9" text-anchor="middle">EC2</text>
+
+        <!-- Desired -->
+        <rect x="240" y="70" width="180" height="130" rx="10" fill="rgba(20,184,166,.04)" stroke="#14b8a6" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="330" y="92" fill="#14b8a6" font-family="DM Sans" font-weight="700" font-size="10" text-anchor="middle">DESIRED CAPACITY = 4</text>
+        <rect x="255" y="105" width="50" height="40" rx="6" fill="#121a28" stroke="#14b8a6"/><text x="280" y="130" fill="#14b8a6" font-family="DM Sans" font-size="9" text-anchor="middle">EC2</text>
+        <rect x="315" y="105" width="50" height="40" rx="6" fill="#121a28" stroke="#14b8a6"/><text x="340" y="130" fill="#14b8a6" font-family="DM Sans" font-size="9" text-anchor="middle">EC2</text>
+        <rect x="255" y="155" width="50" height="40" rx="6" fill="#121a28" stroke="#14b8a6"/><text x="280" y="180" fill="#14b8a6" font-family="DM Sans" font-size="9" text-anchor="middle">EC2</text>
+        <rect x="315" y="155" width="50" height="40" rx="6" fill="#121a28" stroke="#14b8a6"/><text x="340" y="180" fill="#14b8a6" font-family="DM Sans" font-size="9" text-anchor="middle">EC2</text>
+
+        <!-- Max -->
+        <rect x="440" y="70" width="310" height="130" rx="10" fill="rgba(239,68,68,.03)" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="595" y="92" fill="#ef4444" font-family="DM Sans" font-weight="700" font-size="10" text-anchor="middle">MAX CAPACITY = 8</text>
+        <rect x="455" y="110" width="42" height="35" rx="5" fill="#121a28" stroke="#6b7fa0" stroke-dasharray="3,2"/><text x="476" y="132" fill="#6b7fa0" font-family="DM Sans" font-size="8" text-anchor="middle">+1</text>
+        <rect x="505" y="110" width="42" height="35" rx="5" fill="#121a28" stroke="#6b7fa0" stroke-dasharray="3,2"/><text x="526" y="132" fill="#6b7fa0" font-family="DM Sans" font-size="8" text-anchor="middle">+2</text>
+        <rect x="555" y="110" width="42" height="35" rx="5" fill="#121a28" stroke="#6b7fa0" stroke-dasharray="3,2"/><text x="576" y="132" fill="#6b7fa0" font-family="DM Sans" font-size="8" text-anchor="middle">+3</text>
+        <rect x="605" y="110" width="42" height="35" rx="5" fill="#121a28" stroke="#6b7fa0" stroke-dasharray="3,2"/><text x="626" y="132" fill="#6b7fa0" font-family="DM Sans" font-size="8" text-anchor="middle">+4</text>
+        <text x="555" y="175" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Scale out on demand →</text>
+      </svg>
+    </div>
+
+    <h3>Scaling Policies</h3>
+    <table class="tbl">
+      <tr><th>Policy Type</th><th>How It Works</th><th>Example</th></tr>
+      <tr><td><strong>Target Tracking</strong></td><td>Set a target metric, ASG adjusts to maintain it</td><td>"Keep average CPU at 50%" — ASG adds/removes to match</td></tr>
+      <tr><td><strong>Step Scaling</strong></td><td>Define steps based on alarm thresholds</td><td>"CPU > 70%: add 2. CPU > 90%: add 4"</td></tr>
+      <tr><td><strong>Simple Scaling</strong></td><td>Single action on alarm breach (legacy)</td><td>"CPU > 70%: add 1 instance, wait 5 min cooldown"</td></tr>
+      <tr><td><strong>Scheduled Scaling</strong></td><td>Scale at specific times</td><td>"Every Friday 5pm: set desired to 10 for weekend traffic"</td></tr>
+      <tr><td><strong>Predictive Scaling</strong></td><td>ML-based, predicts future traffic from patterns</td><td>Learns your traffic pattern and pre-provisions instances</td></tr>
+    </table>
+    <div class="co ok">
+      <span class="icon">✅</span>
+      <div class="t"><strong>Best Practice:</strong> Use <strong>Target Tracking</strong> as default — it's the simplest and most effective. Combine with <strong>Predictive Scaling</strong> for cyclical patterns. Use <strong>Scheduled</strong> for known events.</div>
+    </div>
+
+    <h3>ASG Key Concepts</h3>
+    <ul>
+      <li><strong>Launch Template</strong> (preferred) vs Launch Configuration (legacy, do not use)</li>
+      <li><strong>Health checks:</strong> EC2 status checks (default) + optional ELB health checks</li>
+      <li><strong>Cooldown period:</strong> Time to wait after scaling action before next action (default 300s)</li>
+      <li><strong>Lifecycle Hooks:</strong> Pause instances during launch/termination for custom actions (install software, drain connections)</li>
+      <li><strong>Instance Refresh:</strong> Rolling update to replace instances (e.g., when updating AMI)</li>
+      <li><strong>Warm Pools:</strong> Pre-initialized instances in stopped state for faster scale-out</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ LAMBDA ═══ -->
+<div class="sec" id="sec-lambda">
+  <div class="card">
+    <h2>⚡ AWS Lambda — Serverless Compute</h2>
+    <p>Lambda runs your code without provisioning servers. You upload code, AWS handles everything else. Pay only when your code executes.</p>
+
+    <div class="kg">
+      <div class="kv"><div class="l">Max Execution Time</div><div class="v">15 minutes (900 seconds)</div></div>
+      <div class="kv"><div class="l">Memory</div><div class="v">128 MB to 10,240 MB (10 GB)</div></div>
+      <div class="kv" style="border-left-color:var(--acc2)"><div class="l" style="color:var(--acc2)">Temp Storage (/tmp)</div><div class="v">512 MB to 10,240 MB (10 GB)</div></div>
+      <div class="kv" style="border-left-color:var(--acc3)"><div class="l" style="color:var(--acc3)">Deployment Package</div><div class="v">50 MB zipped, 250 MB unzipped (use layers for more)</div></div>
+      <div class="kv" style="border-left-color:var(--acc5)"><div class="l" style="color:var(--acc5)">Concurrency</div><div class="v">1,000 concurrent executions per Region (soft limit, can increase)</div></div>
+      <div class="kv" style="border-left-color:var(--acc6)"><div class="l" style="color:var(--acc6)">Pricing</div><div class="v">$0.20 per 1M requests + compute time (GB-seconds). First 1M free!</div></div>
+    </div>
+
+    <h3>Lambda Event Sources (Triggers)</h3>
+    <div class="fg">
+      <div class="ft" style="border-left:3px solid var(--acc)"><div class="fi">🪣</div><div class="fn">S3 Events</div><div class="fd">Object created/deleted → trigger Lambda (image processing, ETL)</div></div>
+      <div class="ft" style="border-left:3px solid var(--acc2)"><div class="fi">🌐</div><div class="fn">API Gateway</div><div class="fd">HTTP request → trigger Lambda (REST API, serverless backend)</div></div>
+      <div class="ft" style="border-left:3px solid var(--acc3)"><div class="fi">📊</div><div class="fn">DynamoDB Streams</div><div class="fd">Table changes → trigger Lambda (event-driven processing)</div></div>
+      <div class="ft" style="border-left:3px solid var(--acc5)"><div class="fi">📨</div><div class="fn">SQS / SNS</div><div class="fd">Message in queue → trigger Lambda (async processing)</div></div>
+      <div class="ft" style="border-left:3px solid var(--acc4)"><div class="fi">⏰</div><div class="fn">CloudWatch Events / EventBridge</div><div class="fd">Scheduled (cron) or event pattern triggers</div></div>
+      <div class="ft" style="border-left:3px solid var(--acc6)"><div class="fi">📡</div><div class="fn">Kinesis Streams</div><div class="fd">Real-time data processing (IoT, clickstream)</div></div>
+    </div>
+
+    <h3>Lambda VPC Access</h3>
+    <ul>
+      <li>By default, Lambda runs outside your VPC (has internet access)</li>
+      <li>To access VPC resources (RDS, ElastiCache), deploy Lambda in your VPC</li>
+      <li>Lambda in VPC <strong>loses internet access</strong> — needs <strong>NAT Gateway</strong> for internet</li>
+      <li>Uses <strong>ENI (Elastic Network Interface)</strong> in your VPC subnets</li>
+    </ul>
+
+    <div class="co danger">
+      <span class="icon">⚠️</span>
+      <div class="t"><strong>Exam Favorite:</strong> "Lambda needs to access RDS in a private subnet AND call an external API" → Deploy Lambda in VPC with access to private subnet + use NAT Gateway in public subnet for internet access.</div>
+    </div>
+
+    <h3>Lambda@Edge & CloudFront Functions</h3>
+    <table class="tbl">
+      <tr><th>Feature</th><th>Lambda@Edge</th><th>CloudFront Functions</th></tr>
+      <tr><td>Runtime</td><td>Node.js, Python</td><td>JavaScript only</td></tr>
+      <tr><td>Execution time</td><td>5-30 seconds</td><td>< 1 millisecond</td></tr>
+      <tr><td>Scale</td><td>Thousands/sec</td><td>Millions/sec</td></tr>
+      <tr><td>Use case</td><td>Heavy processing at edge</td><td>Lightweight header manipulation, URL rewrites</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ CONTAINERS ═══ -->
+<div class="sec" id="sec-containers">
+  <div class="card">
+    <h2>🐳 Container Services</h2>
+
+    <h3>ECS vs EKS vs Fargate</h3>
+    <table class="tbl">
+      <tr><th>Service</th><th>What It Is</th><th>Infrastructure</th><th>Best For</th></tr>
+      <tr><td><strong>ECS</strong></td><td>AWS-native container orchestration</td><td>EC2 or Fargate</td><td>AWS-centric teams, simpler container workloads</td></tr>
+      <tr><td><strong>EKS</strong></td><td>Managed Kubernetes</td><td>EC2 or Fargate</td><td>Teams already using K8s, multi-cloud portability</td></tr>
+      <tr><td><strong>Fargate</strong></td><td>Serverless compute engine for containers</td><td>No EC2 (AWS manages)</td><td>No infra management needed, pay-per-task</td></tr>
+    </table>
+
+    <h3>ECS Architecture</h3>
+    <div class="dia">
+      <svg viewBox="0 0 780 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="10" width="740" height="180" rx="12" fill="rgba(236,72,153,.03)" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="40" y="38" fill="#ec4899" font-family="Sora" font-weight="700" font-size="13">ECS Cluster</text>
+
+        <!-- Task definition -->
+        <rect x="40" y="55" width="180" height="50" rx="8" fill="#121a28" stroke="#eab308"/>
+        <text x="130" y="78" fill="#eab308" font-family="DM Sans" font-weight="700" font-size="11" text-anchor="middle">📋 Task Definition</text>
+        <text x="130" y="95" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Image, CPU, Memory, Ports</text>
+
+        <line x1="220" y1="80" x2="280" y2="80" stroke="#14b8a6" stroke-width="1.5"/>
+
+        <!-- Service -->
+        <rect x="280" y="55" width="140" height="50" rx="8" fill="#121a28" stroke="#14b8a6"/>
+        <text x="350" y="78" fill="#14b8a6" font-family="DM Sans" font-weight="700" font-size="11" text-anchor="middle">⚙️ Service</text>
+        <text x="350" y="95" fill="#6b7fa0" font-family="DM Sans" font-size="9" text-anchor="middle">Desired count, LB, ASG</text>
+
+        <line x1="420" y1="70" x2="480" y2="50" stroke="#f97316" stroke-width="1"/><line x1="420" y1="90" x2="480" y2="110" stroke="#f97316" stroke-width="1"/>
+
+        <!-- Tasks -->
+        <rect x="480" y="25" width="120" height="45" rx="6" fill="#121a28" stroke="#f97316"/>
+        <text x="540" y="52" fill="#f97316" font-family="DM Sans" font-size="10" text-anchor="middle">Task (Container 1)</text>
+        <rect x="480" y="85" width="120" height="45" rx="6" fill="#121a28" stroke="#f97316"/>
+        <text x="540" y="112" fill="#f97316" font-family="DM Sans" font-size="10" text-anchor="middle">Task (Container 2)</text>
+        <rect x="480" y="140" width="120" height="45" rx="6" fill="#121a28" stroke="#f97316"/>
+        <text x="540" y="167" fill="#f97316" font-family="DM Sans" font-size="10" text-anchor="middle">Task (Container 3)</text>
+
+        <!-- Launch type labels -->
+        <rect x="640" y="50" width="110" height="30" rx="6" fill="rgba(99,102,241,.08)" stroke="#6366f1"/>
+        <text x="695" y="70" fill="#6366f1" font-family="DM Sans" font-size="9" text-anchor="middle">EC2 Launch Type</text>
+        <rect x="640" y="100" width="110" height="30" rx="6" fill="rgba(14,165,233,.08)" stroke="#0ea5e9"/>
+        <text x="695" y="120" fill="#0ea5e9" font-family="DM Sans" font-size="9" text-anchor="middle">Fargate Launch Type</text>
+      </svg>
+    </div>
+
+    <h3>ECR — Elastic Container Registry</h3>
+    <ul>
+      <li>AWS-managed Docker registry (like Docker Hub, but private)</li>
+      <li>Store, manage, deploy container images</li>
+      <li>Integrated with ECS and EKS</li>
+      <li>Supports image vulnerability scanning</li>
+    </ul>
+
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="t"><strong>Exam Decision:</strong> "Run Docker containers with no server management" → <strong>Fargate</strong>. "Need Kubernetes" → <strong>EKS</strong>. "AWS-native container orchestration" → <strong>ECS</strong>. "Store Docker images" → <strong>ECR</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OTHER COMPUTE ═══ -->
+<div class="sec" id="sec-misc">
+  <div class="card">
+    <h2>🧩 Other Compute Services</h2>
+
+    <h3>Elastic Beanstalk</h3>
+    <ul>
+      <li><strong>PaaS</strong> — deploy web apps without managing infrastructure</li>
+      <li>Supports: Java, .NET, Node.js, Python, Go, Docker, etc.</li>
+      <li>Under the hood: creates EC2, ASG, ELB, RDS, etc.</li>
+      <li><strong>Free</strong> — you only pay for underlying resources</li>
+      <li>Still gives you full control of resources if needed</li>
+      <li>Great for developers who don't want to manage infra</li>
+    </ul>
+
+    <h3>AWS Batch</h3>
+    <ul>
+      <li>Fully managed <strong>batch processing</strong> at any scale</li>
+      <li>Dynamically launches EC2 or Spot instances based on job requirements</li>
+      <li>You define jobs as Docker images, Batch handles scheduling & compute</li>
+      <li>Different from Lambda: <strong>no time limit</strong>, uses EC2 (not serverless in the Lambda sense)</li>
+    </ul>
+
+    <h3>AWS Lightsail</h3>
+    <ul>
+      <li>Simple, low-cost virtual servers for small projects</li>
+      <li>Bundled: compute + storage + networking at fixed monthly price</li>
+      <li>Great for simple web apps, blogs, dev/test environments</li>
+      <li>Not designed for enterprise or complex architectures</li>
+    </ul>
+
+    <h3>Compute Service Decision Matrix</h3>
+    <table class="tbl">
+      <tr><th>Scenario</th><th>Best Service</th></tr>
+      <tr><td>Full OS control, specific hardware needs</td><td>EC2</td></tr>
+      <tr><td>Short-lived event-driven code (< 15 min)</td><td>Lambda</td></tr>
+      <tr><td>Docker containers without server management</td><td>Fargate (with ECS or EKS)</td></tr>
+      <tr><td>Docker containers with full infra control</td><td>ECS on EC2</td></tr>
+      <tr><td>Kubernetes workloads</td><td>EKS</td></tr>
+      <tr><td>Deploy web app, minimal infra management</td><td>Elastic Beanstalk</td></tr>
+      <tr><td>Long-running batch jobs (hours/days)</td><td>AWS Batch</td></tr>
+      <tr><td>Simple blog or small website, fixed cost</td><td>Lightsail</td></tr>
+      <tr><td>Per-socket licensing / BYOL</td><td>EC2 Dedicated Host</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="sec" id="sec-quiz">
+  <div class="card">
+    <h2>🧪 Day 5-7 Quiz — Compute (25 Questions)</h2>
+    <p>Master compute services. Click an answer — explanations revealed instantly.</p>
+    <div class="sbar" id="scoreBar"><div class="sv" id="scoreText">0 / 0</div><div class="sl">Correct Answers</div></div>
+    <div id="quizBox"></div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">AWS SAA-C03 Study Guide · Day 5-7: Compute Services · Built for Mohan's Certification Journey</div>
+
+<script>
+const Q=[
+{q:"Which EC2 instance type family is best for high-performance computing with sustained CPU usage?",o:["t3 (General Purpose)","c5 (Compute Optimized)","r5 (Memory Optimized)","i3 (Storage Optimized)"],c:1,e:"C-family (Compute Optimized) is designed for workloads needing high sustained CPU — batch processing, HPC, scientific modeling. T-series is burstable and would throttle."},
+{q:"An EC2 instance needs to access DynamoDB. What is the BEST way to provide credentials?",o:["Store access keys in environment variables","Use an IAM Role attached via Instance Profile","Embed keys in the application code","Use the root account keys"],c:1,e:"IAM Roles (Instance Profiles) provide temporary, automatically rotated credentials. Never use long-term access keys on EC2."},
+{q:"Which EBS volume type should you use for a database requiring 40,000 IOPS?",o:["gp3","gp2","io2","st1"],c:2,e:"gp3 max is 16,000 IOPS. io2 supports up to 64,000 IOPS (io2 Block Express up to 256,000). For >16K IOPS, you need Provisioned IOPS (io1/io2)."},
+{q:"EC2 Instance Store data persists after the instance is stopped. True or False?",o:["True","False"],c:1,e:"False! Instance Store is ephemeral — data is LOST when the instance stops, terminates, or the underlying hardware fails. Use EBS for persistent storage."},
+{q:"Which load balancer operates at Layer 7 and supports path-based routing?",o:["NLB","ALB","GWLB","Classic Load Balancer"],c:1,e:"ALB (Application Load Balancer) operates at Layer 7 (HTTP/HTTPS) and supports path-based and host-based routing, making it ideal for microservices."},
+{q:"What is the maximum execution time for an AWS Lambda function?",o:["5 minutes","10 minutes","15 minutes","60 minutes"],c:2,e:"Lambda has a maximum execution timeout of 15 minutes (900 seconds). For longer tasks, consider AWS Batch, Step Functions, or EC2."},
+{q:"Which EC2 pricing model offers up to 90% discount but can be interrupted with 2 minutes notice?",o:["Reserved Instances","Savings Plans","Spot Instances","On-Demand"],c:2,e:"Spot Instances offer up to 90% discount but AWS can reclaim them with a 2-minute warning. Use for fault-tolerant workloads only."},
+{q:"A company needs Docker containers without managing any EC2 instances. Best option?",o:["ECS on EC2","EKS on EC2","Fargate","Elastic Beanstalk"],c:2,e:"Fargate is serverless containers — AWS manages all underlying infrastructure. You just define your task and Fargate runs it. Works with both ECS and EKS."},
+{q:"Which placement group strategy provides the LOWEST network latency between instances?",o:["Spread","Partition","Cluster","Default (no placement group)"],c:2,e:"Cluster placement groups place all instances on the same rack in the same AZ, providing the lowest latency (10 Gbps) between instances. Used for HPC."},
+{q:"What is the key difference between Dedicated Instance and Dedicated Host?",o:["Dedicated Host is cheaper","Dedicated Instance gives hardware visibility","Dedicated Host supports BYOL with socket/core visibility","They are the same thing"],c:2,e:"Dedicated Host gives you visibility into sockets and physical cores, enabling BYOL (Bring Your Own License) for software with per-socket licensing."},
+{q:"How do you move an EBS volume from one AZ to another?",o:["Detach and reattach directly","Create a snapshot, then create a new volume from it in the target AZ","Use EBS migration tool","You cannot — EBS volumes are global"],c:1,e:"EBS volumes are locked to one AZ. To move: create a snapshot → create new volume from snapshot in target AZ. To cross-Region: copy snapshot to target Region first."},
+{q:"Lambda is deployed in a VPC to access RDS. It can't reach the internet. What's missing?",o:["Internet Gateway","VPN Connection","NAT Gateway in public subnet","Direct Connect"],c:2,e:"Lambda in a VPC loses internet access. To reach the internet, route traffic through a NAT Gateway in a public subnet. Or use VPC Endpoints for AWS services."},
+{q:"Which scaling policy uses machine learning to predict traffic patterns?",o:["Target Tracking","Step Scaling","Predictive Scaling","Scheduled Scaling"],c:2,e:"Predictive Scaling uses ML to analyze historical traffic patterns and pre-provision instances before the expected traffic increase."},
+{q:"An ASG has min=2, desired=4, max=8. If one instance fails health check, what happens?",o:["ASG does nothing","ASG terminates it and launches a replacement to maintain 4","ASG scales down to 3","ASG scales up to 5"],c:1,e:"ASG terminates the unhealthy instance and launches a new one to maintain the desired capacity of 4. This is the self-healing feature of ASG."},
+{q:"gp3 vs gp2: Which lets you independently set IOPS and throughput?",o:["gp2","gp3","Both","Neither"],c:1,e:"gp3 allows you to independently configure IOPS (up to 16K) and throughput (up to 1,000 MB/s). In gp2, IOPS is linked to volume size (3 IOPS per GB)."},
+{q:"Which service should you use to run batch jobs that take several hours with no time limit?",o:["Lambda","AWS Batch","Step Functions","SQS"],c:1,e:"AWS Batch is designed for batch processing with no time limits. Lambda is limited to 15 minutes. Batch dynamically provisions EC2/Spot for your jobs."},
+{q:"NLB provides what feature that ALB does NOT?",o:["Path-based routing","Static IP / Elastic IP per AZ","Lambda targets","WebSocket support"],c:1,e:"NLB provides static IPs (one Elastic IP per AZ). ALB uses a dynamic DNS name. If you need a static IP for a load balancer, use NLB (or ALB + Global Accelerator)."},
+{q:"Cross-zone load balancing is enabled by default on which load balancer?",o:["NLB","ALB","GWLB","Classic LB"],c:1,e:"ALB has cross-zone load balancing enabled by default (free). NLB has it disabled by default and charges for inter-AZ data transfer when enabled."},
+{q:"What is the maximum number of instances in a Spread placement group per AZ?",o:["3","5","7","Unlimited"],c:2,e:"Spread placement groups allow a maximum of 7 running instances per AZ. Each instance runs on different hardware for maximum isolation."},
+{q:"Which compute service is BEST for a developer who just wants to deploy code without managing infrastructure?",o:["EC2","Fargate","Elastic Beanstalk","Lambda"],c:2,e:"Elastic Beanstalk is PaaS — upload your code and Beanstalk handles provisioning, load balancing, scaling, and monitoring. Still uses EC2 under the hood."},
+{q:"EBS st1 and sc1 volumes can be used as boot volumes. True or False?",o:["True","False"],c:1,e:"False! Only SSD volumes (gp2, gp3, io1, io2) can be boot volumes. HDD volumes (st1, sc1) are for data storage only."},
+{q:"A Standard Reserved Instance allows you to change the instance family. True or False?",o:["True","False"],c:1,e:"False! Standard RIs allow size changes within the same family. To change family, OS, or tenancy, you need a Convertible RI (up to 66% discount vs 72%)."},
+{q:"Which ELB type is designed for deploying third-party virtual appliances like firewalls?",o:["ALB","NLB","GWLB","Classic LB"],c:2,e:"Gateway Load Balancer (GWLB) operates at Layer 3 and is designed for third-party network virtual appliances — firewalls, IDS/IPS, deep packet inspection."},
+{q:"Lambda Layers are used for what purpose?",o:["Adding more memory","Sharing common code/libraries across functions","Increasing timeout beyond 15 min","Providing VPC access"],c:1,e:"Lambda Layers let you package shared dependencies (libraries, SDKs, custom runtimes) and reuse them across multiple functions, keeping deployment packages small."},
+{q:"Which Savings Plan type applies to EC2, Fargate, AND Lambda?",o:["EC2 Instance Savings Plan","Compute Savings Plan","Standard Savings Plan","All-Service Savings Plan"],c:1,e:"Compute Savings Plans are the most flexible — they apply to EC2, Fargate, and Lambda across any Region, family, OS, or tenancy. Up to 66% savings."}
+];
+
+let sc=0,an=0;
+function renderQ(){document.getElementById('quizBox').innerHTML=Q.map((q,i)=>`<div class="quiz-q" id="q${i}"><div class="qn">Q${i+1}</div><div class="qt">${q.q}</div>${q.o.map((o,j)=>`<button class="qo" onclick="chk(${i},${j})" id="q${i}o${j}">${String.fromCharCode(65+j)}. ${o}</button>`).join('')}<div class="qexp" id="e${i}">${q.e}</div></div>`).join('')}
+function chk(qi,oi){const el=document.getElementById(`q${qi}`);if(el.dataset.d)return;el.dataset.d='1';an++;Q[qi].o.forEach((_,j)=>document.getElementById(`q${qi}o${j}`).classList.add('off'));if(oi===Q[qi].c){document.getElementById(`q${qi}o${oi}`).classList.add('correct');sc++}else{document.getElementById(`q${qi}o${oi}`).classList.add('wrong');document.getElementById(`q${qi}o${Q[qi].c}`).classList.add('correct')}document.getElementById(`e${qi}`).classList.add('show');const b=document.getElementById('scoreBar');b.style.display='block';document.getElementById('scoreText').textContent=`${sc} / ${an}`}
+function go(id){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.getElementById(`sec-${id}`).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');window.scrollTo({top:200,behavior:'smooth'})}
+function toggleAcc(b){const p=b.nextElementSibling;b.classList.toggle('open');p.classList.toggle('open')}
+renderQ();
+</script>
+</body>
+</html>

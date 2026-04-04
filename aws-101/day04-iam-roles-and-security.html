@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 4 | IAM Roles and Security</title>
+  <style>
+    :root { --bg:#09101c; --panel:rgba(12,20,34,.9); --panel-2:#0f1828; --line:rgba(147,174,219,.18); --text:#ebf2ff; --muted:#9cb1d1; --cyan:#63d0ff; --orange:#ffa25c; --green:#a5e26c; --pink:#ff6fa6; --red:#ff7272; --shadow:0 26px 56px rgba(0,0,0,.32); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Segoe UI",Tahoma,sans-serif; background:radial-gradient(circle at 12% 0%, rgba(99,208,255,.14), transparent 28%), radial-gradient(circle at 88% 10%, rgba(255,111,166,.14), transparent 24%), linear-gradient(180deg, #040914 0%, var(--bg) 48%, #0a1422 100%); color:var(--text); line-height:1.65; }
+    .shell { width:min(1180px, calc(100% - 24px)); margin:0 auto; padding:22px 0 64px; }
+    .hero, .panel { border:1px solid var(--line); border-radius:24px; background:var(--panel); box-shadow:var(--shadow); backdrop-filter:blur(16px); }
+    .hero { padding:34px 24px; }
+    .badge, .eyebrow { display:inline-block; padding:6px 12px; border-radius:999px; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .badge { color:var(--orange); background:rgba(255,162,92,.1); border:1px solid rgba(255,162,92,.2); }
+    .eyebrow { color:var(--cyan); background:rgba(99,208,255,.1); border:1px solid rgba(99,208,255,.18); margin-bottom:12px; }
+    h1,h2,h3 { margin:0 0 12px; line-height:1.1; }
+    h1 { font-size:clamp(2.2rem, 5vw, 4rem); max-width:10ch; margin-top:16px; }
+    h2 { font-size:clamp(1.4rem, 2.8vw, 2.1rem); }
+    h3 { font-size:1.06rem; }
+    p { margin:0 0 12px; color:var(--muted); }
+    ul { margin:0; padding-left:20px; }
+    li { margin-bottom:8px; color:var(--muted); }
+    strong { color:var(--text); }
+    .nav { position:sticky; top:0; z-index:20; margin-top:16px; display:flex; gap:8px; overflow-x:auto; padding:10px; border:1px solid var(--line); border-radius:18px; background:rgba(9,16,28,.9); }
+    .nav button, .answers button, .score button { font:inherit; cursor:pointer; transition:.2s ease; }
+    .nav button { border:1px solid transparent; background:transparent; color:var(--muted); padding:10px 14px; border-radius:999px; font-weight:600; white-space:nowrap; }
+    .nav button.active, .nav button:hover { color:var(--text); background:rgba(99,208,255,.1); border-color:rgba(99,208,255,.18); }
+    .grid { display:grid; gap:18px; margin-top:18px; }
+    .grid.two { grid-template-columns:1.15fr .85fr; }
+    .cards, .compare, .quiz-wrap { display:grid; gap:14px; }
+    .cards, .compare { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+    .panel { padding:22px; }
+    .card, .compare-box, .question, .score { border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.03); }
+    .card, .compare-box, .question { padding:16px; }
+    .note { border-left:4px solid var(--orange); padding:14px 16px; border-radius:14px; background:rgba(255,162,92,.08); color:var(--text); margin-top:14px; }
+    .danger { border-left-color:var(--red); background:rgba(255,114,114,.08); }
+    .good { border-left-color:var(--green); background:rgba(165,226,108,.08); }
+    .pink { border-left-color:var(--pink); background:rgba(255,111,166,.08); }
+    .table-wrap { overflow-x:auto; margin-top:14px; }
+    table { width:100%; min-width:720px; border-collapse:collapse; }
+    th, td { padding:12px 14px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:var(--orange); font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; }
+    td { color:var(--muted); }
+    .timeline { display:grid; gap:14px; position:relative; margin-top:14px; }
+    .timeline::before { content:""; position:absolute; left:13px; top:8px; bottom:8px; width:2px; background:linear-gradient(180deg, var(--orange), rgba(99,208,255,.35)); }
+    .step { position:relative; padding-left:36px; color:var(--muted); }
+    .step::before { content:""; position:absolute; left:7px; top:7px; width:14px; height:14px; border-radius:50%; background:var(--orange); box-shadow:0 0 0 6px rgba(255,162,92,.12); }
+    .step strong { display:block; margin-bottom:4px; }
+    .q-label { display:inline-block; margin-bottom:10px; padding:4px 8px; border-radius:8px; background:rgba(255,162,92,.12); color:var(--orange); font-size:.74rem; font-weight:700; text-transform:uppercase; }
+    .answers { display:grid; gap:8px; margin-top:12px; }
+    .answers button { padding:11px 13px; border-radius:12px; border:1px solid var(--line); background:var(--panel-2); color:var(--text); text-align:left; }
+    .answers button.correct { border-color:rgba(165,226,108,.5); background:rgba(165,226,108,.12); color:#e7f7d4; }
+    .answers button.wrong { border-color:rgba(255,114,114,.5); background:rgba(255,114,114,.12); color:#ffd4d4; }
+    .explanation { display:none; margin-top:10px; }
+    .explanation.show { display:block; }
+    .score { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; padding:16px; }
+    .score button { border:1px solid rgba(255,162,92,.28); border-radius:999px; padding:10px 14px; background:rgba(255,162,92,.09); color:var(--text); font-weight:700; }
+    .footer { text-align:center; margin-top:22px; color:var(--muted); }
+    code { color:#ffd772; }
+    @media (max-width:900px) { .grid.two { grid-template-columns:1fr; } }
+    @media (max-width:640px) { .shell { width:min(1180px, calc(100% - 16px)); } .hero, .panel { padding:18px; } h1 { max-width:none; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <div class="badge">Day 4 - IAM Roles and Security</div>
+      <h1>Think like an AWS security architect</h1>
+      <p>Day 4 takes IAM from basic concepts into real design decisions. This is where you learn how access is delegated, how one account trusts another, how companies connect existing identity systems to AWS, and how security controls fit around IAM.</p>
+      <p>If Day 3 taught you the building blocks, Day 4 teaches you how those blocks are used in real architecture.</p>
+    </header>
+    <nav class="nav" id="nav">
+      <button class="active" data-target="overview">Overview</button>
+      <button data-target="roles">Roles</button>
+      <button data-target="trust">Trust Policies</button>
+      <button data-target="cross-account">Cross-Account</button>
+      <button data-target="federation">Federation</button>
+      <button data-target="security">Security Controls</button>
+      <button data-target="patterns">Architecture Patterns</button>
+      <button data-target="quiz">Quiz</button>
+    </nav>
+    <section class="grid cards" id="overview">
+      <div class="card"><div class="eyebrow">Main Idea</div><h3>Role-based access</h3><p>Roles are how AWS safely gives temporary permission to services, users, and even other accounts.</p></div>
+      <div class="card"><div class="eyebrow">Main Idea</div><h3>Trust and delegation</h3><p>A role is useful only when the right entity is trusted to assume it.</p></div>
+      <div class="card"><div class="eyebrow">Main Idea</div><h3>Enterprise identity</h3><p>Large organizations usually connect existing identity systems to AWS instead of creating separate IAM users for everyone.</p></div>
+    </section>
+    <section class="grid two" id="roles">
+      <div class="panel">
+        <div class="eyebrow">IAM Roles</div>
+        <h2>Why roles are such a big deal</h2>
+        <p>Roles are one of the most important AWS security concepts because they reduce long-term credential exposure and enable temporary, delegated access.</p>
+        <ul>
+          <li><strong>A role is not tied to one person forever.</strong> It can be assumed when needed.</li>
+          <li><strong>Roles usually produce temporary credentials.</strong> That is safer than leaving permanent secrets everywhere.</li>
+          <li><strong>AWS services commonly use roles.</strong> EC2, Lambda, and others should usually assume roles instead of storing access keys.</li>
+          <li><strong>People can also assume roles.</strong> This is useful for temporary admin access or cross-account work.</li>
+        </ul>
+        <div class="note good">Strong trainer memory line: <strong>Role = delegated access for a limited time.</strong></div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Role Use Cases</div>
+        <h2>When roles are the right answer</h2>
+        <div class="compare">
+          <div class="compare-box"><h3>EC2 to AWS</h3><p>An instance needs S3 or DynamoDB access. Attach a role to the instance.</p></div>
+          <div class="compare-box"><h3>Lambda to AWS</h3><p>A function needs CloudWatch logging, SQS access, or DynamoDB access. Use an execution role.</p></div>
+          <div class="compare-box"><h3>User temporary elevation</h3><p>A user assumes a more privileged role only when needed instead of always having admin rights.</p></div>
+          <div class="compare-box"><h3>Cross-account access</h3><p>One AWS account assumes a role in another account to perform a task safely.</p></div>
+        </div>
+      </div>
+    </section>
+    <section class="grid two" id="trust">
+      <div class="panel">
+        <div class="eyebrow">Trust Policies</div>
+        <h2>Every role has two sides</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Side</th><th>What it answers</th><th>Simple meaning</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Trust policy</strong></td><td>Who can assume this role?</td><td>The entry rule</td></tr>
+              <tr><td><strong>Permissions policy</strong></td><td>What can this role do once assumed?</td><td>The action rule</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note">Easy way to say it: <strong>trust decides who gets in, permissions decide what happens after they get in.</strong></div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Exam Trap</div>
+        <h2>What people misunderstand</h2>
+        <ul>
+          <li>A role does not magically run by itself. Something trusted must assume it.</li>
+          <li>A role can trust one entity but still do nothing useful if its permissions are weak.</li>
+          <li>A role can have strong permissions but still be safe if trust is tightly limited.</li>
+        </ul>
+        <div class="note danger">Trainer warning: many IAM mistakes come from understanding permissions but forgetting trust.</div>
+      </div>
+    </section>
+    <section class="grid two" id="cross-account">
+      <div class="panel">
+        <div class="eyebrow">Cross-Account Access</div>
+        <h2>How account A safely works in account B</h2>
+        <div class="timeline">
+          <div class="step"><strong>Create a role in account B</strong> that trusts account A.</div>
+          <div class="step"><strong>Attach permissions to that role</strong> inside account B.</div>
+          <div class="step"><strong>A user or service in account A assumes the role</strong>.</div>
+          <div class="step"><strong>AWS issues temporary credentials</strong> for the role session.</div>
+          <div class="step"><strong>The caller acts inside account B</strong> using the permissions of that role.</div>
+        </div>
+        <div class="note">This is one of the cleanest ways to share access between AWS accounts without sharing passwords or long-term keys.</div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">When It Appears</div>
+        <h2>Real cross-account scenarios</h2>
+        <ul>
+          <li>A security account needs to audit many workload accounts.</li>
+          <li>A central DevOps account deploys infrastructure into multiple application accounts.</li>
+          <li>One account needs limited access to another account's S3, KMS, or operational resources.</li>
+        </ul>
+        <div class="note good">Architecture takeaway: cross-account roles support separation of duties and better multi-account governance.</div>
+      </div>
+    </section>
+    <section class="grid two" id="federation">
+      <div class="panel">
+        <div class="eyebrow">Federation</div>
+        <h2>Identity that starts outside AWS</h2>
+        <p>Federation means AWS trusts an external identity provider. Instead of creating separate AWS users for everyone, people authenticate with an existing identity system and then receive AWS access.</p>
+        <ul>
+          <li>Good for companies that already manage employee identities centrally.</li>
+          <li>Reduces the need to create large numbers of IAM users.</li>
+          <li>Usually leads to temporary AWS access rather than permanent credentials.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">When It Is the Answer</div>
+        <h2>Exam signals for federation</h2>
+        <div class="compare">
+          <div class="compare-box"><h3>Existing corporate login</h3><p>The company wants employees to use their current enterprise credentials.</p></div>
+          <div class="compare-box"><h3>Central identity management</h3><p>The company does not want a separate IAM user lifecycle inside AWS for everyone.</p></div>
+          <div class="compare-box"><h3>Temporary access preferred</h3><p>The design should avoid long-lived AWS credentials when possible.</p></div>
+        </div>
+        <div class="note pink">If the question says employees should sign in with existing company credentials, federation is a very strong signal.</div>
+      </div>
+    </section>
+    <section class="grid two" id="security">
+      <div class="panel">
+        <div class="eyebrow">Security Controls</div>
+        <h2>What strengthens IAM in practice?</h2>
+        <ul>
+          <li><strong>MFA</strong> adds another layer to sign-in.</li>
+          <li><strong>Password policy</strong> helps enforce stronger console access hygiene.</li>
+          <li><strong>Credential rotation</strong> reduces risk around long-lived keys.</li>
+          <li><strong>CloudTrail</strong> records actions for audit and investigation.</li>
+          <li><strong>Access Analyzer</strong> helps detect broad or unintended access.</li>
+        </ul>
+        <div class="note">IAM is not only about granting access. It is also about controlling, reviewing, and proving that access was used correctly.</div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Security Thinking</div>
+        <h2>How an architect answers IAM security questions</h2>
+        <div class="compare">
+          <div class="compare-box"><h3>For services</h3><p>Use roles, not hardcoded keys.</p></div>
+          <div class="compare-box"><h3>For humans</h3><p>Use least privilege and MFA.</p></div>
+          <div class="compare-box"><h3>For auditing</h3><p>Use CloudTrail to record activity.</p></div>
+          <div class="compare-box"><h3>For suspicious access review</h3><p>Use analysis tools and review policies for overexposure.</p></div>
+        </div>
+        <div class="note danger">Common bad pattern: embedding long-term AWS keys inside EC2 instances, code repositories, or configuration files.</div>
+      </div>
+    </section>
+    <section class="grid two" id="patterns">
+      <div class="panel">
+        <div class="eyebrow">Architecture Patterns</div>
+        <h2>What a certified trainer wants you to recognize</h2>
+        <div class="card"><h3>Pattern 1: Application on EC2 needs S3 access</h3><p>Attach an IAM role to the EC2 instance with the required permissions. This is safer than storing access keys on disk.</p></div>
+        <div class="card" style="margin-top:14px;"><h3>Pattern 2: Central operations team manages many accounts</h3><p>Use cross-account roles so the central team can assume controlled access into workload accounts.</p></div>
+        <div class="card" style="margin-top:14px;"><h3>Pattern 3: Employees use enterprise login</h3><p>Use federation so AWS access is based on the organization's identity provider rather than separate IAM users for every employee.</p></div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Common Mistakes</div>
+        <h2>Where learners often lose marks</h2>
+        <ul>
+          <li>Choosing IAM users instead of roles for AWS services.</li>
+          <li>Forgetting that roles need both trust and permissions.</li>
+          <li>Missing the signal for federation when corporate identity already exists.</li>
+          <li>Not recognizing cross-account access as a role-based trust design.</li>
+          <li>Ignoring the security risk of long-term embedded credentials.</li>
+        </ul>
+        <div class="note good">Trainer shortcut: when the question says <strong>temporary</strong>, <strong>delegated</strong>, <strong>cross-account</strong>, or <strong>AWS service access</strong>, roles should be one of your first thoughts.</div>
+      </div>
+    </section>
+    <section class="grid" id="quiz">
+      <div class="panel">
+        <div class="eyebrow">Quiz</div>
+        <h2>Day 4 architect quiz</h2>
+        <div class="quiz-wrap">
+          <div class="question" data-answer="1"><div class="q-label">Question 1</div><p>A Lambda function needs to write logs to CloudWatch and read from DynamoDB. What is the recommended design?</p><div class="answers"><button type="button">Create an IAM user for Lambda and store its keys</button><button type="button">Attach an IAM role to Lambda</button><button type="button">Use the root account</button><button type="button">Put the keys in an environment variable forever</button></div><p class="explanation">Lambda should assume an IAM execution role with the required permissions.</p></div>
+          <div class="question" data-answer="2"><div class="q-label">Question 2</div><p>What tells AWS who is allowed to assume a role?</p><div class="answers"><button type="button">Password policy</button><button type="button">CloudTrail log</button><button type="button">Trust policy</button><button type="button">Security group rule</button></div><p class="explanation">The trust policy defines who or what can assume the role.</p></div>
+          <div class="question" data-answer="0"><div class="q-label">Question 3</div><p>A company wants employees to access AWS using existing enterprise credentials. What is the best fit?</p><div class="answers"><button type="button">Federation</button><button type="button">One shared root account</button><button type="button">Instance store</button><button type="button">Dedicated Host</button></div><p class="explanation">Federation lets AWS trust an external identity provider instead of managing separate AWS identities for everyone.</p></div>
+          <div class="question" data-answer="3"><div class="q-label">Question 4</div><p>A security account needs to inspect resources in many workload accounts. Which pattern is most appropriate?</p><div class="answers"><button type="button">Share the root password across teams</button><button type="button">Create permanent IAM users in every account</button><button type="button">Use one EC2 key pair everywhere</button><button type="button">Use cross-account roles</button></div><p class="explanation">Cross-account roles are the standard pattern for controlled multi-account access.</p></div>
+          <div class="question" data-answer="1"><div class="q-label">Question 5</div><p>What is the safest general statement about long-term access keys in application servers?</p><div class="answers"><button type="button">They are always preferred over roles</button><button type="button">They should usually be avoided when roles can be used</button><button type="button">They are required for every Lambda function</button><button type="button">They replace CloudTrail</button></div><p class="explanation">If roles are available, they are usually safer than storing long-term secrets on servers.</p></div>
+        </div>
+        <div class="score"><div><strong id="scoreValue">0 / 5</strong><br><span id="scoreText">Answer the questions to see your score.</span></div><button type="button" id="resetQuiz">Reset quiz</button></div>
+      </div>
+    </section>
+    <p class="footer">Day 4 now teaches IAM the way architects use it: delegation, trust, enterprise identity, and secure multi-account design.</p>
+  </div>
+  <script>
+    const navButtons = document.querySelectorAll("#nav button");
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = document.getElementById(button.dataset.target);
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        navButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+    const questions = document.querySelectorAll(".question");
+    const scoreValue = document.getElementById("scoreValue");
+    const scoreText = document.getElementById("scoreText");
+    function updateScore() {
+      let correct = 0;
+      let answered = 0;
+      questions.forEach((question) => {
+        const chosen = question.querySelector(".answers button.correct, .answers button.wrong");
+        if (chosen) answered += 1;
+        if (question.dataset.answeredCorrectly === "true") correct += 1;
+      });
+      scoreValue.textContent = `${correct} / ${questions.length}`;
+      scoreText.textContent = answered === questions.length ? (correct === questions.length ? "Excellent. You are thinking in IAM architecture patterns now." : "Good work. Review the explanations and retake the quiz once more.") : "Answer the questions to see your score.";
+    }
+    questions.forEach((question) => {
+      const correctIndex = Number(question.dataset.answer);
+      const buttons = question.querySelectorAll(".answers button");
+      const explanation = question.querySelector(".explanation");
+      buttons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          if (question.dataset.locked === "true") return;
+          question.dataset.locked = "true";
+          explanation.classList.add("show");
+          buttons.forEach((choice, choiceIndex) => {
+            choice.disabled = true;
+            if (choiceIndex === correctIndex) choice.classList.add("correct");
+          });
+          if (index === correctIndex) {
+            question.dataset.answeredCorrectly = "true";
+          } else {
+            button.classList.add("wrong");
+            question.dataset.answeredCorrectly = "false";
+          }
+          updateScore();
+        });
+      });
+    });
+    document.getElementById("resetQuiz").addEventListener("click", () => {
+      questions.forEach((question) => {
+        question.dataset.locked = "false";
+        question.dataset.answeredCorrectly = "false";
+        question.querySelector(".explanation").classList.remove("show");
+        question.querySelectorAll(".answers button").forEach((button) => {
+          button.disabled = false;
+          button.classList.remove("correct", "wrong");
+        });
+      });
+      scoreValue.textContent = `0 / ${questions.length}`;
+      scoreText.textContent = "Answer the questions to see your score.";
+    });
+  </script>
+</body>
+</html>

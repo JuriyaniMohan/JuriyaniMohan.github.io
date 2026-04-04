@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Guides</title>
+  <style>
+    :root {
+      --bg: #0a1020;
+      --panel: rgba(18, 27, 47, 0.88);
+      --panel-2: #12203a;
+      --border: rgba(78, 132, 220, 0.35);
+      --text: #eaf4ff;
+      --muted: #94a9c9;
+      --cyan: #4cc3ff;
+      --green: #27d39a;
+      --green-soft: rgba(39, 211, 154, 0.12);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(76, 195, 255, 0.08), transparent 25%),
+        radial-gradient(circle at top right, rgba(39, 211, 154, 0.08), transparent 22%),
+        linear-gradient(180deg, #070d1b 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 28px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .cloud-icon {
+      font-size: 34px;
+      color: #ffffff;
+      display: block;
+      margin-bottom: 10px;
+      animation: floatCloud 2.8s ease-in-out infinite;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.3rem, 5vw, 4rem);
+      color: var(--cyan);
+      letter-spacing: -0.04em;
+    }
+
+    .dot-wrap {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      animation: pulseDots 1.2s infinite ease-in-out;
+      box-shadow: 0 0 12px rgba(39, 211, 154, 0.45);
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .subtitle {
+      margin: 14px 0 0;
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      margin: 22px 0 12px;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 12px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(39, 211, 154, 0.75);
+      background: var(--green-soft);
+      color: #8df0cc;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.25s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-2px);
+      background: rgba(39, 211, 154, 0.2);
+      box-shadow: 0 10px 24px rgba(39, 211, 154, 0.18);
+    }
+
+    .info-card {
+      margin-top: 26px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 1.9rem;
+      color: var(--cyan);
+      margin: 0 0 22px;
+      font-weight: 700;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .meta-box {
+      background: #0f1d35;
+      border-radius: 16px;
+      padding: 18px 18px 16px;
+      border: 1px solid rgba(76, 195, 255, 0.08);
+      transition: 0.25s ease;
+    }
+
+    .meta-box:hover {
+      transform: translateY(-3px);
+      border-color: rgba(76, 195, 255, 0.2);
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .meta-value {
+      font-size: 1.15rem;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      color: #6f86a8;
+      font-size: 0.98rem;
+    }
+
+    @keyframes pulseDots {
+      0%, 100% {
+        transform: translateY(0);
+        opacity: 0.35;
+      }
+      50% {
+        transform: translateY(-7px);
+        opacity: 1;
+      }
+    }
+
+    @keyframes floatCloud {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .info-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <span class="cloud-icon">☁</span>
+
+      <div class="title-row">
+        <div class="dot-wrap">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+
+        <h1>Learning Guides</h1>
+
+        <div class="dot-wrap">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <p class="subtitle">Choose what you want to learn today</p>
+    </header>
+
+    <div class="section-title">Currently I am having below two learning path</div>
+    <section class="panel">
+      <div class="chip-row">
+        <a class="chip" href="Azure101.html">Azure</a>
+        <a class="chip" href="aws-101">AWS</a>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <h2 class="card-title">☁ Cloud</h2>
+
+      <div class="meta-grid">
+        <div class="meta-box">
+          <span class="meta-label">Domain</span>
+          <div class="meta-value">Microsoft Azure</div>
+        </div>
+
+        <div class="meta-box">
+          <span class="meta-label">Repo Author</span>
+          <div class="meta-value">Mohan Juriyani</div>
+        </div>
+
+        <div class="meta-box">
+          <span class="meta-label">Hosting</span>
+          <div class="meta-value">GitHub Pages</div>
+        </div>
+
+        <div class="meta-box">
+          <span class="meta-label">SSL</span>
+          <div class="meta-value">HTTPS (Free)</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      © 2026 Mohan Juriyani | Cloud Infrastructure Engineer
+    </footer>
+  </div>
+</body>
+</html>

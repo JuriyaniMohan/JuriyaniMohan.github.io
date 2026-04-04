@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 1-2 | AWS Fundamentals — SAA-C03 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f1a;
+  --surface: #131829;
+  --surface2: #1a2035;
+  --border: #252d45;
+  --accent: #f59e0b;
+  --accent2: #3b82f6;
+  --accent3: #10b981;
+  --accent4: #ef4444;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --aws-orange: #ff9900;
+  --aws-dark: #232f3e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Hero */
+.hero {
+  position: relative;
+  padding: 80px 24px 60px;
+  text-align: center;
+  background: linear-gradient(135deg, #0b0f1a 0%, #1a1040 50%, #0b0f1a 100%);
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 40%, rgba(245,158,11,0.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 60%, rgba(59,130,246,0.06) 0%, transparent 50%);
+  animation: heroGlow 12s ease-in-out infinite;
+}
+@keyframes heroGlow {
+  0%,100% { transform: translate(0,0); }
+  50% { transform: translate(-3%,-2%); }
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+.hero .badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+/* Navigation */
+.nav-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11,15,26,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  overflow-x: auto;
+  gap: 4px;
+}
+.nav-tabs button {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 14px 18px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-tabs button:hover { color: var(--text); }
+.nav-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Content Sections */
+.content { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+.section { display: none; animation: fadeIn 0.4s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 24px;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: rgba(245,158,11,0.3); }
+.card h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 20px 0 10px;
+  color: var(--accent);
+}
+.card p { margin-bottom: 12px; color: var(--text); }
+.card ul { padding-left: 20px; margin-bottom: 12px; }
+.card li { margin-bottom: 6px; color: var(--text); }
+.card li::marker { color: var(--accent); }
+
+/* Diagrams */
+.diagram-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+.diagram-box svg { display: block; margin: 0 auto; max-width: 100%; }
+
+/* Key Value Pairs */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.kv-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 3px solid var(--accent);
+}
+.kv-item .label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.kv-item .value { font-size: 0.95rem; color: var(--text); }
+
+/* Comparison Table */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+.compare-table th {
+  background: var(--surface2);
+  color: var(--accent);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.compare-table td {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+/* Callout */
+.callout {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.callout.info { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+.callout.success { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.2); }
+.callout.danger { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+.callout .icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+.callout .text { font-size: 0.9rem; color: var(--text); }
+.callout .text strong { color: #fff; }
+
+/* Code */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  background: var(--surface2);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* Quiz */
+.quiz-container { margin-top: 16px; }
+.quiz-q {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.quiz-q .q-text {
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+}
+.quiz-q .q-num {
+  display: inline-block;
+  background: var(--accent);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.quiz-option:hover { border-color: var(--accent); background: rgba(245,158,11,0.05); }
+.quiz-option.correct { border-color: var(--accent3); background: rgba(16,185,129,0.1); color: var(--accent3); }
+.quiz-option.wrong { border-color: var(--accent4); background: rgba(239,68,68,0.08); color: var(--accent4); }
+.quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+.quiz-explanation {
+  margin-top: 10px;
+  padding: 12px 16px;
+  background: rgba(16,185,129,0.06);
+  border-left: 3px solid var(--accent3);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: none;
+}
+.quiz-explanation.show { display: block; }
+
+/* Score */
+.score-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  margin-top: 20px;
+}
+.score-bar .score-text { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.score-bar .score-label { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Pillar cards */
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+.pillar-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.pillar-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.pillar-card .p-icon { font-size: 1.6rem; margin-bottom: 8px; }
+.pillar-card .p-name { font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 6px; }
+.pillar-card .p-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+/* Progress bar */
+.progress-wrap { margin: 24px 0; }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.progress-header span { font-size: 0.8rem; color: var(--text-muted); }
+.progress-track {
+  height: 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent3));
+  border-radius: 4px;
+  width: 0%;
+  transition: width 1s ease;
+}
+
+/* Accordion */
+.accordion-item { margin-bottom: 8px; }
+.accordion-btn {
+  width: 100%;
+  text-align: left;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+.accordion-btn:hover { background: rgba(245,158,11,0.06); }
+.accordion-btn .arrow { transition: transform 0.3s; }
+.accordion-btn.open .arrow { transform: rotate(180deg); }
+.accordion-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  padding: 0 18px;
+}
+.accordion-panel.open {
+  max-height: 2000px;
+  padding: 14px 18px;
+}
+.accordion-panel p, .accordion-panel ul { font-size: 0.9rem; color: var(--text-muted); }
+.accordion-panel ul { padding-left: 18px; }
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="badge">Week 1 · Days 1–2</div>
+    <h1>AWS Fundamentals</h1>
+    <p>Global Infrastructure, Well-Architected Framework, Shared Responsibility Model & Core AWS Concepts</p>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-tabs" id="navTabs">
+  <button class="active" onclick="showSection('overview')">Overview</button>
+  <button onclick="showSection('global')">Global Infra</button>
+  <button onclick="showSection('wellarch')">Well-Architected</button>
+  <button onclick="showSection('shared')">Shared Responsibility</button>
+  <button onclick="showSection('pricing')">Pricing Models</button>
+  <button onclick="showSection('support')">Support Plans</button>
+  <button onclick="showSection('quiz')">Quiz (15 Qs)</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ========== OVERVIEW ========== -->
+<div class="section active" id="sec-overview">
+  <div class="card">
+    <h2>🎯 Learning Objectives</h2>
+    <p>By the end of Days 1-2, you should be able to:</p>
+    <ul>
+      <li>Explain AWS global infrastructure — Regions, AZs, Edge Locations, Local Zones</li>
+      <li>Describe the 6 pillars of the Well-Architected Framework</li>
+      <li>Differentiate responsibilities under the Shared Responsibility Model</li>
+      <li>Understand AWS pricing models and support plans</li>
+      <li>Navigate the AWS Management Console confidently</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📋 What is AWS?</h2>
+    <p><strong>Amazon Web Services (AWS)</strong> is the world's most comprehensive cloud platform, offering 200+ services from data centers globally. Think of it as renting computing resources instead of buying physical hardware.</p>
+
+    <h3>Why Cloud Computing?</h3>
+    <div class="kv-grid">
+      <div class="kv-item">
+        <div class="label">Trade CapEx for OpEx</div>
+        <div class="value">No upfront hardware costs — pay only for what you use</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">Economies of Scale</div>
+        <div class="value">AWS serves millions of customers, passing savings to you</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">Elastic Scaling</div>
+        <div class="value">Scale up or down in minutes, not weeks</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">Global Reach</div>
+        <div class="value">Deploy worldwide in minutes with 30+ Regions</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">Speed & Agility</div>
+        <div class="value">Experiment and innovate rapidly at low cost</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">No Data Center Mgmt</div>
+        <div class="value">Focus on your application, not infrastructure</div>
+      </div>
+    </div>
+
+    <h3>Cloud Deployment Models</h3>
+    <table class="compare-table">
+      <tr><th>Model</th><th>Description</th><th>Example</th></tr>
+      <tr><td><strong>Public Cloud</strong></td><td>Resources owned by cloud provider, shared across customers</td><td>AWS, Azure, GCP</td></tr>
+      <tr><td><strong>Private Cloud</strong></td><td>Dedicated infrastructure for a single organization</td><td>On-premises VMware, AWS Outposts</td></tr>
+      <tr><td><strong>Hybrid Cloud</strong></td><td>Combination of public + private cloud</td><td>Company data center + AWS VPN</td></tr>
+    </table>
+
+    <h3>Cloud Service Models (Know These!)</h3>
+    <table class="compare-table">
+      <tr><th>Model</th><th>You Manage</th><th>Provider Manages</th><th>AWS Example</th></tr>
+      <tr><td><strong>IaaS</strong></td><td>OS, runtime, data, app</td><td>Hardware, networking</td><td>EC2, VPC</td></tr>
+      <tr><td><strong>PaaS</strong></td><td>Data, application code</td><td>OS, runtime, hardware</td><td>Elastic Beanstalk, RDS</td></tr>
+      <tr><td><strong>SaaS</strong></td><td>Nothing (just use it)</td><td>Everything</td><td>Amazon WorkMail</td></tr>
+    </table>
+
+    <div class="callout">
+      <span class="icon">💡</span>
+      <div class="text"><strong>Exam Tip:</strong> The SAA-C03 exam loves asking "which is the MOST cost-effective" or "LEAST operational overhead" — understanding IaaS vs PaaS vs SaaS helps you pick the right answer.</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-header"><span>Day 1-2 Progress</span><span>Section 1 of 6</span></div>
+    <div class="progress-track"><div class="progress-fill" style="width:16%"></div></div>
+  </div>
+</div>
+
+<!-- ========== GLOBAL INFRASTRUCTURE ========== -->
+<div class="section" id="sec-global">
+  <div class="card">
+    <h2>🌍 AWS Global Infrastructure</h2>
+    <p>AWS operates a massive global network. Understanding this infrastructure is essential — it forms the foundation for everything you'll learn.</p>
+
+    <h3>Hierarchy of AWS Infrastructure</h3>
+    <div class="diagram-box">
+      <svg viewBox="0 0 800 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Region box -->
+        <rect x="40" y="20" width="720" height="340" rx="16" stroke="#f59e0b" stroke-width="2" fill="rgba(245,158,11,0.04)"/>
+        <text x="60" y="50" fill="#f59e0b" font-family="Plus Jakarta Sans" font-weight="700" font-size="16">AWS Region (e.g., ap-southeast-1 / Singapore)</text>
+        
+        <!-- AZ 1 -->
+        <rect x="70" y="70" width="200" height="240" rx="12" stroke="#3b82f6" stroke-width="1.5" fill="rgba(59,130,246,0.05)"/>
+        <text x="90" y="96" fill="#3b82f6" font-family="Plus Jakarta Sans" font-weight="700" font-size="13">Availability Zone 1a</text>
+        <rect x="90" y="110" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="110" y="135" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 1</text>
+        <rect x="90" y="160" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="110" y="185" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 2</text>
+        <rect x="90" y="210" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="110" y="235" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 3</text>
+        <text x="100" y="280" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="10">Redundant power,</text>
+        <text x="100" y="295" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="10">networking, connectivity</text>
+
+        <!-- AZ 2 -->
+        <rect x="300" y="70" width="200" height="240" rx="12" stroke="#3b82f6" stroke-width="1.5" fill="rgba(59,130,246,0.05)"/>
+        <text x="320" y="96" fill="#3b82f6" font-family="Plus Jakarta Sans" font-weight="700" font-size="13">Availability Zone 1b</text>
+        <rect x="320" y="110" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="340" y="135" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 4</text>
+        <rect x="320" y="160" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="340" y="185" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 5</text>
+        <rect x="320" y="210" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="340" y="235" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 6</text>
+
+        <!-- AZ 3 -->
+        <rect x="530" y="70" width="200" height="240" rx="12" stroke="#3b82f6" stroke-width="1.5" fill="rgba(59,130,246,0.05)"/>
+        <text x="550" y="96" fill="#3b82f6" font-family="Plus Jakarta Sans" font-weight="700" font-size="13">Availability Zone 1c</text>
+        <rect x="550" y="110" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="570" y="135" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 7</text>
+        <rect x="550" y="160" width="160" height="40" rx="6" fill="#1a2035" stroke="#252d45"/>
+        <text x="570" y="185" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="12">Data Center 8</text>
+
+        <!-- Connections -->
+        <line x1="270" y1="190" x2="300" y2="190" stroke="#10b981" stroke-width="2" stroke-dasharray="6,3"/>
+        <line x1="500" y1="190" x2="530" y2="190" stroke="#10b981" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="260" y="170" fill="#10b981" font-family="Plus Jakarta Sans" font-size="9" text-anchor="middle">High-speed</text>
+        <text x="515" y="170" fill="#10b981" font-family="Plus Jakarta Sans" font-size="9" text-anchor="middle">Private</text>
+        
+        <!-- Edge -->
+        <text x="400" y="345" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="11" text-anchor="middle">⚡ 400+ Edge Locations (CloudFront, Route 53) — distributed globally outside Regions</text>
+      </svg>
+    </div>
+
+    <h3>Key Concepts Breakdown</h3>
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">
+        🟠 Regions <span class="arrow">▼</span>
+      </button>
+      <div class="accordion-panel">
+        <p>A <strong>Region</strong> is a geographic area with multiple isolated data centers. Examples: <code>us-east-1</code> (N. Virginia), <code>ap-southeast-1</code> (Singapore).</p>
+        <ul>
+          <li>AWS has <strong>30+ Regions</strong> worldwide</li>
+          <li>Each Region is <strong>completely independent</strong> — data doesn't leave a Region unless you configure it</li>
+          <li>Not all services are available in all Regions</li>
+        </ul>
+        <p><strong>How to choose a Region:</strong></p>
+        <ul>
+          <li>🏛️ <strong>Compliance</strong> — Data sovereignty laws (e.g., GDPR requires EU Regions)</li>
+          <li>📍 <strong>Proximity</strong> — Closer to users = lower latency</li>
+          <li>💰 <strong>Pricing</strong> — Prices vary by Region</li>
+          <li>🛠️ <strong>Service availability</strong> — New services launch in select Regions first</li>
+        </ul>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">
+        🔵 Availability Zones (AZs) <span class="arrow">▼</span>
+      </button>
+      <div class="accordion-panel">
+        <p>Each Region has <strong>minimum 3 AZs</strong> (usually 3-6). Each AZ is one or more discrete data centers.</p>
+        <ul>
+          <li>AZs are <strong>physically separated</strong> — different buildings, different power grids, different flood plains</li>
+          <li>Connected via <strong>high-bandwidth, ultra-low-latency private networking</strong></li>
+          <li>Deploying across AZs gives you <strong>high availability</strong></li>
+          <li>AZ names (like <code>us-east-1a</code>) are <strong>randomized per account</strong> — your 1a might be my 1c</li>
+        </ul>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">
+        ⚡ Edge Locations & Local Zones <span class="arrow">▼</span>
+      </button>
+      <div class="accordion-panel">
+        <p><strong>Edge Locations</strong> are mini data centers used by CloudFront (CDN) and Route 53 (DNS). There are <strong>400+</strong> edge locations — far more than Regions.</p>
+        <ul>
+          <li>Cache content closer to users for low latency</li>
+          <li>Used by: CloudFront, Route 53, AWS WAF, AWS Shield</li>
+        </ul>
+        <p><strong>Local Zones</strong> are extensions of a Region placed closer to end users for ultra-low-latency needs (like gaming or video rendering).</p>
+        <p><strong>AWS Wavelength</strong> — Deploys AWS compute/storage at 5G telecom provider edge locations for single-digit millisecond latency to mobile devices.</p>
+        <p><strong>AWS Outposts</strong> — AWS-managed racks installed in YOUR data center. Same AWS APIs on-premises. Good for hybrid/low-latency/data residency needs.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="icon">📝</span>
+      <div class="text"><strong>Exam Pattern:</strong> Questions often say "minimize latency" or "meet data residency requirements." Region choice = compliance + proximity. Multi-AZ = high availability. CloudFront = low latency for end users.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🌐 Global vs Regional vs AZ-Level Services</h2>
+    <table class="compare-table">
+      <tr><th>Scope</th><th>Services</th></tr>
+      <tr><td><strong>Global</strong></td><td>IAM, Route 53, CloudFront, WAF, S3 (namespace is global, data is regional)</td></tr>
+      <tr><td><strong>Regional</strong></td><td>VPC, Lambda, API Gateway, RDS, DynamoDB, ELB</td></tr>
+      <tr><td><strong>AZ-Level</strong></td><td>EC2 instances, EBS volumes, Subnets, ENIs</td></tr>
+    </table>
+
+    <div class="callout danger">
+      <span class="icon">⚠️</span>
+      <div class="text"><strong>Common Mistake:</strong> S3 bucket names are globally unique, but the data is stored in the Region you choose. IAM is truly global — users/roles work across all Regions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== WELL-ARCHITECTED ========== -->
+<div class="section" id="sec-wellarch">
+  <div class="card">
+    <h2>🏛️ AWS Well-Architected Framework</h2>
+    <p>The Well-Architected Framework provides <strong>6 pillars</strong> of best practices for building cloud architectures. This is one of the most heavily tested topics on the SAA-C03 exam.</p>
+
+    <div class="callout">
+      <span class="icon">🧠</span>
+      <div class="text"><strong>Memory Aid — "CROPSS":</strong> Cost optimization, Reliability, Operational excellence, Performance efficiency, Security, Sustainability</div>
+    </div>
+
+    <div class="pillar-grid">
+      <div class="pillar-card" style="border-left: 3px solid #ef4444;">
+        <div class="p-icon">🔒</div>
+        <div class="p-name">Security</div>
+        <div class="p-desc">Protect data, systems, and assets. Implement least privilege, enable traceability, encrypt at all layers, automate security best practices.</div>
+      </div>
+      <div class="pillar-card" style="border-left: 3px solid #3b82f6;">
+        <div class="p-icon">🔄</div>
+        <div class="p-name">Reliability</div>
+        <div class="p-desc">Recover from failures, meet demand dynamically. Test recovery procedures, scale horizontally, use Multi-AZ/Multi-Region.</div>
+      </div>
+      <div class="pillar-card" style="border-left: 3px solid #f59e0b;">
+        <div class="p-icon">⚡</div>
+        <div class="p-name">Performance Efficiency</div>
+        <div class="p-desc">Use computing resources efficiently. Select right resource types, monitor performance, make trade-offs. Use serverless, caching, CDN.</div>
+      </div>
+      <div class="pillar-card" style="border-left: 3px solid #10b981;">
+        <div class="p-icon">💰</div>
+        <div class="p-name">Cost Optimization</div>
+        <div class="p-desc">Avoid unnecessary costs. Right-size instances, use Spot/Reserved, analyze spending, implement lifecycle policies.</div>
+      </div>
+      <div class="pillar-card" style="border-left: 3px solid #8b5cf6;">
+        <div class="p-icon">🔧</div>
+        <div class="p-name">Operational Excellence</div>
+        <div class="p-desc">Run and monitor systems effectively. Automate changes, respond to events, use Infrastructure as Code, learn from failures.</div>
+      </div>
+      <div class="pillar-card" style="border-left: 3px solid #06b6d4;">
+        <div class="p-icon">🌱</div>
+        <div class="p-name">Sustainability</div>
+        <div class="p-desc">Minimize environmental impact. Right-size workloads, use efficient hardware, reduce downstream waste. Newest pillar (added 2021).</div>
+      </div>
+    </div>
+
+    <h3>Deep Dive: Each Pillar</h3>
+
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">🔒 Security — Detailed Breakdown <span class="arrow">▼</span></button>
+      <div class="accordion-panel">
+        <p><strong>Design Principles:</strong></p>
+        <ul>
+          <li><strong>Implement a strong identity foundation</strong> — Centralize identity, use least privilege, use IAM roles (not keys)</li>
+          <li><strong>Enable traceability</strong> — Log and audit all actions with CloudTrail, VPC Flow Logs</li>
+          <li><strong>Apply security at all layers</strong> — Security Groups, NACLs, WAF, encryption</li>
+          <li><strong>Automate security</strong> — Use Security Hub, GuardDuty, Config rules</li>
+          <li><strong>Protect data in transit and at rest</strong> — TLS/SSL, KMS encryption, S3 bucket policies</li>
+          <li><strong>Keep people away from data</strong> — Use automation, no direct access to production</li>
+          <li><strong>Prepare for security events</strong> — Incident response plans, runbooks</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">🔄 Reliability — Detailed Breakdown <span class="arrow">▼</span></button>
+      <div class="accordion-panel">
+        <p><strong>Design Principles:</strong></p>
+        <ul>
+          <li><strong>Automatically recover from failure</strong> — Auto Scaling, health checks, self-healing</li>
+          <li><strong>Test recovery procedures</strong> — Game days, chaos engineering</li>
+          <li><strong>Scale horizontally</strong> — Multiple small instances > one large instance</li>
+          <li><strong>Stop guessing capacity</strong> — Use Auto Scaling, serverless</li>
+          <li><strong>Manage change with automation</strong> — CloudFormation, CI/CD pipelines</li>
+        </ul>
+        <p><strong>Key Services:</strong> Multi-AZ RDS, S3 (11 nines durability), Route 53 health checks, Auto Scaling Groups</p>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">⚡ Performance Efficiency — Detailed <span class="arrow">▼</span></button>
+      <div class="accordion-panel">
+        <ul>
+          <li><strong>Democratize advanced technologies</strong> — Use managed services (RDS instead of self-managed DB)</li>
+          <li><strong>Go global in minutes</strong> — Multi-Region deployments, CloudFront</li>
+          <li><strong>Use serverless architectures</strong> — Lambda, Fargate, DynamoDB</li>
+          <li><strong>Experiment more often</strong> — Test different instance types</li>
+          <li><strong>Consider mechanical sympathy</strong> — Match your tech choice to your workload</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">💰 Cost Optimization — Detailed <span class="arrow">▼</span></button>
+      <div class="accordion-panel">
+        <ul>
+          <li><strong>Implement cloud financial management</strong> — Use Cost Explorer, Budgets</li>
+          <li><strong>Adopt a consumption model</strong> — Pay for what you use, turn off when not needed</li>
+          <li><strong>Measure overall efficiency</strong> — Track cost per transaction</li>
+          <li><strong>Stop spending on undifferentiated heavy lifting</strong> — Use managed services</li>
+          <li><strong>Analyze and attribute expenditure</strong> — Tagging strategy</li>
+        </ul>
+        <p><strong>Key Tools:</strong> AWS Cost Explorer, AWS Budgets, Reserved Instances, Savings Plans, Spot Instances</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔧 AWS Well-Architected Tool</h2>
+    <p>AWS provides a <strong>free tool</strong> in the console that lets you review your architecture against the 6 pillars. It generates a report with improvement recommendations.</p>
+    <div class="callout info">
+      <span class="icon">🎯</span>
+      <div class="text"><strong>Exam Tip:</strong> If a question asks "how to review your architecture against AWS best practices" — the answer is the <strong>AWS Well-Architected Tool</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SHARED RESPONSIBILITY ========== -->
+<div class="section" id="sec-shared">
+  <div class="card">
+    <h2>🤝 Shared Responsibility Model</h2>
+    <p>One of the most important concepts for the exam. AWS and you (the customer) share security responsibilities.</p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 800 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Customer section -->
+        <rect x="40" y="20" width="720" height="170" rx="12" fill="rgba(59,130,246,0.06)" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="60" y="48" fill="#3b82f6" font-family="Plus Jakarta Sans" font-weight="800" font-size="15">CUSTOMER RESPONSIBILITY — "Security IN the Cloud"</text>
+        
+        <rect x="60" y="60" width="150" height="50" rx="6" fill="#1a2035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="85" y="80" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Customer Data</text>
+        <text x="85" y="98" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Your files, DBs</text>
+
+        <rect x="225" y="60" width="150" height="50" rx="6" fill="#1a2035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="245" y="80" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Platform & Apps</text>
+        <text x="245" y="98" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">IAM, OS patches</text>
+
+        <rect x="390" y="60" width="150" height="50" rx="6" fill="#1a2035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="410" y="80" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Network Config</text>
+        <text x="410" y="98" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">SGs, NACLs, routing</text>
+
+        <rect x="555" y="60" width="180" height="50" rx="6" fill="#1a2035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="575" y="80" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Client & Server Encrypt</text>
+        <text x="575" y="98" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Data encryption, KMS</text>
+
+        <rect x="60" y="120" width="320" height="50" rx="6" fill="#1a2035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="80" y="140" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">OS, Network & Firewall Configuration</text>
+        <text x="80" y="158" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Patching EC2 OS, configuring firewall rules</text>
+
+        <rect x="395" y="120" width="340" height="50" rx="6" fill="#1a2035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="415" y="140" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Identity & Access Management</text>
+        <text x="415" y="158" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">IAM users, roles, policies, MFA</text>
+
+        <!-- Divider -->
+        <line x1="40" y1="210" x2="760" y2="210" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8,4"/>
+        <rect x="330" y="198" width="140" height="24" rx="12" fill="#f59e0b"/>
+        <text x="400" y="215" fill="#000" font-family="Plus Jakarta Sans" font-weight="800" font-size="11" text-anchor="middle">SHARED LINE</text>
+
+        <!-- AWS section -->
+        <rect x="40" y="230" width="720" height="170" rx="12" fill="rgba(245,158,11,0.05)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="60" y="258" fill="#f59e0b" font-family="Plus Jakarta Sans" font-weight="800" font-size="15">AWS RESPONSIBILITY — "Security OF the Cloud"</text>
+
+        <rect x="60" y="270" width="160" height="50" rx="6" fill="#1a2035" stroke="#f59e0b" stroke-width="1"/>
+        <text x="80" y="290" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Compute</text>
+        <text x="80" y="308" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Physical servers</text>
+
+        <rect x="235" y="270" width="130" height="50" rx="6" fill="#1a2035" stroke="#f59e0b" stroke-width="1"/>
+        <text x="255" y="290" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Storage</text>
+        <text x="255" y="308" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Physical disks</text>
+
+        <rect x="380" y="270" width="140" height="50" rx="6" fill="#1a2035" stroke="#f59e0b" stroke-width="1"/>
+        <text x="400" y="290" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Database</text>
+        <text x="400" y="308" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Managed infra</text>
+
+        <rect x="535" y="270" width="200" height="50" rx="6" fill="#1a2035" stroke="#f59e0b" stroke-width="1"/>
+        <text x="555" y="290" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Networking / Hardware</text>
+        <text x="555" y="308" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Global backbone, fiber</text>
+
+        <rect x="60" y="330" width="675" height="50" rx="6" fill="#1a2035" stroke="#f59e0b" stroke-width="1"/>
+        <text x="80" y="350" fill="#e2e8f0" font-family="Plus Jakarta Sans" font-size="11" font-weight="600">Regions, Availability Zones, Edge Locations — Physical Security, Power, Cooling</text>
+        <text x="80" y="368" fill="#94a3b8" font-family="Plus Jakarta Sans" font-size="9">Guards, cameras, biometric access, environmental controls at all data centers</text>
+      </svg>
+    </div>
+
+    <h3>Easy Rule of Thumb</h3>
+    <table class="compare-table">
+      <tr><th>If you can configure it in the AWS Console...</th><th>Then it's YOUR responsibility</th></tr>
+      <tr><td>Security Groups, NACLs</td><td>✅ You configure them = You own them</td></tr>
+      <tr><td>IAM users, policies, MFA</td><td>✅ You create them = You secure them</td></tr>
+      <tr><td>EC2 OS patching</td><td>✅ You choose the AMI = You patch it</td></tr>
+      <tr><td>S3 bucket policies</td><td>✅ You set permissions = You're responsible</td></tr>
+    </table>
+
+    <h3>Managed vs Unmanaged — Responsibility Shifts</h3>
+    <table class="compare-table">
+      <tr><th>Service</th><th>Customer Responsibility</th><th>AWS Responsibility</th></tr>
+      <tr><td><strong>EC2</strong> (IaaS)</td><td>OS patching, firewall, IAM, data encryption</td><td>Physical host, hypervisor, network</td></tr>
+      <tr><td><strong>RDS</strong> (PaaS)</td><td>IAM, data encryption, Security Groups</td><td>OS patching, DB engine patching, host</td></tr>
+      <tr><td><strong>Lambda</strong> (Serverless)</td><td>IAM, code, data</td><td>Everything else — OS, runtime, scaling</td></tr>
+      <tr><td><strong>S3</strong> (Managed)</td><td>Bucket policies, encryption, IAM, data classification</td><td>Infrastructure, durability, availability</td></tr>
+    </table>
+
+    <div class="callout danger">
+      <span class="icon">🎯</span>
+      <div class="text"><strong>Exam Favorite:</strong> "Who is responsible for patching the OS on an EC2 instance?" → <strong>Customer</strong>. "Who is responsible for patching the OS on RDS?" → <strong>AWS</strong>. The more managed the service, the more AWS handles.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PRICING ========== -->
+<div class="section" id="sec-pricing">
+  <div class="card">
+    <h2>💰 AWS Pricing Fundamentals</h2>
+    <p>AWS has a <strong>pay-as-you-go</strong> pricing model. Understanding how AWS charges is crucial for cost optimization questions on the exam.</p>
+
+    <h3>3 Pricing Fundamentals</h3>
+    <div class="kv-grid">
+      <div class="kv-item" style="border-left-color: #3b82f6;">
+        <div class="label" style="color:#3b82f6;">Compute</div>
+        <div class="value">Pay per second/hour of compute time (EC2, Lambda invocations)</div>
+      </div>
+      <div class="kv-item" style="border-left-color: #10b981;">
+        <div class="label" style="color:#10b981;">Storage</div>
+        <div class="value">Pay per GB stored (S3, EBS, EFS)</div>
+      </div>
+      <div class="kv-item" style="border-left-color: #8b5cf6;">
+        <div class="label" style="color:#8b5cf6;">Data Transfer</div>
+        <div class="value">Pay per GB transferred OUT of AWS. Transfer IN is free. Transfer between AZs costs money.</div>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="icon">🆓</span>
+      <div class="text"><strong>Always Free:</strong> Data transfer IN to AWS is always free. VPC is free (but NAT Gateway, VPN, etc. cost money). IAM is always free. CloudFormation is free (you pay for resources it creates).</div>
+    </div>
+
+    <h3>EC2 Pricing Models (Preview — Detailed in Module 3)</h3>
+    <table class="compare-table">
+      <tr><th>Model</th><th>Discount</th><th>Commitment</th><th>Best For</th></tr>
+      <tr><td><strong>On-Demand</strong></td><td>0%</td><td>None</td><td>Short-term, unpredictable workloads</td></tr>
+      <tr><td><strong>Reserved</strong></td><td>Up to 72%</td><td>1 or 3 years</td><td>Steady-state, predictable workloads</td></tr>
+      <tr><td><strong>Savings Plans</strong></td><td>Up to 72%</td><td>1 or 3 years</td><td>Flexible across instance families</td></tr>
+      <tr><td><strong>Spot</strong></td><td>Up to 90%</td><td>None (can be interrupted)</td><td>Fault-tolerant, batch processing</td></tr>
+      <tr><td><strong>Dedicated Host</strong></td><td>Varies</td><td>On-Demand or Reserved</td><td>Compliance, licensing (BYOL)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>🆓 AWS Free Tier</h2>
+    <p>AWS offers a Free Tier for hands-on practice:</p>
+    <div class="kv-grid">
+      <div class="kv-item">
+        <div class="label">Always Free</div>
+        <div class="value">Lambda (1M requests/month), DynamoDB (25 GB), SNS, SQS, CloudWatch</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">12 Months Free</div>
+        <div class="value">EC2 t2.micro (750 hrs/mo), S3 (5 GB), RDS (750 hrs/mo), CloudFront (50 GB)</div>
+      </div>
+      <div class="kv-item">
+        <div class="label">Trials</div>
+        <div class="value">SageMaker, Redshift, others — short-term free trials</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SUPPORT PLANS ========== -->
+<div class="section" id="sec-support">
+  <div class="card">
+    <h2>📞 AWS Support Plans</h2>
+    <table class="compare-table">
+      <tr><th>Feature</th><th>Basic (Free)</th><th>Developer ($29/mo)</th><th>Business ($100/mo)</th><th>Enterprise ($15K/mo)</th></tr>
+      <tr><td><strong>Trusted Advisor</strong></td><td>7 core checks</td><td>7 core checks</td><td>Full checks</td><td>Full checks</td></tr>
+      <tr><td><strong>Tech Support</strong></td><td>None</td><td>Business-hour email</td><td>24/7 phone, email, chat</td><td>24/7 + TAM</td></tr>
+      <tr><td><strong>Response Time (Critical)</strong></td><td>—</td><td>12 hours</td><td>1 hour</td><td>15 minutes</td></tr>
+      <tr><td><strong>TAM</strong></td><td>No</td><td>No</td><td>No</td><td>Yes (dedicated)</td></tr>
+      <tr><td><strong>Concierge</strong></td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
+      <tr><td><strong>Training</strong></td><td>No</td><td>No</td><td>No</td><td>Self-paced labs</td></tr>
+    </table>
+
+    <div class="callout">
+      <span class="icon">💡</span>
+      <div class="text"><strong>Exam Tip:</strong> "TAM" (Technical Account Manager) is <strong>only in Enterprise</strong>. "Full Trusted Advisor" checks require <strong>Business or Enterprise</strong>. These are common exam questions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== QUIZ ========== -->
+<div class="section" id="sec-quiz">
+  <div class="card">
+    <h2>🧪 Day 1-2 Quiz — AWS Fundamentals</h2>
+    <p>Test your understanding with 15 questions. Click an answer to check — explanations are revealed after each question.</p>
+
+    <div class="score-bar" id="scoreBar" style="display:none;">
+      <div class="score-text" id="scoreText">0 / 15</div>
+      <div class="score-label">Correct Answers</div>
+    </div>
+
+    <div class="quiz-container" id="quizContainer"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  AWS SAA-C03 Study Guide · Day 1-2: AWS Fundamentals · Built for Mohan's Certification Journey
+</div>
+
+<script>
+// Quiz Data
+const quizData = [
+  {
+    q: "What is the MINIMUM number of Availability Zones in an AWS Region?",
+    options: ["1", "2", "3", "4"],
+    correct: 2,
+    explanation: "Every AWS Region has a minimum of 3 Availability Zones for high availability. Most Regions have 3-6 AZs."
+  },
+  {
+    q: "Which of the following is a GLOBAL AWS service?",
+    options: ["EC2", "VPC", "IAM", "RDS"],
+    correct: 2,
+    explanation: "IAM is a global service — users and roles created in IAM are available across all Regions. EC2, VPC, and RDS are regional services."
+  },
+  {
+    q: "Who is responsible for patching the operating system on an Amazon EC2 instance?",
+    options: ["AWS", "The Customer", "Shared responsibility", "AWS Support"],
+    correct: 1,
+    explanation: "Under the Shared Responsibility Model, the customer is responsible for OS patching on EC2 (IaaS). AWS manages the underlying hardware and hypervisor."
+  },
+  {
+    q: "Which pillar of the Well-Architected Framework focuses on avoiding unnecessary costs?",
+    options: ["Reliability", "Performance Efficiency", "Cost Optimization", "Operational Excellence"],
+    correct: 2,
+    explanation: "Cost Optimization is the pillar focused on eliminating unnecessary costs, using the right pricing models, and measuring efficiency."
+  },
+  {
+    q: "A company must store data within the EU due to GDPR. What should they do?",
+    options: [
+      "Use CloudFront edge locations in the EU",
+      "Choose an AWS Region within the EU",
+      "Use AWS Outposts in their office",
+      "Enable S3 Cross-Region Replication"
+    ],
+    correct: 1,
+    explanation: "Data residency requirements are solved by choosing an AWS Region in the required geography. Data doesn't leave a Region unless you configure it to."
+  },
+  {
+    q: "What AWS feature provides content caching at 400+ locations worldwide?",
+    options: ["Availability Zones", "Local Zones", "Edge Locations (CloudFront)", "AWS Wavelength"],
+    correct: 2,
+    explanation: "Edge Locations are used by CloudFront (CDN) and Route 53. There are 400+ edge locations globally, far more than Regions or AZs."
+  },
+  {
+    q: "Which support plan gives you a dedicated Technical Account Manager (TAM)?",
+    options: ["Basic", "Developer", "Business", "Enterprise"],
+    correct: 3,
+    explanation: "Only the Enterprise support plan ($15K/month minimum) includes a dedicated TAM. This is a very common exam question."
+  },
+  {
+    q: "In the Shared Responsibility Model, who patches the DB engine for Amazon RDS?",
+    options: ["The Customer", "AWS", "A third-party vendor", "It depends on the DB engine"],
+    correct: 1,
+    explanation: "RDS is a managed (PaaS) service. AWS is responsible for OS and DB engine patching. The customer is responsible for IAM, data encryption, and Security Group configuration."
+  },
+  {
+    q: "Which factor should you consider FIRST when choosing an AWS Region?",
+    options: ["Price", "Latency", "Compliance/Data sovereignty", "Number of AZs"],
+    correct: 2,
+    explanation: "Compliance and data sovereignty are the #1 factor. If regulations require data to stay in a specific country, that overrides all other factors."
+  },
+  {
+    q: "S3 bucket names are globally unique. Where is the actual data stored?",
+    options: [
+      "Distributed across all Regions",
+      "In the Region you specify when creating the bucket",
+      "At the nearest Edge Location",
+      "In the us-east-1 Region by default"
+    ],
+    correct: 1,
+    explanation: "S3 bucket names must be globally unique, but the data is physically stored in the specific Region you choose. This is a common trick question."
+  },
+  {
+    q: "What is the Well-Architected Framework's NEWEST pillar, added in 2021?",
+    options: ["Security", "Cost Optimization", "Sustainability", "Reliability"],
+    correct: 2,
+    explanation: "Sustainability was added as the 6th pillar in 2021, focusing on minimizing environmental impact of cloud workloads."
+  },
+  {
+    q: "Which pricing model offers up to 90% discount but can be interrupted?",
+    options: ["Reserved Instances", "Savings Plans", "Spot Instances", "Dedicated Hosts"],
+    correct: 2,
+    explanation: "Spot Instances offer up to 90% discount compared to On-Demand pricing, but AWS can reclaim them with a 2-minute warning when capacity is needed."
+  },
+  {
+    q: "What does AWS Outposts do?",
+    options: [
+      "Provides DDoS protection",
+      "Extends AWS infrastructure to your on-premises data center",
+      "Manages DNS routing",
+      "Provides content delivery"
+    ],
+    correct: 1,
+    explanation: "AWS Outposts brings AWS-managed infrastructure (racks) to your on-premises data center, enabling hybrid architectures with the same AWS APIs."
+  },
+  {
+    q: "Data transfer INTO AWS from the internet is charged at what rate?",
+    options: ["$0.01 per GB", "$0.09 per GB", "Free (no charge)", "Varies by Region"],
+    correct: 2,
+    explanation: "Data transfer INTO AWS is always free. You only pay for data transfer OUT of AWS to the internet and between some services/AZs."
+  },
+  {
+    q: "Which cloud deployment model combines on-premises infrastructure with cloud?",
+    options: ["Public Cloud", "Private Cloud", "Hybrid Cloud", "Multi-Cloud"],
+    correct: 2,
+    explanation: "Hybrid Cloud combines on-premises (private) infrastructure with public cloud resources, connected via VPN or Direct Connect."
+  }
+];
+
+let score = 0;
+let answered = 0;
+
+function renderQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = quizData.map((q, i) => `
+    <div class="quiz-q" id="q${i}">
+      <div class="q-num">Q${i+1}</div>
+      <div class="q-text">${q.q}</div>
+      ${q.options.map((opt, j) => `
+        <button class="quiz-option" onclick="checkAnswer(${i}, ${j})" id="q${i}o${j}">${String.fromCharCode(65+j)}. ${opt}</button>
+      `).join('')}
+      <div class="quiz-explanation" id="exp${i}">${q.explanation}</div>
+    </div>
+  `).join('');
+}
+
+function checkAnswer(qi, oi) {
+  const q = quizData[qi];
+  const qEl = document.getElementById(`q${qi}`);
+  if (qEl.dataset.answered) return;
+  qEl.dataset.answered = 'true';
+  answered++;
+
+  // Disable all options
+  q.options.forEach((_, j) => {
+    document.getElementById(`q${qi}o${j}`).classList.add('disabled');
+  });
+
+  // Mark correct/wrong
+  if (oi === q.correct) {
+    document.getElementById(`q${qi}o${oi}`).classList.add('correct');
+    score++;
+  } else {
+    document.getElementById(`q${qi}o${oi}`).classList.add('wrong');
+    document.getElementById(`q${qi}o${q.correct}`).classList.add('correct');
+  }
+
+  // Show explanation
+  document.getElementById(`exp${qi}`).classList.add('show');
+
+  // Update score
+  const bar = document.getElementById('scoreBar');
+  bar.style.display = 'block';
+  document.getElementById('scoreText').textContent = `${score} / ${answered}`;
+}
+
+// Navigation
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${id}`).classList.add('active');
+  document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  window.scrollTo({ top: 200, behavior: 'smooth' });
+}
+
+// Accordion
+function toggleAccordion(btn) {
+  const panel = btn.nextElementSibling;
+  btn.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+// Init
+renderQuiz();
+</script>
+</body>
+</html>

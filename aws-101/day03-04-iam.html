@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3-4 | IAM — SAA-C03 Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07080d;
+  --surface: #0f1118;
+  --surface2: #161922;
+  --surface3: #1c2030;
+  --border: #262a3a;
+  --accent: #22d3ee;
+  --accent2: #a78bfa;
+  --accent3: #34d399;
+  --accent4: #f87171;
+  --accent5: #fbbf24;
+  --text: #e0e4ef;
+  --text-muted: #7c83a1;
+  --glow: rgba(34,211,238,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.72;overflow-x:hidden;}
+::-webkit-scrollbar{width:7px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* ── Hero ── */
+.hero{
+  position:relative;padding:80px 24px 56px;text-align:center;
+  background:linear-gradient(160deg,#07080d 0%,#0d1025 40%,#130d22 70%,#07080d 100%);
+  overflow:hidden;
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 80%,rgba(34,211,238,0.07),transparent 60%),
+             radial-gradient(ellipse at 20% 30%,rgba(167,139,250,0.05),transparent 50%);
+  pointer-events:none;
+}
+.hero-inner{position:relative;z-index:1;max-width:780px;margin:0 auto;}
+.badge{
+  display:inline-block;padding:5px 14px;
+  background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.25);
+  border-radius:20px;font-size:.75rem;font-weight:600;color:var(--accent);
+  letter-spacing:1.2px;text-transform:uppercase;margin-bottom:18px;
+}
+.hero h1{
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.4rem);font-weight:700;
+  letter-spacing:-1px;margin-bottom:14px;
+  background:linear-gradient(135deg,#fff 0%,#22d3ee 60%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p{font-size:1.05rem;color:var(--text-muted);max-width:580px;margin:0 auto;}
+
+/* ── Sticky Nav ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,8,13,0.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;overflow-x:auto;gap:2px;padding:0 16px;
+}
+.nav button{
+  flex-shrink:0;background:none;border:none;color:var(--text-muted);
+  font-family:inherit;font-size:.82rem;font-weight:600;
+  padding:13px 16px;cursor:pointer;
+  border-bottom:2px solid transparent;transition:.2s;white-space:nowrap;
+}
+.nav button:hover{color:var(--text);}
+.nav button.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ── Sections ── */
+.wrap{max-width:920px;margin:0 auto;padding:36px 24px 80px;}
+.sec{display:none;animation:fadeUp .35s ease;}
+.sec.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+/* ── Card ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:28px;margin-bottom:22px;
+  transition:border-color .3s;
+}
+.card:hover{border-color:rgba(34,211,238,0.2);}
+.card h2{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.card h3{font-size:1.05rem;font-weight:700;margin:22px 0 10px;color:var(--accent);}
+.card p{margin-bottom:10px;}
+.card ul{padding-left:20px;margin-bottom:10px;}
+.card li{margin-bottom:5px;}
+.card li::marker{color:var(--accent);}
+
+/* ── Diagram ── */
+.dia{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:20px;margin:18px 0;overflow-x:auto;
+}
+.dia svg{display:block;margin:0 auto;max-width:100%;}
+
+/* ── Grid helpers ── */
+.kv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0;}
+.kv{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:15px;border-left:3px solid var(--accent);
+}
+.kv .l{font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.kv .v{font-size:.9rem;}
+
+/* ── Table ── */
+.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+.tbl th{background:var(--surface2);color:var(--accent);font-weight:700;text-align:left;padding:11px 14px;border:1px solid var(--border);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;}
+.tbl td{padding:10px 14px;border:1px solid var(--border);}
+.tbl tr:nth-child(even) td{background:rgba(255,255,255,0.015);}
+
+/* ── Callout ── */
+.co{
+  border-radius:10px;padding:15px 18px;margin:14px 0;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.co.tip{background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.18);}
+.co.warn{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.18);}
+.co.danger{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.18);}
+.co.ok{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.18);}
+.co .icon{font-size:1.25rem;flex-shrink:0;margin-top:2px;}
+.co .txt{font-size:.88rem;}
+.co .txt strong{color:#fff;}
+
+/* ── Code ── */
+code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--surface2);padding:2px 7px;border-radius:4px;color:var(--accent5);}
+pre{
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:18px;margin:14px 0;
+  overflow-x:auto;line-height:1.6;color:#c9d1d9;
+}
+pre .k{color:#ff7b72;}
+pre .s{color:#a5d6ff;}
+pre .c{color:#8b949e;font-style:italic;}
+
+/* ── Accordion ── */
+.acc-item{margin-bottom:6px;}
+.acc-btn{
+  width:100%;text-align:left;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;
+  padding:13px 18px;color:#fff;font-family:inherit;font-size:.92rem;font-weight:600;
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s;
+}
+.acc-btn:hover{background:rgba(34,211,238,0.04);}
+.acc-btn .arr{transition:transform .3s;font-size:.75rem;}
+.acc-btn.open .arr{transform:rotate(180deg);}
+.acc-panel{max-height:0;overflow:hidden;transition:max-height .4s ease;padding:0 18px;}
+.acc-panel.open{max-height:4000px;padding:14px 18px;}
+.acc-panel p,.acc-panel ul{font-size:.88rem;color:var(--text-muted);}
+.acc-panel ul{padding-left:18px;}
+
+/* ── Pillar / Feature Cards ── */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0;}
+.feat{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:18px;transition:transform .2s,border-color .2s;
+}
+.feat:hover{transform:translateY(-3px);border-color:var(--accent);}
+.feat .fi{font-size:1.5rem;margin-bottom:8px;}
+.feat .fn{font-weight:700;color:#fff;font-size:.92rem;margin-bottom:5px;}
+.feat .fd{font-size:.78rem;color:var(--text-muted);line-height:1.5;}
+
+/* ── Policy Syntax Highlight ── */
+.policy-box{
+  background:#0d1117;border:1px solid var(--border);
+  border-radius:10px;padding:20px;margin:14px 0;
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  line-height:1.7;overflow-x:auto;
+}
+.policy-box .pk{color:#ff7b72;}
+.policy-box .ps{color:#a5d6ff;}
+.policy-box .pv{color:#7ee787;}
+.policy-box .pc{color:#8b949e;}
+
+/* ── Quiz ── */
+.quiz-q{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+.quiz-q .qn{display:inline-block;background:var(--accent);color:#000;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:4px;margin-bottom:8px;}
+.quiz-q .qt{font-weight:700;color:#fff;margin-bottom:12px;font-size:.93rem;line-height:1.55;}
+.qo{
+  display:block;width:100%;text-align:left;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:11px 15px;margin-bottom:7px;
+  color:var(--text);font-family:inherit;font-size:.88rem;
+  cursor:pointer;transition:.2s;
+}
+.qo:hover{border-color:var(--accent);background:rgba(34,211,238,0.04);}
+.qo.correct{border-color:var(--accent3);background:rgba(52,211,153,0.1);color:var(--accent3);}
+.qo.wrong{border-color:var(--accent4);background:rgba(248,113,113,0.07);color:var(--accent4);}
+.qo.off{pointer-events:none;opacity:.65;}
+.qexp{
+  margin-top:10px;padding:11px 15px;
+  background:rgba(52,211,153,0.05);border-left:3px solid var(--accent3);
+  border-radius:0 8px 8px 0;font-size:.82rem;color:var(--text-muted);display:none;
+}
+.qexp.show{display:block;}
+
+.score-bar{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:20px;text-align:center;margin:20px 0;display:none;
+}
+.score-bar .sv{font-size:1.8rem;font-weight:800;color:var(--accent);}
+.score-bar .sl{font-size:.82rem;color:var(--text-muted);}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:40px 24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:.78rem;}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="badge">Week 1 · Days 3–4</div>
+    <h1>IAM — Identity & Access Management</h1>
+    <p>Users, Groups, Roles, Policies, MFA, Cross-Account Access & Security Best Practices</p>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="navTabs">
+  <button class="active" onclick="go('overview')">Overview</button>
+  <button onclick="go('core')">Core Concepts</button>
+  <button onclick="go('policies')">Policies Deep Dive</button>
+  <button onclick="go('roles')">Roles & Federation</button>
+  <button onclick="go('security')">Security & MFA</button>
+  <button onclick="go('best')">Best Practices</button>
+  <button onclick="go('advanced')">Advanced IAM</button>
+  <button onclick="go('quiz')">Quiz (20 Qs)</button>
+</div>
+
+<!-- CONTENT -->
+<div class="wrap">
+
+<!-- ═══════ OVERVIEW ═══════ -->
+<div class="sec active" id="sec-overview">
+  <div class="card">
+    <h2>🎯 Learning Objectives</h2>
+    <p>By the end of Days 3-4, you should be able to:</p>
+    <ul>
+      <li>Create and manage IAM Users, Groups, and Roles</li>
+      <li>Write and interpret IAM policies (JSON)</li>
+      <li>Explain the difference between identity-based and resource-based policies</li>
+      <li>Configure MFA and password policies</li>
+      <li>Set up cross-account access with IAM Roles</li>
+      <li>Understand federation, SSO, and AWS Organizations</li>
+      <li>Apply IAM security best practices for the exam</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>🔐 What is IAM?</h2>
+    <p><strong>IAM (Identity and Access Management)</strong> is a <strong>global</strong> AWS service that lets you control WHO can access WHAT in your AWS account. It is the foundation of all AWS security.</p>
+
+    <div class="kv-grid">
+      <div class="kv"><div class="l">Scope</div><div class="v">Global — not tied to any Region</div></div>
+      <div class="kv"><div class="l">Cost</div><div class="v">Always FREE — no charge for IAM</div></div>
+      <div class="kv"><div class="l">Root Account</div><div class="v">Created when you set up AWS — has FULL access. Never use for daily tasks!</div></div>
+      <div class="kv"><div class="l">Default Access</div><div class="v">New IAM users have ZERO permissions (implicit deny)</div></div>
+    </div>
+
+    <div class="co warn">
+      <span class="icon">⚠️</span>
+      <div class="txt"><strong>Root Account Warning:</strong> The root account should ONLY be used for: initial account setup, creating first IAM admin user, and changing account settings. Enable MFA on root immediately. Never create access keys for root.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧱 IAM Building Blocks — The Big Picture</h2>
+    <div class="dia">
+      <svg viewBox="0 0 840 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- AWS Account boundary -->
+        <rect x="20" y="10" width="800" height="440" rx="16" stroke="#262a3a" stroke-width="1.5" fill="rgba(34,211,238,0.02)"/>
+        <text x="40" y="38" fill="#7c83a1" font-family="Space Grotesk" font-weight="700" font-size="13">AWS ACCOUNT</text>
+
+        <!-- Root -->
+        <rect x="340" y="50" width="160" height="50" rx="10" fill="#1c2030" stroke="#f87171" stroke-width="2"/>
+        <text x="420" y="72" fill="#f87171" font-family="Outfit" font-weight="700" font-size="13" text-anchor="middle">👑 Root User</text>
+        <text x="420" y="90" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Full access — DO NOT USE daily</text>
+
+        <!-- Users -->
+        <rect x="50" y="150" width="120" height="50" rx="8" fill="#1c2030" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="110" y="180" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">👤 User: Alice</text>
+        <rect x="190" y="150" width="120" height="50" rx="8" fill="#1c2030" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="250" y="180" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">👤 User: Bob</text>
+        <rect x="330" y="150" width="120" height="50" rx="8" fill="#1c2030" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="390" y="180" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">👤 User: Carol</text>
+
+        <!-- Group -->
+        <rect x="60" y="240" width="380" height="60" rx="10" fill="rgba(167,139,250,0.06)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="80" y="265" fill="#a78bfa" font-family="Outfit" font-weight="700" font-size="12">👥 Group: Developers</text>
+        <text x="80" y="285" fill="#7c83a1" font-family="Outfit" font-size="10">Contains: Alice, Bob, Carol — All inherit group policies</text>
+
+        <!-- Lines users to group -->
+        <line x1="110" y1="200" x2="110" y2="240" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="250" y1="200" x2="250" y2="240" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="390" y1="200" x2="390" y2="240" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Policy attached to group -->
+        <rect x="60" y="330" width="200" height="55" rx="8" fill="rgba(52,211,153,0.06)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="80" y="352" fill="#34d399" font-family="Outfit" font-weight="700" font-size="11">📜 Policy: EC2FullAccess</text>
+        <text x="80" y="370" fill="#7c83a1" font-family="Outfit" font-size="9">Attached to Developers group</text>
+        <line x1="160" y1="300" x2="160" y2="330" stroke="#34d399" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Inline policy on user -->
+        <rect x="280" y="330" width="200" height="55" rx="8" fill="rgba(251,191,36,0.06)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="300" y="352" fill="#fbbf24" font-family="Outfit" font-weight="700" font-size="11">📜 Inline Policy: S3ReadOnly</text>
+        <text x="300" y="370" fill="#7c83a1" font-family="Outfit" font-size="9">Attached directly to User: Carol</text>
+        <line x1="390" y1="300" x2="380" y2="330" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Role -->
+        <rect x="540" y="150" width="240" height="70" rx="10" fill="rgba(34,211,238,0.04)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="560" y="175" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="12">🎭 Role: EC2-S3-Access</text>
+        <text x="560" y="195" fill="#7c83a1" font-family="Outfit" font-size="10">Assumed by EC2 instances</text>
+        <text x="560" y="210" fill="#7c83a1" font-family="Outfit" font-size="10">Temporary credentials (STS)</text>
+
+        <!-- EC2 instance assuming role -->
+        <rect x="570" y="260" width="180" height="50" rx="8" fill="#1c2030" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="660" y="282" fill="#f59e0b" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">🖥️ EC2 Instance</text>
+        <text x="660" y="300" fill="#7c83a1" font-family="Outfit" font-size="9" text-anchor="middle">Assumes role → accesses S3</text>
+        <line x1="660" y1="220" x2="660" y2="260" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="670" y="245" fill="#22d3ee" font-family="Outfit" font-size="9">AssumeRole</text>
+
+        <!-- S3 resource policy -->
+        <rect x="570" y="340" width="180" height="50" rx="8" fill="rgba(52,211,153,0.06)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="660" y="362" fill="#34d399" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">🪣 S3 Bucket Policy</text>
+        <text x="660" y="380" fill="#7c83a1" font-family="Outfit" font-size="9" text-anchor="middle">Resource-based policy</text>
+        <line x1="660" y1="310" x2="660" y2="340" stroke="#34d399" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Legend -->
+        <rect x="60" y="410" width="12" height="12" rx="2" fill="#22d3ee"/>
+        <text x="80" y="421" fill="#7c83a1" font-family="Outfit" font-size="10">User / Role</text>
+        <rect x="180" y="410" width="12" height="12" rx="2" fill="#a78bfa"/>
+        <text x="200" y="421" fill="#7c83a1" font-family="Outfit" font-size="10">Group</text>
+        <rect x="270" y="410" width="12" height="12" rx="2" fill="#34d399"/>
+        <text x="290" y="421" fill="#7c83a1" font-family="Outfit" font-size="10">Policy (Managed)</text>
+        <rect x="400" y="410" width="12" height="12" rx="2" fill="#fbbf24"/>
+        <text x="420" y="421" fill="#7c83a1" font-family="Outfit" font-size="10">Policy (Inline)</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CORE CONCEPTS ═══════ -->
+<div class="sec" id="sec-core">
+  <div class="card">
+    <h2>👤 IAM Users</h2>
+    <p>An IAM user represents a <strong>person or application</strong> that needs to interact with AWS.</p>
+    <div class="kv-grid">
+      <div class="kv"><div class="l">Console Access</div><div class="v">Username + password (+ optional MFA)</div></div>
+      <div class="kv"><div class="l">Programmatic Access</div><div class="v">Access Key ID + Secret Access Key</div></div>
+      <div class="kv"><div class="l">Default Permissions</div><div class="v">NONE — must be explicitly granted</div></div>
+      <div class="kv"><div class="l">Limit</div><div class="v">5,000 IAM users per account (hard limit)</div></div>
+    </div>
+    <div class="co danger">
+      <span class="icon">🚫</span>
+      <div class="txt"><strong>Never embed access keys in code!</strong> Use IAM Roles for EC2/Lambda instead. Access keys in code is a top security anti-pattern. If keys are leaked, rotate them immediately.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>👥 IAM Groups</h2>
+    <p>Groups are <strong>collections of IAM users</strong>. Policies attached to the group apply to all members.</p>
+    <ul>
+      <li>A user can belong to <strong>up to 10 groups</strong></li>
+      <li>Groups <strong>cannot be nested</strong> (no groups within groups)</li>
+      <li>Groups are <strong>not identities</strong> — you can't reference a group in a resource policy's Principal</li>
+      <li>There is <strong>no default "All Users" group</strong> — you must create one manually if needed</li>
+    </ul>
+    <div class="co tip">
+      <span class="icon">💡</span>
+      <div class="txt"><strong>Best Practice:</strong> Always assign permissions through Groups, not directly to Users. This makes management scalable — when Alice changes teams, just move her to a different group.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎭 IAM Roles</h2>
+    <p>Roles are IAM identities with <strong>temporary credentials</strong>. They are <strong>assumed</strong> by trusted entities (users, services, accounts).</p>
+
+    <h3>When to Use Roles (Critical for Exam!)</h3>
+    <div class="feat-grid">
+      <div class="feat" style="border-left:3px solid var(--accent);">
+        <div class="fi">🖥️</div>
+        <div class="fn">EC2 Instance Role</div>
+        <div class="fd">Give EC2 instances permissions to access S3, DynamoDB, etc. without embedding access keys.</div>
+      </div>
+      <div class="feat" style="border-left:3px solid var(--accent2);">
+        <div class="fi">⚡</div>
+        <div class="fn">Lambda Execution Role</div>
+        <div class="fd">Every Lambda function needs a role to access other AWS services. Called the "execution role."</div>
+      </div>
+      <div class="feat" style="border-left:3px solid var(--accent3);">
+        <div class="fi">🔄</div>
+        <div class="fn">Cross-Account Access</div>
+        <div class="fd">User in Account A assumes a role in Account B to access resources there. No need to create users in both accounts.</div>
+      </div>
+      <div class="feat" style="border-left:3px solid var(--accent5);">
+        <div class="fi">🌐</div>
+        <div class="fn">Federation (SSO)</div>
+        <div class="fd">External users (SAML 2.0, OIDC, Active Directory) assume roles to get temporary AWS access.</div>
+      </div>
+    </div>
+
+    <h3>How Role Assumption Works</h3>
+    <div class="dia">
+      <svg viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- EC2 -->
+        <rect x="30" y="60" width="140" height="70" rx="10" fill="#1c2030" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="100" y="90" fill="#f59e0b" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">🖥️ EC2 Instance</text>
+        <text x="100" y="110" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Needs S3 access</text>
+
+        <!-- Arrow 1 -->
+        <line x1="170" y1="95" x2="260" y2="95" stroke="#22d3ee" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="215" y="85" fill="#22d3ee" font-family="Outfit" font-size="9" text-anchor="middle">1. AssumeRole</text>
+
+        <!-- STS -->
+        <rect x="260" y="60" width="140" height="70" rx="10" fill="#1c2030" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="330" y="90" fill="#a78bfa" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">🔑 AWS STS</text>
+        <text x="330" y="110" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Security Token Service</text>
+
+        <!-- Arrow 2 -->
+        <line x1="400" y1="95" x2="490" y2="95" stroke="#34d399" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="445" y="85" fill="#34d399" font-family="Outfit" font-size="9" text-anchor="middle">2. Temp creds</text>
+
+        <!-- Temp Creds -->
+        <rect x="490" y="50" width="150" height="90" rx="10" fill="#1c2030" stroke="#34d399" stroke-width="1.5"/>
+        <text x="565" y="78" fill="#34d399" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">📋 Temporary Credentials</text>
+        <text x="565" y="96" fill="#7c83a1" font-family="Outfit" font-size="9" text-anchor="middle">Access Key + Secret Key</text>
+        <text x="565" y="112" fill="#7c83a1" font-family="Outfit" font-size="9" text-anchor="middle">+ Session Token</text>
+        <text x="565" y="128" fill="#fbbf24" font-family="Outfit" font-size="9" text-anchor="middle">Expires: 1-12 hours</text>
+
+        <!-- Arrow 3 -->
+        <line x1="640" y1="95" x2="710" y2="95" stroke="#22d3ee" stroke-width="2" marker-end="url(#arr3)"/>
+        <text x="675" y="85" fill="#22d3ee" font-family="Outfit" font-size="9" text-anchor="middle">3. Access</text>
+
+        <!-- S3 -->
+        <rect x="710" y="60" width="80" height="70" rx="10" fill="#1c2030" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="750" y="95" fill="#f59e0b" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">🪣 S3</text>
+
+        <defs>
+          <marker id="arr" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto"><path d="M0 0 L10 3.5 L0 7z" fill="#22d3ee"/></marker>
+          <marker id="arr2" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto"><path d="M0 0 L10 3.5 L0 7z" fill="#34d399"/></marker>
+          <marker id="arr3" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto"><path d="M0 0 L10 3.5 L0 7z" fill="#22d3ee"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="txt"><strong>Exam Tip:</strong> When the question says "an EC2 instance needs to access S3" — the answer is ALWAYS <strong>IAM Role (Instance Profile)</strong>, never access keys.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ POLICIES DEEP DIVE ═══════ -->
+<div class="sec" id="sec-policies">
+  <div class="card">
+    <h2>📜 IAM Policies — Deep Dive</h2>
+    <p>Policies are <strong>JSON documents</strong> that define permissions. They are the core of IAM — every access decision goes through policy evaluation.</p>
+
+    <h3>Policy Structure (VERY Important for Exam)</h3>
+    <div class="policy-box">
+{<br>
+&nbsp;&nbsp;<span class="pk">"Version"</span>: <span class="ps">"2012-10-17"</span>,<br>
+&nbsp;&nbsp;<span class="pk">"Statement"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pk">"Sid"</span>: <span class="ps">"AllowS3Read"</span>,          <span class="pc">// Optional identifier</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pk">"Effect"</span>: <span class="pv">"Allow"</span>,              <span class="pc">// Allow or Deny</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pk">"Action"</span>: [                       <span class="pc">// What actions are allowed</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ps">"s3:GetObject"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ps">"s3:ListBucket"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pk">"Resource"</span>: [                     <span class="pc">// Which resources</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ps">"arn:aws:s3:::my-bucket"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ps">"arn:aws:s3:::my-bucket/*"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="pk">"Condition"</span>: {                    <span class="pc">// Optional conditions</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ps">"IpAddress"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ps">"aws:SourceIp"</span>: <span class="pv">"203.0.113.0/24"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;]<br>
+}
+    </div>
+
+    <h3>Policy Evaluation Logic — The Golden Rule</h3>
+    <div class="dia">
+      <svg viewBox="0 0 800 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Start -->
+        <rect x="30" y="110" width="110" height="45" rx="22" fill="#1c2030" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="85" y="137" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">API Request</text>
+
+        <!-- Step 1 -->
+        <rect x="180" y="100" width="160" height="65" rx="10" fill="#1c2030" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="260" y="125" fill="#a78bfa" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">Explicit DENY?</text>
+        <text x="260" y="148" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Check all policies</text>
+
+        <!-- Deny result -->
+        <rect x="200" y="210" width="120" height="40" rx="8" fill="rgba(248,113,113,0.1)" stroke="#f87171" stroke-width="1.5"/>
+        <text x="260" y="235" fill="#f87171" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">❌ DENIED</text>
+        <line x1="260" y1="165" x2="260" y2="210" stroke="#f87171" stroke-width="1.5"/>
+        <text x="270" y="195" fill="#f87171" font-family="Outfit" font-size="9">YES</text>
+
+        <!-- Step 2 -->
+        <rect x="390" y="100" width="160" height="65" rx="10" fill="#1c2030" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="470" y="125" fill="#fbbf24" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">Explicit ALLOW?</text>
+        <text x="470" y="148" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Any policy allows?</text>
+        <line x1="340" y1="132" x2="390" y2="132" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="365" y="125" fill="#22d3ee" font-family="Outfit" font-size="9">NO</text>
+
+        <!-- Allow result -->
+        <rect x="600" y="100" width="120" height="40" rx="8" fill="rgba(52,211,153,0.1)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="660" y="125" fill="#34d399" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">✅ ALLOWED</text>
+        <line x1="550" y1="120" x2="600" y2="120" stroke="#34d399" stroke-width="1.5"/>
+        <text x="575" y="113" fill="#34d399" font-family="Outfit" font-size="9">YES</text>
+
+        <!-- Default deny -->
+        <rect x="410" y="210" width="120" height="40" rx="8" fill="rgba(248,113,113,0.1)" stroke="#f87171" stroke-width="1.5"/>
+        <text x="470" y="235" fill="#f87171" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">❌ DENIED</text>
+        <line x1="470" y1="165" x2="470" y2="210" stroke="#f87171" stroke-width="1.5"/>
+        <text x="480" y="195" fill="#f87171" font-family="Outfit" font-size="9">NO (implicit deny)</text>
+
+        <line x1="140" y1="132" x2="180" y2="132" stroke="#22d3ee" stroke-width="1.5"/>
+
+        <!-- Legend -->
+        <text x="30" y="270" fill="#fbbf24" font-family="Outfit" font-weight="700" font-size="11">⚡ KEY RULE: Explicit Deny ALWAYS wins → then check for Allow → default is Deny</text>
+      </svg>
+    </div>
+
+    <h3>Types of Policies</h3>
+    <table class="tbl">
+      <tr><th>Type</th><th>Attached To</th><th>Key Points</th></tr>
+      <tr><td><strong>AWS Managed</strong></td><td>Users, Groups, Roles</td><td>Created by AWS. Examples: <code>AmazonS3FullAccess</code>, <code>AdministratorAccess</code>. Can't edit.</td></tr>
+      <tr><td><strong>Customer Managed</strong></td><td>Users, Groups, Roles</td><td>Created by you. Reusable, versioned (up to 5 versions). Best practice for custom needs.</td></tr>
+      <tr><td><strong>Inline</strong></td><td>Single User, Group, or Role</td><td>Embedded in the identity. Deleted when identity is deleted. Use for strict 1:1 mapping.</td></tr>
+      <tr><td><strong>Resource-based</strong></td><td>Resources (S3, SQS, etc.)</td><td>Attached to the resource, not the identity. Has a <code>Principal</code> field specifying WHO.</td></tr>
+      <tr><td><strong>Permissions Boundary</strong></td><td>Users, Roles</td><td>Sets the MAXIMUM permissions. Even if a policy allows more, the boundary limits it.</td></tr>
+      <tr><td><strong>SCP (Service Control Policy)</strong></td><td>AWS Organizations (OUs, accounts)</td><td>Limits what services/actions an entire account can use. Doesn't grant — only restricts.</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>🧩 ARN Format (Amazon Resource Name)</h2>
+    <p>Every AWS resource has a unique ARN. Understanding the format is essential for writing policies.</p>
+    <div class="policy-box">
+<span class="pc">// General format:</span><br>
+arn:<span class="pk">partition</span>:<span class="ps">service</span>:<span class="pv">region</span>:<span class="pk">account-id</span>:<span class="ps">resource-type/resource-id</span><br><br>
+<span class="pc">// Examples:</span><br>
+arn:aws:s3:::my-bucket                     <span class="pc">// S3 bucket (no region/account for S3)</span><br>
+arn:aws:s3:::my-bucket/*                   <span class="pc">// All objects IN the bucket</span><br>
+arn:aws:ec2:us-east-1:123456789012:instance/i-abc123  <span class="pc">// Specific EC2 instance</span><br>
+arn:aws:iam::123456789012:user/alice        <span class="pc">// IAM user (global, no region)</span><br>
+arn:aws:lambda:ap-southeast-1:123456789012:function:myFunc <span class="pc">// Lambda function</span>
+    </div>
+    <div class="co warn">
+      <span class="icon">⚠️</span>
+      <div class="txt"><strong>Common Exam Trap:</strong> <code>arn:aws:s3:::my-bucket</code> refers to the bucket itself. <code>arn:aws:s3:::my-bucket/*</code> refers to the objects inside. You often need BOTH in a policy!</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔀 Identity-based vs Resource-based Policies</h2>
+    <table class="tbl">
+      <tr><th>Feature</th><th>Identity-based</th><th>Resource-based</th></tr>
+      <tr><td><strong>Attached to</strong></td><td>Users, Groups, Roles</td><td>Resources (S3, SQS, Lambda, KMS)</td></tr>
+      <tr><td><strong>Has Principal field?</strong></td><td>NO (identity IS the principal)</td><td>YES — specifies who can access</td></tr>
+      <tr><td><strong>Cross-account</strong></td><td>Needs role assumption</td><td>Can directly grant cross-account access</td></tr>
+      <tr><td><strong>Example</strong></td><td>IAM policy on a user</td><td>S3 bucket policy, SQS queue policy</td></tr>
+    </table>
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="txt"><strong>Exam Tip:</strong> For cross-account S3 access, you can use either: (1) Role assumption, OR (2) S3 bucket policy with the other account's ARN as Principal. Resource-based policies don't require the user to give up their original permissions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ROLES & FEDERATION ═══════ -->
+<div class="sec" id="sec-roles">
+  <div class="card">
+    <h2>🔄 Cross-Account Access</h2>
+    <p>A common architecture pattern — User in Account A needs access to resources in Account B.</p>
+    <div class="dia">
+      <svg viewBox="0 0 800 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="300" height="180" rx="12" fill="rgba(34,211,238,0.03)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="40" y="48" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="13">Account A (Dev)</text>
+        <rect x="50" y="70" width="120" height="50" rx="8" fill="#1c2030" stroke="#22d3ee"/>
+        <text x="110" y="100" fill="#e0e4ef" font-family="Outfit" font-weight="600" font-size="11" text-anchor="middle">👤 Dev User</text>
+        <rect x="50" y="140" width="240" height="40" rx="8" fill="#1c2030" stroke="#a78bfa"/>
+        <text x="170" y="165" fill="#a78bfa" font-family="Outfit" font-size="10" text-anchor="middle">Policy: Allow sts:AssumeRole on Acct B role</text>
+
+        <rect x="480" y="20" width="300" height="180" rx="12" fill="rgba(251,191,36,0.03)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="500" y="48" fill="#fbbf24" font-family="Outfit" font-weight="700" font-size="13">Account B (Prod)</text>
+        <rect x="510" y="70" width="240" height="50" rx="8" fill="#1c2030" stroke="#fbbf24"/>
+        <text x="630" y="92" fill="#fbbf24" font-family="Outfit" font-weight="600" font-size="11" text-anchor="middle">🎭 Role: ProdReadOnly</text>
+        <text x="630" y="110" fill="#7c83a1" font-family="Outfit" font-size="9" text-anchor="middle">Trust: Account A</text>
+        <rect x="510" y="140" width="240" height="40" rx="8" fill="#1c2030" stroke="#34d399"/>
+        <text x="630" y="165" fill="#34d399" font-family="Outfit" font-size="10" text-anchor="middle">Policy: S3 + RDS Read-Only access</text>
+
+        <!-- Arrow -->
+        <line x1="320" y1="95" x2="480" y2="95" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="400" y="85" fill="#22d3ee" font-family="Outfit" font-weight="600" font-size="10" text-anchor="middle">sts:AssumeRole →</text>
+        <text x="400" y="115" fill="#7c83a1" font-family="Outfit" font-size="9" text-anchor="middle">Gets temp credentials</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🌐 Identity Federation</h2>
+    <p>Federation allows <strong>external users</strong> (corporate AD, Google, Facebook) to access AWS without creating IAM users.</p>
+    <table class="tbl">
+      <tr><th>Federation Type</th><th>Protocol</th><th>Use Case</th></tr>
+      <tr><td><strong>SAML 2.0</strong></td><td>SAML</td><td>Enterprise SSO (Active Directory, Okta, Azure AD)</td></tr>
+      <tr><td><strong>Web Identity (OIDC)</strong></td><td>OpenID Connect</td><td>Mobile apps (Login with Google/Facebook/Amazon)</td></tr>
+      <tr><td><strong>AWS SSO / IAM Identity Center</strong></td><td>SAML + SCIM</td><td>Centralized access to multiple AWS accounts (recommended)</td></tr>
+      <tr><td><strong>Custom Identity Broker</strong></td><td>Custom</td><td>Legacy apps that can't use SAML/OIDC directly</td></tr>
+    </table>
+    <div class="co tip">
+      <span class="icon">💡</span>
+      <div class="txt"><strong>Exam Favorite:</strong> "Company uses Active Directory and needs SSO to AWS" → <strong>AWS IAM Identity Center</strong> (formerly AWS SSO) is the recommended answer. SAML 2.0 federation is the older approach. <strong>Amazon Cognito</strong> is for mobile/web app users.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏢 AWS Organizations & SCPs</h2>
+    <p>AWS Organizations lets you manage <strong>multiple AWS accounts</strong> centrally. Service Control Policies (SCPs) set guardrails.</p>
+    <div class="kv-grid">
+      <div class="kv" style="border-left-color:var(--accent2);"><div class="l" style="color:var(--accent2);">Management Account</div><div class="v">The master account that creates the organization. SCPs do NOT apply to it.</div></div>
+      <div class="kv" style="border-left-color:var(--accent3);"><div class="l" style="color:var(--accent3);">OUs (Organizational Units)</div><div class="v">Logical groupings of accounts (e.g., Dev, Staging, Prod)</div></div>
+      <div class="kv" style="border-left-color:var(--accent5);"><div class="l" style="color:var(--accent5);">SCPs</div><div class="v">Define maximum permissions for accounts/OUs. They don't grant — only restrict.</div></div>
+      <div class="kv" style="border-left-color:var(--accent4);"><div class="l" style="color:var(--accent4);">Consolidated Billing</div><div class="v">Single bill for all accounts. Volume discounts apply across all accounts.</div></div>
+    </div>
+    <div class="co warn">
+      <span class="icon">⚠️</span>
+      <div class="txt"><strong>Key Exam Point:</strong> SCPs affect all users and roles in member accounts — including the root user of those accounts! But SCPs never affect the <strong>management account</strong> itself. SCPs don't grant permissions — they only set boundaries.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SECURITY & MFA ═══════ -->
+<div class="sec" id="sec-security">
+  <div class="card">
+    <h2>🔐 Multi-Factor Authentication (MFA)</h2>
+    <p>MFA adds a second layer of security beyond passwords. AWS strongly recommends MFA for all users, especially root.</p>
+
+    <h3>MFA Device Options</h3>
+    <table class="tbl">
+      <tr><th>Device</th><th>Type</th><th>Details</th></tr>
+      <tr><td><strong>Virtual MFA</strong></td><td>Software</td><td>Google Authenticator, Authy, Microsoft Authenticator. Free, most common.</td></tr>
+      <tr><td><strong>U2F Security Key</strong></td><td>Hardware</td><td>YubiKey by Yubico. Physical USB key. Supports multiple root & IAM users.</td></tr>
+      <tr><td><strong>Hardware MFA</strong></td><td>Hardware</td><td>Gemalto token. Key fob or display card. Must be purchased.</td></tr>
+    </table>
+    <div class="co ok">
+      <span class="icon">✅</span>
+      <div class="txt"><strong>Best Practice:</strong> Enable MFA on the root account FIRST. Then enable MFA on all IAM users. You can enforce MFA via IAM policies using the condition key <code>aws:MultiFactorAuthPresent</code>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔑 Password Policy</h2>
+    <p>You can configure account-wide password requirements:</p>
+    <ul>
+      <li>Minimum password length</li>
+      <li>Require uppercase, lowercase, numbers, special characters</li>
+      <li>Allow/prevent password reuse (remember last N passwords)</li>
+      <li>Password expiration (force rotation every N days)</li>
+      <li>Allow users to change their own password</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📊 IAM Credentials Report & Access Advisor</h2>
+    <div class="kv-grid">
+      <div class="kv" style="border-left-color:var(--accent2);">
+        <div class="l" style="color:var(--accent2);">Credentials Report</div>
+        <div class="v"><strong>Account-level.</strong> Lists ALL users and status of their credentials (password, access keys, MFA). CSV download. Great for auditing.</div>
+      </div>
+      <div class="kv" style="border-left-color:var(--accent3);">
+        <div class="l" style="color:var(--accent3);">Access Advisor</div>
+        <div class="v"><strong>User-level.</strong> Shows which services a user accessed and when. Use to identify and remove unused permissions (least privilege).</div>
+      </div>
+    </div>
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="txt"><strong>Exam Tip:</strong> "Audit all IAM users' credentials" → <strong>Credentials Report</strong>. "Find unused permissions for a specific user" → <strong>Access Advisor</strong>. Know the difference!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BEST PRACTICES ═══════ -->
+<div class="sec" id="sec-best">
+  <div class="card">
+    <h2>✅ IAM Best Practices Checklist</h2>
+    <p>These are heavily tested on the exam and are real-world critical:</p>
+
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">1. Don't use the root account for daily tasks <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>Create an IAM admin user immediately. Lock root credentials, enable MFA, and store securely. Only use root for tasks that require it (like changing account billing settings).</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">2. Apply the Principle of Least Privilege <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>Grant only the permissions required to perform a task — nothing more. Start with zero permissions and add as needed. Use IAM Access Advisor to identify and remove unused permissions.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">3. Use Groups to assign permissions <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>Never attach policies directly to users. Create groups (Admins, Developers, ReadOnly) and assign users to groups. When someone changes roles, just move them to a different group.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">4. Use IAM Roles for AWS services <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>EC2, Lambda, ECS — all should use IAM Roles, never hardcoded access keys. Roles provide temporary credentials that rotate automatically.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">5. Enable MFA everywhere <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>Enable MFA on root first, then all IAM users. Use conditional policies to enforce MFA for sensitive operations.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">6. Rotate credentials regularly <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>Set password rotation policies. Rotate access keys regularly. Use IAM Credentials Report to audit key age.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">7. Use AWS managed policies when possible <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>AWS maintains these policies and updates them. Use customer managed policies for custom requirements. Avoid inline policies except for strict 1:1 relationships.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-btn" onclick="toggleAcc(this)">8. Use Permissions Boundaries for delegation <span class="arr">▼</span></button>
+      <div class="acc-panel"><p>When you want to allow developers to create roles but limit what permissions those roles can have, use permissions boundaries. The boundary sets the maximum.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ADVANCED IAM ═══════ -->
+<div class="sec" id="sec-advanced">
+  <div class="card">
+    <h2>🧠 Permissions Boundaries</h2>
+    <p>A permissions boundary is an advanced feature that sets the <strong>maximum permissions</strong> an IAM entity can have.</p>
+    <div class="dia">
+      <svg viewBox="0 0 600 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="200" cy="120" r="100" fill="rgba(34,211,238,0.08)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="200" y="85" fill="#22d3ee" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">Identity Policy</text>
+        <text x="200" y="105" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">S3, EC2, RDS,</text>
+        <text x="200" y="120" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Lambda, DynamoDB</text>
+
+        <circle cx="350" cy="120" r="100" fill="rgba(167,139,250,0.08)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="350" y="85" fill="#a78bfa" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">Permissions</text>
+        <text x="350" y="100" fill="#a78bfa" font-family="Outfit" font-weight="700" font-size="12" text-anchor="middle">Boundary</text>
+        <text x="350" y="120" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">S3, EC2,</text>
+        <text x="350" y="135" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">CloudWatch</text>
+
+        <!-- Intersection label -->
+        <text x="275" y="160" fill="#34d399" font-family="Outfit" font-weight="800" font-size="11" text-anchor="middle">Effective:</text>
+        <text x="275" y="175" fill="#34d399" font-family="Outfit" font-weight="700" font-size="11" text-anchor="middle">S3 + EC2 only</text>
+
+        <text x="300" y="230" fill="#7c83a1" font-family="Outfit" font-size="10" text-anchor="middle">Effective permissions = INTERSECTION of identity policy ∩ boundary</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔍 IAM Policy Conditions</h2>
+    <p>Conditions add fine-grained control. Common condition keys for the exam:</p>
+    <table class="tbl">
+      <tr><th>Condition Key</th><th>What It Does</th><th>Example Use</th></tr>
+      <tr><td><code>aws:SourceIp</code></td><td>Restrict by IP address</td><td>Allow access only from office IP range</td></tr>
+      <tr><td><code>aws:MultiFactorAuthPresent</code></td><td>Require MFA</td><td>Deny delete actions without MFA</td></tr>
+      <tr><td><code>aws:RequestedRegion</code></td><td>Restrict by Region</td><td>Only allow actions in ap-southeast-1</td></tr>
+      <tr><td><code>aws:PrincipalTag</code></td><td>Attribute-based access (ABAC)</td><td>Allow based on user's tags</td></tr>
+      <tr><td><code>s3:prefix</code></td><td>S3 key prefix</td><td>Allow access only to specific S3 folder</td></tr>
+      <tr><td><code>ec2:ResourceTag</code></td><td>EC2 resource tags</td><td>Allow stopping only instances tagged "Dev"</td></tr>
+      <tr><td><code>aws:SecureTransport</code></td><td>Enforce HTTPS</td><td>Deny S3 access over HTTP</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>🆔 IAM Identity Center (AWS SSO)</h2>
+    <p>The <strong>recommended</strong> way to manage access for a multi-account organization.</p>
+    <ul>
+      <li>Single sign-on to multiple AWS accounts and business applications</li>
+      <li>Integrates with Active Directory, Okta, Azure AD (SAML 2.0)</li>
+      <li>Built-in identity store or connect external IdP</li>
+      <li>Permission Sets = collections of policies assigned to users/groups per account</li>
+      <li>Centralized access management via AWS Organizations</li>
+    </ul>
+    <div class="co tip">
+      <span class="icon">🎯</span>
+      <div class="txt"><strong>Exam Tip:</strong> Any question about "centralized access management across multiple AWS accounts" → <strong>IAM Identity Center</strong>. It replaced the old AWS SSO naming.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 STS — Security Token Service</h2>
+    <p>STS provides <strong>temporary, limited-privilege credentials</strong>. Key API calls:</p>
+    <table class="tbl">
+      <tr><th>API Call</th><th>Use Case</th></tr>
+      <tr><td><code>AssumeRole</code></td><td>Assume a role within your account or cross-account</td></tr>
+      <tr><td><code>AssumeRoleWithSAML</code></td><td>For SAML 2.0 federated users</td></tr>
+      <tr><td><code>AssumeRoleWithWebIdentity</code></td><td>For web identity federation (use Cognito instead)</td></tr>
+      <tr><td><code>GetSessionToken</code></td><td>For MFA, returns temp creds</td></tr>
+      <tr><td><code>GetCallerIdentity</code></td><td>Returns details about the IAM user/role making the call (debugging)</td></tr>
+      <tr><td><code>DecodeAuthorizationMessage</code></td><td>Decode error messages from AWS API calls</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════ QUIZ ═══════ -->
+<div class="sec" id="sec-quiz">
+  <div class="card">
+    <h2>🧪 Day 3-4 Quiz — IAM (20 Questions)</h2>
+    <p>Test your understanding of IAM concepts. Click to answer — explanations appear after each question.</p>
+
+    <div class="score-bar" id="scoreBar">
+      <div class="sv" id="scoreText">0 / 0</div>
+      <div class="sl">Correct Answers</div>
+    </div>
+
+    <div id="quizBox"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<div class="footer">AWS SAA-C03 Study Guide · Day 3-4: IAM · Built for Mohan's Certification Journey</div>
+
+<script>
+const Q = [
+  {q:"IAM is a _____ service.",o:["Regional","AZ-specific","Global","Multi-Region"],c:2,e:"IAM is a global service. Users, groups, roles, and policies are not tied to any specific Region."},
+  {q:"What is the default permission level for a newly created IAM user?",o:["Full admin access","Read-only access","No permissions (implicit deny)","PowerUser access"],c:2,e:"New IAM users have ZERO permissions by default. Everything is implicitly denied until you explicitly grant access via policies."},
+  {q:"An EC2 instance needs to read objects from S3. What is the BEST approach?",o:["Store access keys in environment variables","Create an IAM user and embed keys in code","Attach an IAM Role to the EC2 instance","Use the root account credentials"],c:2,e:"IAM Roles with instance profiles are the best practice. They provide temporary credentials that rotate automatically — no keys to manage or leak."},
+  {q:"What does an explicit DENY in an IAM policy do?",o:["It is overridden by any Allow statement","It has no effect if an Allow exists","It ALWAYS overrides any Allow (highest priority)","It only applies to the root user"],c:2,e:"Explicit Deny ALWAYS wins over any Allow statement. This is the #1 rule of IAM policy evaluation."},
+  {q:"How many IAM groups can an IAM user belong to?",o:["1","5","10","Unlimited"],c:2,e:"An IAM user can belong to a maximum of 10 groups. This is a hard limit."},
+  {q:"Which IAM feature lets you see the last time a user accessed a specific service?",o:["Credentials Report","Access Advisor","CloudTrail","IAM Dashboard"],c:1,e:"Access Advisor is user-level and shows which services were accessed and when. It's used for implementing least privilege by removing unused permissions."},
+  {q:"What is the main difference between IAM Roles and IAM Users?",o:["Roles cost more","Roles provide permanent credentials","Roles provide temporary credentials via STS","Roles can only be used by AWS services"],c:2,e:"Roles provide temporary credentials through STS (Security Token Service). They can be assumed by users, services, or accounts. The credentials expire automatically."},
+  {q:"Which policy type sets the MAXIMUM permissions an IAM entity can have?",o:["AWS Managed Policy","Inline Policy","Service Control Policy","Permissions Boundary"],c:3,e:"Permissions Boundaries set the maximum permissions. Effective permissions = the intersection of the identity policy and the boundary. Even if a policy allows more, the boundary limits it."},
+  {q:"You need to grant cross-account access. Which is the recommended approach?",o:["Share IAM user credentials","Create duplicate users in both accounts","Use IAM Roles with cross-account trust","Use the root account of the target"],c:2,e:"Cross-account IAM Roles are the recommended approach. Create a role in the target account with a trust policy allowing the source account."},
+  {q:"What is the purpose of SCPs in AWS Organizations?",o:["Grant permissions to users","Replace IAM policies","Set maximum permissions for accounts/OUs","Enable MFA for all accounts"],c:2,e:"SCPs (Service Control Policies) don't grant permissions — they only set guardrails (maximum boundaries) for what services/actions are available in member accounts."},
+  {q:"SCPs apply to the management (master) account of an Organization. True or False?",o:["True","False"],c:1,e:"False! SCPs do NOT affect the management account. They only restrict member accounts and their users/roles (including the root user of member accounts)."},
+  {q:"Which service provides centralized SSO across multiple AWS accounts?",o:["IAM Groups","AWS Cognito","IAM Identity Center (AWS SSO)","Amazon WorkSpaces"],c:2,e:"IAM Identity Center (formerly AWS SSO) provides centralized single sign-on across multiple AWS accounts in an Organization. Cognito is for application users."},
+  {q:"The IAM Credentials Report provides information at which level?",o:["User-level","Account-level","Region-level","Organization-level"],c:1,e:"The Credentials Report is account-level — it lists ALL IAM users and their credential status (password age, MFA, access key status). It's downloaded as a CSV."},
+  {q:"Which MFA device is a physical USB key?",o:["Virtual MFA device","Hardware MFA key fob","U2F Security Key (YubiKey)","SMS-based MFA"],c:2,e:"U2F Security Keys (like YubiKey) are physical USB devices. Note: AWS does NOT support SMS-based MFA — that's a trick answer option."},
+  {q:"What does the policy condition key 'aws:MultiFactorAuthPresent' check?",o:["If the user has a password","If the user's access key is valid","If the user authenticated with MFA","If the user is in a specific Region"],c:2,e:"This condition key checks whether the API call was made with MFA authentication. Used to enforce MFA for sensitive operations like deleting resources."},
+  {q:"Which of these is NOT a valid IAM policy type?",o:["AWS Managed","Customer Managed","Inline","Inherited"],c:3,e:"There is no 'Inherited' policy type in IAM. Policies can be AWS Managed, Customer Managed, Inline, Resource-based, Permissions Boundary, or SCP."},
+  {q:"arn:aws:s3:::my-bucket vs arn:aws:s3:::my-bucket/* — what's the difference?",o:["They are identical","First = bucket, Second = objects in bucket","First = objects, Second = bucket","First = Region, Second = AZ"],c:1,e:"The first ARN refers to the bucket itself (for actions like ListBucket). The second refers to objects inside the bucket (for actions like GetObject, PutObject). You often need BOTH."},
+  {q:"A company uses Active Directory for employee authentication. They want employees to access AWS. Best approach?",o:["Create IAM users for each employee","Use IAM Identity Center with SAML federation","Give everyone the root password","Create shared access keys"],c:1,e:"IAM Identity Center with SAML 2.0 federation to Active Directory is the recommended approach. No need to create individual IAM users."},
+  {q:"What happens when both an identity-based policy ALLOWS an action and a resource-based policy DENIES it?",o:["Allow wins","Deny wins","They cancel out","Error occurs"],c:1,e:"Explicit Deny ALWAYS wins, regardless of whether it comes from an identity-based or resource-based policy. This is the fundamental IAM evaluation rule."},
+  {q:"Which STS API call would you use to get temporary credentials for a cross-account role?",o:["GetSessionToken","GetCallerIdentity","AssumeRole","DecodeAuthorizationMessage"],c:2,e:"AssumeRole is used to assume a role, including cross-account roles. It returns temporary credentials (Access Key, Secret Key, Session Token)."}
+];
+
+let sc=0,ans=0;
+function renderQ(){
+  document.getElementById('quizBox').innerHTML=Q.map((q,i)=>`
+    <div class="quiz-q" id="q${i}">
+      <div class="qn">Q${i+1}</div>
+      <div class="qt">${q.q}</div>
+      ${q.o.map((o,j)=>`<button class="qo" onclick="chk(${i},${j})" id="q${i}o${j}">${String.fromCharCode(65+j)}. ${o}</button>`).join('')}
+      <div class="qexp" id="e${i}">${q.e}</div>
+    </div>
+  `).join('');
+}
+function chk(qi,oi){
+  const el=document.getElementById(`q${qi}`);
+  if(el.dataset.done)return;
+  el.dataset.done='1';ans++;
+  Q[qi].o.forEach((_,j)=>document.getElementById(`q${qi}o${j}`).classList.add('off'));
+  if(oi===Q[qi].c){document.getElementById(`q${qi}o${oi}`).classList.add('correct');sc++;}
+  else{document.getElementById(`q${qi}o${oi}`).classList.add('wrong');document.getElementById(`q${qi}o${Q[qi].c}`).classList.add('correct');}
+  document.getElementById(`e${qi}`).classList.add('show');
+  const bar=document.getElementById('scoreBar');bar.style.display='block';
+  document.getElementById('scoreText').textContent=`${sc} / ${ans}`;
+}
+
+// Nav
+function go(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`sec-${id}`).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  window.scrollTo({top:200,behavior:'smooth'});
+}
+
+// Accordion
+function toggleAcc(btn){
+  const p=btn.nextElementSibling;
+  btn.classList.toggle('open');p.classList.toggle('open');
+}
+
+renderQ();
+</script>
+</body>
+</html>

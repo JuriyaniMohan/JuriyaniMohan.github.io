@@ -163,5 +163,226 @@ body {
 .comp-table tr:hover td { background: rgba(255,255,255,0.02); }
 .comp-table .check { color: var(--accent3); }
 .comp-table .cross { color: var(--danger); }
+/* NAV */
+.toc {
+  max-width: 1100px;
+  margin: -40px auto 0;
+  padding: 0 24px;
+  position: relative;
+  z-index: 2;
+}
+.toc-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 36px;
+}
+.toc h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: var(--accent);
+}
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px;
+}
+.toc-grid a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toc-grid a:hover { background: var(--surface2); color: var(--accent); }
+.toc-grid a .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  background: rgba(56,189,248,0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  min-width: 32px;
+  text-align: center;
+}
+
+/* MAIN CONTENT */
+.content {
+  max-width: 1100px;
+  margin: 48px auto;
+  padding: 0 24px;
+}
+
+/* CHAPTER */
+.chapter {
+  margin-bottom: 64px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.chapter-header {
+  padding: 32px 36px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.chapter-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.chapter-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.chapter-body { padding: 32px 36px; }
+.chapter-body p { margin-bottom: 16px; color: var(--text); }
+
+/* SUBTOPIC */
+.subtopic {
+  margin-top: 28px;
+  padding: 24px;
+  background: var(--surface2);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent);
+}
+.subtopic h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+.subtopic h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: var(--accent3);
+}
+.subtopic p, .subtopic li { color: var(--text); margin-bottom: 8px; }
+.subtopic ul, .subtopic ol { padding-left: 20px; margin-bottom: 12px; }
+.subtopic li { margin-bottom: 6px; }
+
+/* COMPARISON TABLE */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+.comp-table th {
+  background: rgba(56,189,248,0.1);
+  color: var(--accent);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+}
+.comp-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+.comp-table .check { color: var(--accent3); }
+.comp-table .cross { color: var(--danger); }
+
+/* DIAGRAM CONTAINER */
+.diagram-container {
+  margin: 24px 0;
+  background: #0d1220;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  overflow-x: auto;
+}
+.diagram-container .diagram-title {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* SVG STYLES */
+svg text { font-family: 'DM Sans', sans-serif; }
+.svg-box { fill: #1e293b; stroke: #334155; stroke-width: 1.5; rx: 8; }
+.svg-box-accent { fill: rgba(56,189,248,0.1); stroke: #38bdf8; stroke-width: 1.5; rx: 8; }
+.svg-box-green { fill: rgba(52,211,153,0.1); stroke: #34d399; stroke-width: 1.5; rx: 8; }
+.svg-box-purple { fill: rgba(129,140,248,0.1); stroke: #818cf8; stroke-width: 1.5; rx: 8; }
+.svg-box-orange { fill: rgba(251,146,60,0.1); stroke: #fb923c; stroke-width: 1.5; rx: 8; }
+.svg-box-pink { fill: rgba(244,114,182,0.1); stroke: #f472b6; stroke-width: 1.5; rx: 8; }
+.svg-label { fill: #e2e8f0; font-size: 13px; font-weight: 600; }
+.svg-sublabel { fill: #8892a8; font-size: 11px; }
+.svg-arrow { stroke: #475569; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+.svg-arrow-accent { stroke: #38bdf8; stroke-width: 2; fill: none; marker-end: url(#arrowhead-accent); }
+
+/* CALLOUT */
+.callout {
+  margin: 16px 0;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
+.callout-info { background: rgba(56,189,248,0.08); border-left: 3px solid var(--accent); }
+.callout-warn { background: rgba(234,179,8,0.08); border-left: 3px solid var(--warning); }
+.callout-tip { background: rgba(52,211,153,0.08); border-left: 3px solid var(--accent3); }
+.callout strong { color: var(--accent); }
+.callout-warn strong { color: var(--warning); }
+.callout-tip strong { color: var(--accent3); }
+
+/* CODE */
+.code-block {
+  background: #0d1220;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent3);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* BADGE */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-aws { background: rgba(251,146,60,0.15); color: #fb923c; }
+.badge-azure { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.badge-gcp { background: rgba(52,211,153,0.15); color: #34d399; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .chapter-body, .chapter-header { padding: 20px; }
+  .toc-inner { padding: 20px; }
+  .toc-grid { grid-template-columns: 1fr; }
+}
+
+/* PRINT */
+@media print {
+  body { background: #fff; color: #1a1a1a; }
+  .chapter { break-inside: avoid; border-color: #ddd; background: #fff; }
+  .subtopic { background: #f8f8f8; border-color: #666; }
+  .hero { background: #fff; min-height: auto; padding: 30px; }
+  .hero h1 { -webkit-text-fill-color: #1a1a1a; }
+}
 
 

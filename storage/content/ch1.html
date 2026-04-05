@@ -1,1 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chapter 1</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
 
+<body>
+
+<div class="sidebar">
+  <h2>📚 Guide</h2>
+  <a href="../index.html">🏠 Home</a>
+  <a href="ch1.html">01 Storage Fundamentals</a>
+  <a href="ch2.html">02 Object Storage</a>
+</div>
+
+<div class="main">
+
+  <a href="../index.html" style="margin:20px;display:inline-block;">⬅ Back</a>
+
+  <div class="chapter">
+    <h1>01 Storage Fundamentals</h1>
+
+    <!-- PASTE YOUR FULL CONTENT HERE -->
+    <p>Cloud storage is the backbone of every modern application. Understanding the three fundamental storage types — Object, Block, and File — and knowing when to use each is the foundation of all cloud architecture decisions.</p>
+    <!-- DIAGRAM: 3 Storage Types -->
+    <div class="diagram-container">
+      <div class="diagram-title">▸ Three Pillars of Cloud Storage</div>
+      <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+        <!-- Object Storage -->
+        <rect x="20" y="30" width="260" height="350" class="svg-box-accent" rx="12"/>
+        <text x="150" y="65" class="svg-label" text-anchor="middle" fill="#38bdf8" font-size="15">Object Storage</text>
+        <text x="150" y="90" class="svg-sublabel" text-anchor="middle">S3 / Blob / GCS</text>
+        <rect x="45" y="110" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="150" y="135" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Data + Metadata + ID</text>
+        <rect x="45" y="160" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="150" y="185" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Flat Namespace</text>
+        <rect x="45" y="210" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="150" y="235" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">HTTP/S API Access</text>
+        <rect x="45" y="260" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="150" y="285" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Immutable (replace only)</text>
+        <text x="150" y="330" class="svg-sublabel" text-anchor="middle" fill="#8892a8" font-size="10">USE CASES:</text>
+        <text x="150" y="348" class="svg-sublabel" text-anchor="middle" fill="#34d399" font-size="11">Backups · Media · Logs · Archives</text>
+        <text x="150" y="366" class="svg-sublabel" text-anchor="middle" fill="#34d399" font-size="11">Static Websites · Data Lakes</text>
+
+        <!-- Block Storage -->
+        <rect x="320" y="30" width="260" height="350" class="svg-box-purple" rx="12"/>
+        <text x="450" y="65" class="svg-label" text-anchor="middle" fill="#818cf8" font-size="15">Block Storage</text>
+        <text x="450" y="90" class="svg-sublabel" text-anchor="middle">EBS / Managed Disk / PD</text>
+        <rect x="345" y="110" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="450" y="135" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Fixed-size Blocks</text>
+        <rect x="345" y="160" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="450" y="185" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Attached to VM</text>
+        <rect x="345" y="210" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="450" y="235" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Low Latency I/O</text>
+        <rect x="345" y="260" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="450" y="285" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Needs File System on Top</text>
+        <text x="450" y="330" class="svg-sublabel" text-anchor="middle" fill="#8892a8" font-size="10">USE CASES:</text>
+        <text x="450" y="348" class="svg-sublabel" text-anchor="middle" fill="#34d399" font-size="11">Databases · OS Disks · OLTP</text>
+        <text x="450" y="366" class="svg-sublabel" text-anchor="middle" fill="#34d399" font-size="11">High-perf Apps · Boot Volumes</text>
+
+        <!-- File Storage -->
+        <rect x="620" y="30" width="260" height="350" class="svg-box-green" rx="12"/>
+        <text x="750" y="65" class="svg-label" text-anchor="middle" fill="#34d399" font-size="15">File Storage</text>
+        <text x="750" y="90" class="svg-sublabel" text-anchor="middle">EFS / Azure Files / Filestore</text>
+        <rect x="645" y="110" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="750" y="135" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Hierarchical (dirs/files)</text>
+        <rect x="645" y="160" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="750" y="185" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Shared Access (NFS/SMB)</text>
+        <rect x="645" y="210" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="750" y="235" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">POSIX-compatible</text>
+        <rect x="645" y="260" width="210" height="40" rx="6" fill="#1e293b" stroke="#334155"/>
+        <text x="750" y="285" class="svg-sublabel" text-anchor="middle" fill="#e2e8f0">Multi-VM Mounting</text>
+        <text x="750" y="330" class="svg-sublabel" text-anchor="middle" fill="#8892a8" font-size="10">USE CASES:</text>
+        <text x="750" y="348" class="svg-sublabel" text-anchor="middle" fill="#34d399" font-size="11">Shared Configs · CMS · Legacy</text>
+        <text x="750" y="366" class="svg-sublabel" text-anchor="middle" fill="#34d399" font-size="11">Lift & Shift · Home Dirs</text>
+      </svg>
+    </div>
+
+    <div class="subtopic">
+      <h3>Object vs Block vs File — Deep Comparison</h3>
+      <table class="comp-table">
+        <thead>
+          <tr><th>Aspect</th><th>Object</th><th>Block</th><th>File</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Access Method</td><td>REST API (HTTP)</td><td>OS-level device</td><td>NFS/SMB protocol</td></tr>
+          <tr><td>Data Unit</td><td>Object (any size)</td><td>Fixed blocks (512B–4KB)</td><td>Files in directories</td></tr>
+          <tr><td>Metadata</td><td>Rich, custom key-value</td><td>Minimal</td><td>Standard file attributes</td></tr>
+          <tr><td>Modify</td><td>Replace entire object</td><td>Modify individual blocks</td><td>Modify bytes in-place</td></tr>
+          <tr><td>Latency</td><td>Higher (ms)</td><td>Very low (sub-ms)</td><td>Medium (ms)</td></tr>
+          <tr><td>Scalability</td><td>Virtually unlimited</td><td>Limited to disk size</td><td>Grows within limits</td></tr>
+          <tr><td>Cost</td><td>Lowest per GB</td><td>Highest per GB</td><td>Medium per GB</td></tr>
+          <tr><td>Multi-access</td><td>Yes (concurrent HTTP)</td><td>Single VM (usually)</td><td>Yes (multi-mount)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="../script.js"></script>
+</body>
+</html>

@@ -97,3 +97,71 @@ body {
 .chapter:hover {
   box-shadow:0 0 25px rgba(56,189,248,0.2);
 }
+
+/* DIAGRAM CONTAINER */
+.diagram-container {
+  margin: 24px 0;
+  background: #0d1220;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  overflow-x: auto;
+}
+.diagram-container .diagram-title {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* SUBTOPIC */
+.subtopic {
+  margin-top: 28px;
+  padding: 24px;
+  background: var(--surface2);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent);
+}
+.subtopic h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+.subtopic h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: var(--accent3);
+}
+.subtopic p, .subtopic li { color: var(--text); margin-bottom: 8px; }
+.subtopic ul, .subtopic ol { padding-left: 20px; margin-bottom: 12px; }
+.subtopic li { margin-bottom: 6px; }
+
+/* COMPARISON TABLE */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+.comp-table th {
+  background: rgba(56,189,248,0.1);
+  color: var(--accent);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+}
+.comp-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+.comp-table .check { color: var(--accent3); }
+.comp-table .cross { color: var(--danger); }
+
+

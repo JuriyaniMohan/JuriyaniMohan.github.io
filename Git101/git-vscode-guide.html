@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git & VS Code — Interactive Field Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --bg-card: #111827;
+    --bg-card-alt: #0d1422;
+    --bg-terminal: #060a12;
+    --border: #1e293b;
+    --border-glow: #22d3ee33;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #22d3ee;
+    --accent-dim: #0e7490;
+    --green: #34d399;
+    --green-dim: #065f46;
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --yellow: #fbbf24;
+    --yellow-dim: #78350f;
+    --purple: #a78bfa;
+    --orange: #fb923c;
+    --gradient-accent: linear-gradient(135deg, #22d3ee, #a78bfa);
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-heading: 'Space Grotesk', sans-serif;
+    --radius: 12px;
+    --shadow: 0 4px 30px rgba(0,0,0,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent-dim); border-radius: 3px; }
+
+  /* ---- Header ---- */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,23,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .header-inner {
+    max-width: 960px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--gradient-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--bg); font-weight: 700;
+  }
+
+  /* ---- Nav Tabs ---- */
+  .nav-tabs {
+    display: flex; gap: 4px; background: var(--bg-card); border-radius: 8px;
+    padding: 3px; border: 1px solid var(--border);
+  }
+  .nav-tab {
+    padding: 6px 14px; border-radius: 6px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+    color: var(--text-muted); border: none; background: none;
+    transition: all 0.25s;
+  }
+  .nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .nav-tab.active {
+    background: var(--accent-dim); color: var(--accent);
+    box-shadow: 0 0 12px rgba(34,211,238,0.15);
+  }
+
+  /* ---- Main Container ---- */
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ---- Section ---- */
+  .section { display: none; animation: fadeIn 0.4s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Section Title ---- */
+  .section-title {
+    font-family: var(--font-heading); font-size: 2rem; font-weight: 700;
+    margin-bottom: 8px;
+    background: var(--gradient-accent); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .section-subtitle {
+    color: var(--text-dim); font-size: 0.95rem; margin-bottom: 36px;
+    border-left: 3px solid var(--accent-dim); padding-left: 14px;
+  }
+
+  /* ---- Step Cards ---- */
+  .step-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+    margin-bottom: 20px; position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .step-card:hover {
+    border-color: var(--border-glow);
+    box-shadow: 0 0 30px rgba(34,211,238,0.06);
+  }
+  .step-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+  }
+  .step-number {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--gradient-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem;
+    color: var(--bg); flex-shrink: 0;
+  }
+  .step-title {
+    font-family: var(--font-heading); font-size: 1.15rem; font-weight: 600;
+  }
+  .step-desc { color: var(--text-dim); margin-bottom: 14px; font-size: 0.93rem; }
+
+  /* ---- Terminal Block ---- */
+  .terminal {
+    background: var(--bg-terminal); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 18px;
+    font-family: var(--font-mono); font-size: 0.82rem;
+    color: var(--green); overflow-x: auto; position: relative;
+    margin-top: 10px;
+  }
+  .terminal .prompt { color: var(--accent); user-select: none; }
+  .terminal .comment { color: var(--text-muted); font-style: italic; }
+  .terminal .flag { color: var(--yellow); }
+  .terminal .string { color: var(--orange); }
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    color: var(--text-muted); font-family: var(--font-mono);
+    font-size: 0.65rem; padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--accent-dim); color: var(--accent); }
+
+  /* ---- Tip Box ---- */
+  .tip-box {
+    background: rgba(34,211,238,0.05); border: 1px solid rgba(34,211,238,0.15);
+    border-radius: 8px; padding: 14px 18px; margin-top: 12px;
+    font-size: 0.87rem; color: var(--text-dim);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .tip-box .tip-icon { color: var(--accent); font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+  /* ---- Issues Section ---- */
+  .issue-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .issue-card:hover { border-color: rgba(248,113,113,0.3); }
+  .issue-header {
+    padding: 18px 24px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    user-select: none;
+  }
+  .issue-header:hover { background: rgba(255,255,255,0.02); }
+  .issue-label {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-heading); font-weight: 600; font-size: 0.95rem;
+  }
+  .issue-badge {
+    padding: 3px 10px; border-radius: 4px; font-size: 0.65rem;
+    font-family: var(--font-mono); font-weight: 700; text-transform: uppercase;
+  }
+  .badge-error { background: var(--red-dim); color: var(--red); }
+  .badge-warn { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-info { background: var(--accent-dim); color: var(--accent); }
+  .issue-chevron {
+    color: var(--text-muted); transition: transform 0.3s; font-size: 1.2rem;
+  }
+  .issue-card.open .issue-chevron { transform: rotate(180deg); }
+  .issue-body {
+    max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+    border-top: 0px solid transparent;
+  }
+  .issue-card.open .issue-body {
+    max-height: 800px;
+    border-top: 1px solid var(--border);
+  }
+  .issue-content { padding: 20px 24px; }
+  .issue-content p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 10px; }
+  .solution-label {
+    font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+    color: var(--green); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  /* ---- Quiz Section ---- */
+  .quiz-progress {
+    display: flex; gap: 6px; margin-bottom: 32px; align-items: center;
+  }
+  .quiz-dot {
+    width: 28px; height: 6px; border-radius: 3px;
+    background: var(--border); transition: background 0.3s;
+  }
+  .quiz-dot.done { background: var(--green); }
+  .quiz-dot.current { background: var(--accent); box-shadow: 0 0 10px rgba(34,211,238,0.4); }
+  .quiz-dot.wrong { background: var(--red); }
+
+  .quiz-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px; display: none;
+    animation: fadeIn 0.35s ease;
+  }
+  .quiz-card.active { display: block; }
+  .quiz-q-number {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;
+  }
+  .quiz-question {
+    font-family: var(--font-heading); font-size: 1.2rem; font-weight: 600;
+    margin-bottom: 24px; line-height: 1.5;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option {
+    background: var(--bg-terminal); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 18px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 0.85rem;
+    color: var(--text-dim); transition: all 0.25s;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .quiz-option:hover:not(.disabled) {
+    border-color: var(--accent); color: var(--text);
+    background: rgba(34,211,238,0.04);
+  }
+  .quiz-option.correct {
+    border-color: var(--green); color: var(--green);
+    background: rgba(52,211,153,0.08);
+  }
+  .quiz-option.incorrect {
+    border-color: var(--red); color: var(--red);
+    background: rgba(248,113,113,0.06);
+  }
+  .quiz-option .opt-letter {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: rgba(255,255,255,0.05); display: flex;
+    align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.75rem; flex-shrink: 0;
+  }
+  .quiz-option.correct .opt-letter { background: var(--green-dim); }
+  .quiz-option.incorrect .opt-letter { background: var(--red-dim); }
+
+  .quiz-explanation {
+    margin-top: 18px; padding: 14px 18px;
+    background: rgba(34,211,238,0.05); border: 1px solid rgba(34,211,238,0.12);
+    border-radius: 8px; font-size: 0.87rem; color: var(--text-dim);
+    display: none;
+  }
+  .quiz-explanation.show { display: block; animation: fadeIn 0.3s ease; }
+
+  .quiz-next-btn {
+    margin-top: 20px; padding: 10px 28px;
+    background: var(--gradient-accent); border: none; border-radius: 8px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem;
+    color: var(--bg); cursor: pointer; display: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .quiz-next-btn.show { display: inline-block; }
+  .quiz-next-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(34,211,238,0.3); }
+
+  /* ---- Score Card ---- */
+  .score-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 40px; text-align: center;
+    display: none;
+  }
+  .score-card.active { display: block; animation: fadeIn 0.5s ease; }
+  .score-big {
+    font-family: var(--font-heading); font-size: 4rem; font-weight: 700;
+    background: var(--gradient-accent); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .score-label { color: var(--text-dim); font-size: 1rem; margin-top: 6px; }
+  .score-message {
+    margin-top: 20px; font-size: 1.05rem; color: var(--text);
+    font-family: var(--font-heading);
+  }
+  .retry-btn {
+    margin-top: 28px; padding: 12px 32px;
+    background: var(--gradient-accent); border: none; border-radius: 8px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem;
+    color: var(--bg); cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .retry-btn:hover { transform: translateY(-2px); }
+
+  /* ---- Keyboard Shortcut Tag ---- */
+  kbd {
+    background: var(--bg-terminal); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 7px;
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--yellow);
+    white-space: nowrap;
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 640px) {
+    .header-inner { flex-direction: column; gap: 12px; }
+    .nav-tabs { width: 100%; justify-content: center; }
+    .section-title { font-size: 1.5rem; }
+    .container { padding: 24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">G</div>
+      Git & VS Code Field Guide
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showSection('workflow')">Workflow</button>
+      <button class="nav-tab" onclick="showSection('issues')">Issues & Fixes</button>
+      <button class="nav-tab" onclick="showSection('quiz')">Quiz</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ========== WORKFLOW SECTION ========== -->
+  <div id="sec-workflow" class="section active">
+    <div class="section-title">Git Workflow in VS Code</div>
+    <div class="section-subtitle">The complete edit → commit → push → PR loop, step by step.</div>
+
+    <!-- Step 1 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">01</div>
+        <div class="step-title">Clone the Repository</div>
+      </div>
+      <div class="step-desc">Start by cloning the remote repo to your local machine. Open VS Code's integrated terminal with <kbd>Ctrl+`</kbd> and run:</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="prompt">$</span> git clone <span class="string">https://github.com/user/repo.git</span><br>
+        <span class="prompt">$</span> cd repo
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>You can also use <kbd>Ctrl+Shift+P</kbd> → "Git: Clone" to clone directly inside VS Code.</span>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">02</div>
+        <div class="step-title">Pull Latest Changes</div>
+      </div>
+      <div class="step-desc">Always sync before starting work to avoid merge conflicts later.</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="prompt">$</span> git pull origin main
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>Use the Source Control "…" menu → Pull, or click the sync icon in the status bar (bottom-left).</span>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">03</div>
+        <div class="step-title">Create a Feature Branch</div>
+      </div>
+      <div class="step-desc">Never work directly on <code>main</code>. Create a branch for your change — keeps history clean and enables proper code review.</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="prompt">$</span> git checkout <span class="flag">-b</span> <span class="string">feature/add-monitoring-playbook</span>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>Click the branch name in the bottom-left status bar → "Create new branch" for a GUI approach.</span>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">04</div>
+        <div class="step-title">Edit Your Files</div>
+      </div>
+      <div class="step-desc">Make your changes. VS Code marks files in the Explorer with colour-coded badges:</div>
+      <div style="margin-top: 10px; display: flex; gap: 20px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 0.85rem;">
+        <span><span style="color:var(--yellow);">M</span> — Modified</span>
+        <span><span style="color:var(--green);">U</span> — Untracked (new)</span>
+        <span><span style="color:var(--red);">D</span> — Deleted</span>
+        <span><span style="color:var(--purple);">R</span> — Renamed</span>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">05</div>
+        <div class="step-title">Stage Changes</div>
+      </div>
+      <div class="step-desc">Staging tells Git exactly which changes to include in the next commit. You can be selective.</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="comment"># Stage specific file</span><br>
+        <span class="prompt">$</span> git add playbooks/monitoring.yml<br><br>
+        <span class="comment"># Stage everything</span><br>
+        <span class="prompt">$</span> git add .
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>In the Source Control panel (<kbd>Ctrl+Shift+G</kbd>), click the <b>+</b> icon next to each file to stage it individually.</span>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">06</div>
+        <div class="step-title">Commit with a Clear Message</div>
+      </div>
+      <div class="step-desc">Write a concise, descriptive commit message. Use present tense, explain the "what" and "why".</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="prompt">$</span> git commit <span class="flag">-m</span> <span class="string">"Add Prometheus alerting rules for disk usage"</span>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>In VS Code, type your message in the Source Control input box and press <kbd>Ctrl+Enter</kbd> to commit.</span>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">07</div>
+        <div class="step-title">Push to Remote</div>
+      </div>
+      <div class="step-desc">Send your branch to GitHub so others can see it and you can open a PR.</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="comment"># First push — set upstream tracking</span><br>
+        <span class="prompt">$</span> git push <span class="flag">-u</span> origin <span class="string">feature/add-monitoring-playbook</span><br><br>
+        <span class="comment"># Subsequent pushes</span><br>
+        <span class="prompt">$</span> git push
+      </div>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">08</div>
+        <div class="step-title">Create a Pull Request & Merge</div>
+      </div>
+      <div class="step-desc">Go to GitHub — you'll see a banner to create a PR. Add reviewers, get approvals, then merge. After merge, clean up locally:</div>
+      <div class="terminal">
+        <button class="copy-btn" onclick="copyCmd(this)">copy</button>
+        <span class="prompt">$</span> git checkout main<br>
+        <span class="prompt">$</span> git pull origin main<br>
+        <span class="prompt">$</span> git branch <span class="flag">-d</span> <span class="string">feature/add-monitoring-playbook</span>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span>Install the <b>GitHub Pull Requests</b> extension to create, review, and merge PRs without leaving VS Code.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ISSUES SECTION ========== -->
+  <div id="sec-issues" class="section">
+    <div class="section-title">Common Issues & Fixes</div>
+    <div class="section-subtitle">Click any issue to expand the solution. All fixes tested in real-world scenarios.</div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-error">ERROR</span> Permission denied (publickey)</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>SSH authentication failed. Your SSH key is missing, not added to the agent, or not registered on GitHub.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Generate a new SSH key</span><br>
+          <span class="prompt">$</span> ssh-keygen <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="string">"you@email.com"</span><br><br>
+          <span class="comment"># Start the SSH agent and add the key</span><br>
+          <span class="prompt">$</span> eval "$(ssh-agent -s)"<br>
+          <span class="prompt">$</span> ssh-add ~/.ssh/id_ed25519<br><br>
+          <span class="comment"># Copy public key → add to GitHub → Settings → SSH Keys</span><br>
+          <span class="prompt">$</span> cat ~/.ssh/id_ed25519.pub
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-error">ERROR</span> Merge Conflicts</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>Two branches modified the same lines. Git can't auto-merge and marks the conflicting sections.</p>
+        <div class="solution-label">✓ Solution</div>
+        <p>VS Code highlights conflicts inline with clickable options: <b>Accept Current</b> | <b>Accept Incoming</b> | <b>Accept Both</b>. After resolving all conflicts:</p>
+        <div class="terminal">
+          <span class="prompt">$</span> git add .<br>
+          <span class="prompt">$</span> git commit <span class="flag">-m</span> <span class="string">"Resolve merge conflict in config.yml"</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-warn">WARN</span> Detached HEAD State</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>You checked out a commit hash or tag instead of a branch. Commits made here will be lost unless saved to a branch.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Create a branch from current detached state</span><br>
+          <span class="prompt">$</span> git checkout <span class="flag">-b</span> <span class="string">recovery-branch</span><br><br>
+          <span class="comment"># Or go back to an existing branch</span><br>
+          <span class="prompt">$</span> git checkout main
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-error">ERROR</span> Rejected Push (non-fast-forward)</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>Remote has commits you don't have locally. Git refuses the push to prevent overwriting others' work.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Pull and rebase your changes on top</span><br>
+          <span class="prompt">$</span> git pull <span class="flag">--rebase</span> origin main<br><br>
+          <span class="comment"># Then push again</span><br>
+          <span class="prompt">$</span> git push origin main
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-warn">WARN</span> Accidentally Committed to Main</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>You made commits directly on <code>main</code> instead of a feature branch.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Create a new branch with your commits</span><br>
+          <span class="prompt">$</span> git branch <span class="string">feature/my-work</span><br><br>
+          <span class="comment"># Reset main to match remote</span><br>
+          <span class="prompt">$</span> git reset <span class="flag">--hard</span> origin/main<br><br>
+          <span class="comment"># Switch to your feature branch</span><br>
+          <span class="prompt">$</span> git checkout <span class="string">feature/my-work</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-info">INFO</span> Undo Last Commit (Keep Changes)</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>You committed too early or with a wrong message. Want to undo the commit but keep files as they are.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Undo commit, keep changes staged</span><br>
+          <span class="prompt">$</span> git reset <span class="flag">--soft</span> HEAD~1<br><br>
+          <span class="comment"># Undo commit, keep changes unstaged</span><br>
+          <span class="prompt">$</span> git reset <span class="flag">--mixed</span> HEAD~1
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-warn">WARN</span> Large File Rejected by GitHub</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>GitHub blocks files over 100 MB. Even if removed later, the file persists in Git history.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Add to .gitignore going forward</span><br>
+          <span class="prompt">$</span> echo <span class="string">"*.iso"</span> >> .gitignore<br><br>
+          <span class="comment"># Remove from history (use git-filter-repo)</span><br>
+          <span class="prompt">$</span> git filter-repo <span class="flag">--path</span> bigfile.iso <span class="flag">--invert-paths</span><br><br>
+          <span class="comment"># For large files, use Git LFS</span><br>
+          <span class="prompt">$</span> git lfs track <span class="string">"*.iso"</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-error">ERROR</span> fatal: not a git repository</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>You're running Git commands outside a repo directory, or the <code>.git</code> folder was deleted.</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Navigate to the correct directory</span><br>
+          <span class="prompt">$</span> cd /path/to/your/repo<br><br>
+          <span class="comment"># Or initialize a new repo</span><br>
+          <span class="prompt">$</span> git init
+        </div>
+      </div></div>
+    </div>
+
+    <div class="issue-card" onclick="toggleIssue(this)">
+      <div class="issue-header">
+        <div class="issue-label"><span class="issue-badge badge-info">INFO</span> Stash Work to Switch Branches</div>
+        <span class="issue-chevron">▾</span>
+      </div>
+      <div class="issue-body"><div class="issue-content">
+        <p>You have uncommitted changes but need to switch branches urgently (e.g., hotfix).</p>
+        <div class="solution-label">✓ Solution</div>
+        <div class="terminal">
+          <span class="comment"># Save current work</span><br>
+          <span class="prompt">$</span> git stash push <span class="flag">-m</span> <span class="string">"WIP: monitoring playbook"</span><br><br>
+          <span class="comment"># Switch and fix</span><br>
+          <span class="prompt">$</span> git checkout hotfix/urgent-patch<br><br>
+          <span class="comment"># Come back and restore</span><br>
+          <span class="prompt">$</span> git checkout feature/monitoring<br>
+          <span class="prompt">$</span> git stash pop
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ========== QUIZ SECTION ========== -->
+  <div id="sec-quiz" class="section">
+    <div class="section-title">Test Your Knowledge</div>
+    <div class="section-subtitle">10 questions covering the full Git + VS Code workflow. Let's see how sharp you are.</div>
+
+    <div class="quiz-progress" id="quizProgress"></div>
+
+    <div id="quizContainer"></div>
+
+    <div class="score-card" id="scoreCard">
+      <div class="score-big" id="scoreBig"></div>
+      <div class="score-label">out of 10 correct</div>
+      <div class="score-message" id="scoreMsg"></div>
+      <button class="retry-btn" onclick="resetQuiz()">Retry Quiz</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- NAV ----
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ---- ISSUES ACCORDION ----
+function toggleIssue(card) {
+  card.classList.toggle('open');
+}
+
+// ---- COPY COMMAND ----
+function copyCmd(btn) {
+  const terminal = btn.parentElement;
+  const text = terminal.innerText.replace('copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+
+// ---- QUIZ DATA ----
+const quizData = [
+  {
+    q: "What is the FIRST thing you should do before starting new work on an existing repo?",
+    opts: ["git commit -m 'start'", "git pull origin main", "git push origin main", "git branch -d old-branch"],
+    correct: 1,
+    explain: "Always pull the latest changes before starting work to ensure you're building on the most recent codebase and to avoid conflicts."
+  },
+  {
+    q: "Which command creates a new branch AND switches to it?",
+    opts: ["git branch feature/new", "git switch --create feature/new", "git checkout -b feature/new", "Both B and C"],
+    correct: 3,
+    explain: "Both 'git switch --create' (modern) and 'git checkout -b' (classic) create a new branch and switch to it in one command."
+  },
+  {
+    q: "What does 'staging' a file mean in Git?",
+    opts: ["Deleting it from the repo", "Marking it to be included in the next commit", "Pushing it to remote", "Reverting it to the last commit"],
+    correct: 1,
+    explain: "Staging (git add) marks specific changes to be included in the next commit. It's like a 'loading dock' before the commit."
+  },
+  {
+    q: "You accidentally committed to main instead of a feature branch. What's the correct recovery sequence?",
+    opts: [
+      "git revert HEAD → git checkout -b feature",
+      "git branch feature → git reset --hard origin/main → git checkout feature",
+      "git stash → git checkout -b feature → git stash pop",
+      "git push --force origin main"
+    ],
+    correct: 1,
+    explain: "Create a branch (preserving your commits), reset main to match remote, then switch to the new branch where your work is safe."
+  },
+  {
+    q: "What does 'git reset --soft HEAD~1' do?",
+    opts: [
+      "Deletes the last commit and all changes permanently",
+      "Undoes the last commit but keeps changes staged",
+      "Undoes the last commit and unstages changes",
+      "Reverts the last commit with a new commit"
+    ],
+    correct: 1,
+    explain: "--soft undoes the commit but keeps your changes in the staging area, ready to be re-committed with a different message or additional changes."
+  },
+  {
+    q: "A push is rejected with 'non-fast-forward'. What should you do?",
+    opts: [
+      "git push --force",
+      "git pull --rebase origin main, then push",
+      "Delete the branch and recreate it",
+      "git reset --hard origin/main"
+    ],
+    correct: 1,
+    explain: "Pull with rebase fetches remote changes and replays your commits on top, then you can push cleanly. Force pushing overwrites history and can destroy teammates' work."
+  },
+  {
+    q: "Which VS Code shortcut opens the Source Control panel?",
+    opts: ["Ctrl+Shift+P", "Ctrl+Shift+G", "Ctrl+Shift+E", "Ctrl+Shift+X"],
+    correct: 1,
+    explain: "Ctrl+Shift+G opens the Source Control (Git) panel. E is Explorer, X is Extensions, P is Command Palette."
+  },
+  {
+    q: "You need to switch branches but have uncommitted work. What's the safest approach?",
+    opts: [
+      "Just switch — Git will carry changes over",
+      "git stash, switch, then git stash pop when back",
+      "git reset --hard, then switch",
+      "Commit with message 'WIP' and push"
+    ],
+    correct: 1,
+    explain: "git stash saves your uncommitted changes temporarily. After switching branches and finishing other work, git stash pop restores them."
+  },
+  {
+    q: "What flag sets the upstream tracking branch on first push?",
+    opts: ["--force", "--set-upstream or -u", "--track", "--origin"],
+    correct: 1,
+    explain: "git push -u origin branch-name sets the upstream so future 'git push' and 'git pull' know which remote branch to target."
+  },
+  {
+    q: "How do you resolve a merge conflict in VS Code?",
+    opts: [
+      "Delete the file and re-create it",
+      "Run git merge --abort and start over",
+      "Use the inline Accept Current/Incoming/Both buttons, then git add and commit",
+      "Switch to a different branch"
+    ],
+    correct: 2,
+    explain: "VS Code highlights conflicts with clickable resolution buttons. After choosing, stage the resolved files and commit to complete the merge."
+  }
+];
+
+// ---- QUIZ ENGINE ----
+let currentQ = 0, score = 0, answered = [];
+
+function initQuiz() {
+  const container = document.getElementById('quizContainer');
+  const progress = document.getElementById('quizProgress');
+  container.innerHTML = '';
+  progress.innerHTML = '';
+
+  quizData.forEach((q, i) => {
+    // Progress dots
+    const dot = document.createElement('div');
+    dot.className = 'quiz-dot' + (i === 0 ? ' current' : '');
+    dot.id = 'dot-' + i;
+    progress.appendChild(dot);
+
+    // Question card
+    const card = document.createElement('div');
+    card.className = 'quiz-card' + (i === 0 ? ' active' : '');
+    card.id = 'qcard-' + i;
+
+    const letters = ['A', 'B', 'C', 'D'];
+    card.innerHTML = `
+      <div class="quiz-q-number">Question ${i + 1} of ${quizData.length}</div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((opt, j) => `
+          <div class="quiz-option" onclick="answer(${i}, ${j})" id="opt-${i}-${j}">
+            <span class="opt-letter">${letters[j]}</span>
+            <span>${opt}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="quiz-explanation" id="exp-${i}">${q.explain}</div>
+      <button class="quiz-next-btn" id="next-${i}" onclick="nextQuestion(${i})">${i === quizData.length - 1 ? 'See Results' : 'Next →'}</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function answer(qi, oi) {
+  if (answered[qi] !== undefined) return;
+  answered[qi] = oi;
+  const correct = quizData[qi].correct;
+  const isCorrect = oi === correct;
+
+  if (isCorrect) score++;
+
+  // Highlight options
+  document.getElementById(`opt-${qi}-${oi}`).classList.add(isCorrect ? 'correct' : 'incorrect');
+  document.getElementById(`opt-${qi}-${correct}`).classList.add('correct');
+
+  // Disable all options
+  quizData[qi].opts.forEach((_, j) => {
+    document.getElementById(`opt-${qi}-${j}`).classList.add('disabled');
+  });
+
+  // Show explanation and next button
+  document.getElementById(`exp-${qi}`).classList.add('show');
+  document.getElementById(`next-${qi}`).classList.add('show');
+
+  // Update progress dot
+  const dot = document.getElementById(`dot-${qi}`);
+  dot.classList.remove('current');
+  dot.classList.add(isCorrect ? 'done' : 'wrong');
+}
+
+function nextQuestion(qi) {
+  const next = qi + 1;
+  if (next >= quizData.length) {
+    // Show score
+    document.getElementById(`qcard-${qi}`).classList.remove('active');
+    const sc = document.getElementById('scoreCard');
+    sc.classList.add('active');
+    document.getElementById('scoreBig').textContent = score;
+
+    let msg = '';
+    if (score === 10) msg = "Perfect score! You've mastered the Git workflow. 🏆";
+    else if (score >= 8) msg = "Excellent — solid Git fundamentals. Keep sharpening. 🔥";
+    else if (score >= 6) msg = "Good baseline. Review the issues you missed above. 💪";
+    else msg = "Needs work — go through the Workflow tab again and retry. 📖";
+    document.getElementById('scoreMsg').textContent = msg;
+    return;
+  }
+
+  document.getElementById(`qcard-${qi}`).classList.remove('active');
+  document.getElementById(`qcard-${next}`).classList.add('active');
+  document.getElementById(`dot-${next}`).classList.add('current');
+  currentQ = next;
+}
+
+function resetQuiz() {
+  currentQ = 0; score = 0; answered = [];
+  document.getElementById('scoreCard').classList.remove('active');
+  initQuiz();
+}
+
+// Init
+initQuiz();
+</script>
+
+</body>
+</html>

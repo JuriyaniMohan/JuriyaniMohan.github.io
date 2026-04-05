@@ -2,8 +2,13 @@ body {
   margin:0;
   display:flex;
   font-family: 'DM Sans', sans-serif;
-  background:#15faa6;
-  color:#e31212;
+  background:#070b14;
+  color:#e2e8f0;
+}
+
+.card {
+  background: #111827;
+  border: 1px solid #1f2937;
 }
 
 /* SIDEBAR */
@@ -67,21 +72,14 @@ body {
 }
 
 /* FLOATING LOGO */
-.floating-logo {
-  position:absolute;
-  top:20px;
-  right:30px;
-  animation:float 3s infinite ease-in-out;
+.move-horizontal {
+  position: relative;
+  animation: moveLR 3s linear infinite;
 }
 
-.floating-logo img {
-  width:50px;
-}
-
-@keyframes float {
-  0% {transform:translateY(0)}
-  50% {transform:translateY(-12px)}
-  100% {transform:translateY(0)}
+@keyframes moveLR {
+  0%   { left: 0; }
+  100% { left: 200px; }
 }
 
 /* CHAPTER PAGE */

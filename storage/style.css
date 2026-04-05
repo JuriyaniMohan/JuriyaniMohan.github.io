@@ -1,13 +1,21 @@
+body {
+  background: radial-gradient(circle at 20% 30%, rgba(56,189,248,0.08), transparent 40%),
+              radial-gradient(circle at 80% 70%, rgba(99,102,241,0.08), transparent 40%),
+              #070b14;
+  color: #e2e8f0;
+}
+
 body::before {
   content: "";
   position: fixed;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 50px 50px;
   pointer-events: none;
 }
+
 .card {
   background: #111827;
   border: 1px solid #1f2937;
@@ -63,6 +71,7 @@ body::before {
   text-align:center;
   padding:100px 20px;
   background: linear-gradient(135deg, #0a0e17 0%, #1a1040 40%, #0f2847 70%);
+  border-bottom: 1px solid #1f2937;
   position:relative;
 }
 
@@ -85,19 +94,11 @@ body::before {
 }
 
 /* CHAPTER PAGE */
-.chapter {
-  max-width:900px;
-  margin:40px auto;
-  padding:30px;
-  background:#111827;
-  border-radius:12px;
-  transition:0.3s;
-}
-
 .chapter:hover {
-  box-shadow:0 0 25px rgba(56,189,248,0.2);
+  box-shadow: 0 0 25px rgba(56,189,248,0.12);
+  transform: translateY(-3px);
+  transition: 0.3s;
 }
-
 /* DIAGRAM CONTAINER */
 .diagram-container {
   margin: 24px 0;

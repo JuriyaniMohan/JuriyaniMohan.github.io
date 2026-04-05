@@ -95,6 +95,60 @@
         </tbody>
       </table>
     </div>
+    
+    <div class="subtopic">
+      <h3>Real-World Use Case Mapping</h3>
+      <table class="comp-table">
+        <thead>
+          <tr><th>Workload</th><th>Best Storage Type</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MySQL / PostgreSQL</td><td>Block</td><td>Needs low-latency random I/O for ACID transactions</td></tr>
+          <tr><td>Application Logs</td><td>Object</td><td>Write-once, append-many pattern; cheap; searchable</td></tr>
+          <tr><td>Image/Video CDN</td><td>Object</td><td>HTTP-accessible, highly scalable, versioning support</td></tr>
+          <tr><td>Shared Config Files</td><td>File</td><td>Multiple VMs need simultaneous read/write to same files</td></tr>
+          <tr><td>VM Boot Disk</td><td>Block</td><td>OS needs direct block-level access</td></tr>
+          <tr><td>Data Lake / Analytics</td><td>Object</td><td>Massive scale, columnar file formats (Parquet)</td></tr>
+          <tr><td>Legacy Enterprise App</td><td>File</td><td>POSIX compatibility for lift-and-shift migration</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="subtopic">
+      <h3>Storage Architecture Basics</h3>
+      <p>Every cloud storage system follows a layered architecture:</p>
+
+      <div class="diagram-container">
+        <div class="diagram-title">▸ Cloud Storage Architecture Stack</div>
+        <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <!-- Layers bottom-up -->
+          <rect x="100" y="240" width="500" height="45" rx="8" fill="rgba(239,68,68,0.1)" stroke="#ef4444"/>
+          <text x="350" y="268" class="svg-label" text-anchor="middle" fill="#ef4444">Physical Disks (HDD / SSD / NVMe)</text>
+
+          <rect x="100" y="185" width="500" height="45" rx="8" fill="rgba(251,146,60,0.1)" stroke="#fb923c"/>
+          <text x="350" y="213" class="svg-label" text-anchor="middle" fill="#fb923c">Storage Controller / Software-Defined Layer</text>
+
+          <rect x="100" y="130" width="500" height="45" rx="8" fill="rgba(234,179,8,0.1)" stroke="#eab308"/>
+          <text x="350" y="158" class="svg-label" text-anchor="middle" fill="#eab308">Replication / Erasure Coding</text>
+
+          <rect x="100" y="75" width="500" height="45" rx="8" fill="rgba(52,211,153,0.1)" stroke="#34d399"/>
+          <text x="350" y="103" class="svg-label" text-anchor="middle" fill="#34d399">Storage Service API (S3 / EBS / NFS)</text>
+
+          <rect x="100" y="20" width="500" height="45" rx="8" fill="rgba(56,189,248,0.1)" stroke="#38bdf8"/>
+          <text x="350" y="48" class="svg-label" text-anchor="middle" fill="#38bdf8">Application / User Access Layer</text>
+
+          <!-- Arrows -->
+          <line x1="350" y1="65" x2="350" y2="75" stroke="#475569" stroke-width="1.5"/>
+          <line x1="350" y1="120" x2="350" y2="130" stroke="#475569" stroke-width="1.5"/>
+          <line x1="350" y1="175" x2="350" y2="185" stroke="#475569" stroke-width="1.5"/>
+          <line x1="350" y1="230" x2="350" y2="240" stroke="#475569" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>Key Concept:</strong> Cloud providers abstract the physical layer entirely. You never manage disks — you choose a storage <em>service</em> and configure its properties (size, performance tier, replication).
+      </div>
+    </div>
 
   </div>
 

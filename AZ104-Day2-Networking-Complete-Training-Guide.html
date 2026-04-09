@@ -73,6 +73,7 @@ p,.list-item{font-size:14px;line-height:1.8;color:#94a3b8;margin-bottom:10px}
 .scenario-title i{margin-right:6px}
 @media(max-width:768px){.container{padding:12px}.nav-tab{padding:8px 14px;font-size:12px}.module-header{padding:14px 16px}.box,.lab,.think,.quiz,.scenario{padding:14px}.diagram{font-size:11px}}
 .hero .badge{position:relative;padding-left:26px}.hero .badge::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:#10b981;animation:blink 2s infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.scroll-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:20px;cursor:pointer;opacity:0;transition:0.3s;z-index:200;box-shadow:0 4px 16px rgba(59,130,246,0.3)}.scroll-top.show{opacity:1}.scroll-top:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(59,130,246,0.4)}
 </style>
 </head>
 <body>
@@ -1735,9 +1736,22 @@ document.querySelectorAll('.module-header').forEach(function(header) {
 });
 </script>
 
-<footer style="text-align:center; padding:20px 0; border-top: 1px solid #334155;">
-  <p style="color:#67e8f9;font-size:13px; text-align:Center; margin-bottom:10px"><strong>© 2026 Mohan Juriyani | Cloud Infrastructure Engineer</strong></p>
+<footer style="text-align:center; padding:30px 0; border-top: 1px solid #334155;">
+  <div style="margin-bottom:12px;">
+    <a href="https://linkedin.com/in/mohanjuriyani" target="_blank" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:#67e8f9; font-weight:600; font-size:13px; transition:0.3s; padding:6px 16px; border-radius:999px; border:1px solid rgba(103,232,249,0.2); background:rgba(103,232,249,0.05);">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="16" alt="LinkedIn" style="border-radius:3px;">
+      Connect on LinkedIn
+    </a>
+  </div>
+  <p style="color:#67e8f9;font-size:13px; margin-bottom:0"><strong>&copy; 2026 Mohan Juriyani | Cloud Infrastructure Engineer</strong></p>
 </footer>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 300);
+});
+</script>
 
 </body>
 </html>

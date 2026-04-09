@@ -101,6 +101,7 @@ footer{text-align:center;padding:3.5rem 2rem;border-top:1px solid var(--border);
 .agent-mars{background:var(--bg-card);border:2px solid var(--mars-color)}.agent-mars h3{color:var(--mars-color)}.agent-mars .agent-tag{background:rgba(224,96,48,0.15);color:var(--mars-color)}
 .agent-mabs{background:var(--bg-card);border:2px solid var(--mabs-color)}.agent-mabs h3{color:var(--mabs-color)}.agent-mabs .agent-tag{background:rgba(45,212,191,0.15);color:var(--mabs-color)}
 .agent-dpm{background:var(--bg-card);border:2px solid var(--dpm-color)}.agent-dpm h3{color:var(--dpm-color)}.agent-dpm .agent-tag{background:rgba(167,139,250,0.15);color:var(--dpm-color)}
+.scroll-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:var(--azure);color:#fff;border:none;font-size:20px;cursor:pointer;opacity:0;transition:0.3s;z-index:200;box-shadow:0 4px 16px rgba(0,120,212,0.3)}.scroll-top.show{opacity:1}.scroll-top:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,120,212,0.4)}
 </style>
 </head>
 <body>
@@ -853,6 +854,21 @@ footer{text-align:center;padding:3.5rem 2rem;border-top:1px solid var(--border);
 <footer>
   <p>Azure Backup &amp; Recovery — Architect's perspective for engineers growing into the role.</p>
   <p style="margin-top:.4rem">Covers AZ-104 exam topics with production-grade insights. Updated for 2025-2026.</p>
+  <div style="margin-top:1rem;">
+    <a href="https://linkedin.com/in/mohanjuriyani" target="_blank" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--azure-bright,#3da2ff); font-weight:600; font-size:.85rem; transition:0.3s; padding:6px 16px; border-radius:999px; border:1px solid rgba(61,162,255,0.2); background:rgba(61,162,255,0.05);">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="16" alt="LinkedIn" style="border-radius:3px;">
+      Connect on LinkedIn
+    </a>
+  </div>
+  <p style="margin-top:.8rem; font-size:.8rem;">&copy; 2026 Mohan Juriyani | Cloud Infrastructure Engineer</p>
 </footer>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 300);
+});
+</script>
+
 </body>
 </html>

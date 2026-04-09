@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Backup &amp; Recovery — The Architect's Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Sora:wght@300;400;600;700;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --bg-card: #0c1019;
+  --bg-card-alt: #111827;
+  --border: #1a2236;
+  --border-accent: #234078;
+  --text: #b0bcd4;
+  --text-dim: #5e6d87;
+  --text-bright: #e2e8f4;
+  --azure: #0078d4;
+  --azure-glow: rgba(0,120,212,0.12);
+  --azure-bright: #3da2ff;
+  --green: #10b981;
+  --green-glow: rgba(16,185,129,0.1);
+  --amber: #f59e0b;
+  --amber-glow: rgba(245,158,11,0.1);
+  --red: #ef4444;
+  --red-glow: rgba(239,68,68,0.1);
+  --purple: #8b5cf6;
+  --purple-glow: rgba(139,92,246,0.1);
+  --cyan: #06b6d4;
+  --cyan-glow: rgba(6,182,212,0.1);
+  --mars-color: #e06030;
+  --mabs-color: #2dd4bf;
+  --dpm-color: #a78bfa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-weight:400;line-height:1.8;overflow-x:hidden}
+::selection{background:var(--azure);color:#fff}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:2rem;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 30%,rgba(0,120,212,0.12),transparent),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(139,92,246,0.06),transparent);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(26,34,54,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(26,34,54,0.5) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,black,transparent);opacity:0.5}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:100px;padding:.4rem 1.2rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--azure);margin-bottom:2rem;position:relative}
+.hero-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero h1{font-size:clamp(2.5rem,7vw,5.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.05;color:var(--text-bright);position:relative}
+.hero h1 .az{background:linear-gradient(135deg,var(--azure),var(--azure-bright),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{font-family:'Lora',serif;font-style:italic;font-size:1.15rem;color:var(--text-dim);margin-top:1.25rem;max-width:640px;position:relative}
+.container{max-width:1120px;margin:0 auto;padding:0 2rem}
+section{padding:4.5rem 0;border-top:1px solid var(--border)}
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--azure);margin-bottom:.6rem}
+.section-title{font-size:clamp(1.75rem,3.5vw,2.75rem);font-weight:800;letter-spacing:-.025em;color:var(--text-bright);margin-bottom:1.25rem;line-height:1.15}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;transition:border-color .3s}
+.card:hover{border-color:var(--border-accent)}
+.card h3{font-size:1.2rem;font-weight:700;color:var(--text-bright);margin-bottom:.6rem}
+.card-az{border-left:3px solid var(--azure)}.card-green{border-left:3px solid var(--green)}.card-amber{border-left:3px solid var(--amber)}.card-red{border-left:3px solid var(--red)}.card-purple{border-left:3px solid var(--purple)}.card-cyan{border-left:3px solid var(--cyan)}
+.highlight-section{background:linear-gradient(135deg,rgba(0,120,212,0.06),rgba(139,92,246,0.06),rgba(6,182,212,0.04));border:2px solid var(--azure);border-radius:20px;padding:3rem;margin:2.5rem 0;position:relative;overflow:hidden}
+.highlight-section::before{content:'★ KEY SECTION';position:absolute;top:0;left:2rem;background:var(--azure);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.3rem 1rem;border-radius:0 0 8px 8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem}
+@media(max-width:900px){.grid-3{grid-template-columns:1fr}}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin:1.5rem 0;font-size:.9rem}
+.tbl th,.tbl td{padding:.85rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+.tbl th{background:var(--bg-card-alt);color:var(--text-bright);font-weight:700;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+.tbl th:first-child{border-radius:10px 0 0 0}.tbl th:last-child{border-radius:0 10px 0 0}
+.tbl td{background:var(--bg-card)}.tbl tr:hover td{background:var(--bg-card-alt)}
+.callout{background:var(--bg-card-alt);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:1.4rem 1.75rem;margin:1.25rem 0;font-size:.93rem}
+.callout-title{font-weight:700;margin-bottom:.4rem;font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.callout-az{border-left-color:var(--azure)}.callout-az .callout-title{color:var(--azure)}
+.callout-green{border-left-color:var(--green)}.callout-green .callout-title{color:var(--green)}
+.callout-amber .callout-title{color:var(--amber)}
+.callout-red{border-left-color:var(--red)}.callout-red .callout-title{color:var(--red)}
+.callout-purple{border-left-color:var(--purple)}.callout-purple .callout-title{color:var(--purple)}
+.memory-tip{background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(6,182,212,0.04));border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:1.25rem 1.5rem;margin:1rem 0;position:relative}
+.memory-tip::before{content:'🧠 MEMORY TIP';font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:700;color:var(--green);letter-spacing:.1em;display:block;margin-bottom:.5rem}
+.diagram-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:2rem;margin:1.75rem 0;overflow-x:auto}
+.diagram-wrap svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.diagram-caption{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--text-dim);margin-top:1rem}
+.tag{display:inline-block;padding:.15rem .6rem;border-radius:100px;font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:700;margin-right:.4rem;margin-bottom:.3rem}
+.tag-az{background:var(--azure-glow);color:var(--azure);border:1px solid rgba(0,120,212,0.25)}
+.tag-green{background:var(--green-glow);color:var(--green);border:1px solid rgba(16,185,129,0.25)}
+.tag-amber{background:var(--amber-glow);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
+.tag-purple{background:var(--purple-glow);color:var(--purple);border:1px solid rgba(139,92,246,0.25)}
+.tag-red{background:var(--red-glow);color:var(--red);border:1px solid rgba(239,68,68,0.25)}
+.tag-cyan{background:var(--cyan-glow);color:var(--cyan);border:1px solid rgba(6,182,212,0.25)}
+.prose p{margin-bottom:.9rem}.prose strong{color:var(--text-bright)}
+.prose code{font-family:'IBM Plex Mono',monospace;font-size:.83em;background:var(--bg-card-alt);padding:.12em .4em;border-radius:5px;border:1px solid var(--border);color:var(--cyan)}
+.prose ul,.prose ol{padding-left:1.5rem;margin-bottom:1rem}.prose li{margin-bottom:.35rem}
+.toc{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:2rem 2.5rem;margin:2.5rem 0}
+.toc h2{font-size:.9rem;font-family:'IBM Plex Mono',monospace;color:var(--azure);margin-bottom:1rem;letter-spacing:.1em;text-transform:uppercase}
+.toc ol{padding-left:1.5rem}.toc li{margin-bottom:.4rem;font-size:.9rem}
+.toc a{color:var(--text);text-decoration:none;transition:color .2s}.toc a:hover{color:var(--azure)}
+.step-list{list-style:none;counter-reset:steps}
+.step-list li{counter-increment:steps;padding:1.1rem 1.25rem 1.1rem 3.75rem;position:relative;border-left:2px solid var(--border);margin-bottom:0}
+.step-list li::before{content:counter(steps);position:absolute;left:-13px;top:1.1rem;width:26px;height:26px;background:var(--azure);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem}
+.step-list li:last-child{border-left-color:transparent}
+.step-list li strong{color:var(--text-bright)}
+footer{text-align:center;padding:3.5rem 2rem;border-top:1px solid var(--border);font-size:.8rem;color:var(--text-dim)}
+.agent-card{border-radius:16px;padding:2rem;position:relative;overflow:hidden}
+.agent-card h3{font-size:1.5rem;margin-bottom:.5rem}
+.agent-card .agent-tag{display:inline-block;padding:.25rem .8rem;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:700;margin-bottom:1rem}
+.agent-mars{background:var(--bg-card);border:2px solid var(--mars-color)}.agent-mars h3{color:var(--mars-color)}.agent-mars .agent-tag{background:rgba(224,96,48,0.15);color:var(--mars-color)}
+.agent-mabs{background:var(--bg-card);border:2px solid var(--mabs-color)}.agent-mabs h3{color:var(--mabs-color)}.agent-mabs .agent-tag{background:rgba(45,212,191,0.15);color:var(--mabs-color)}
+.agent-dpm{background:var(--bg-card);border:2px solid var(--dpm-color)}.agent-dpm h3{color:var(--dpm-color)}.agent-dpm .agent-tag{background:rgba(167,139,250,0.15);color:var(--dpm-color)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">AZ-104 · BACKUP &amp; DISASTER RECOVERY</div>
+  <h1><span class="az">Azure Backup</span></h1>
+  <h1 style="font-size:clamp(1.2rem,2.5vw,2rem);margin-top:.4rem;font-weight:300;color:var(--text-dim)">&amp; Site Recovery — Complete Guide</h1>
+  <p class="sub">From backup policies and vault types to MARS, MABS, DPM agents — every concept an architect needs, with memory tricks for the exam.</p>
+</div>
+<div class="container">
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#what">What is Azure Backup &amp; Why It Exists</a></li>
+    <li><a href="#service">The Azure Backup Service — How It Works for VMs</a></li>
+    <li><a href="#policies">Backup Policies — Schedules, Retention, Tiers</a></li>
+    <li><a href="#vaults">Vaults — Types, Differences, When to Use Each</a></li>
+    <li><a href="#rto-rpo">RTO &amp; RPO — The Two Numbers That Define DR</a></li>
+    <li><a href="#bcc">Business Continuity Center (BCC / BCDR)</a></li>
+    <li><a href="#asr">Azure Site Recovery (ASR) — Deep Dive</a></li>
+    <li><a href="#asr-arch">ASR Architecture &amp; How It Works</a></li>
+    <li><a href="#same-region">Same-Region DR — When You Can't Leave</a></li>
+    <li><a href="#backup-options">Recovery Services Vault Backup Options</a></li>
+    <li><a href="#backup-howto">How to Backup VMs, Storage, Data &amp; More</a></li>
+    <li><a href="#mars-mabs-dpm">★ MARS, MABS &amp; DPM — The Complete Breakdown</a></li>
+    <li><a href="#decision">Architect's Decision Framework</a></li>
+  </ol>
+</div>
+
+<!-- 1 -->
+<section id="what">
+  <div class="section-label">Chapter 01</div>
+  <h2 class="section-title">What is Azure Backup &amp; Why It Exists</h2>
+  <div class="prose">
+    <p><strong>Azure Backup is a fully managed, cloud-native backup service</strong> that replaces traditional on-premises backup infrastructure (tape drives, backup servers, SAN snapshots) with a simple, scalable, pay-as-you-go solution. Instead of managing your own backup servers, storage, and rotation schedules, Azure handles everything — you just define policies and Azure does the rest.</p>
+    <p>Think of it this way: in the old world, backing up meant buying expensive backup software (Veritas, Commvault), dedicated backup servers, tape libraries, and hiring someone to manage tape rotation. Azure Backup eliminates all of that.</p>
+  </div>
+  <div class="grid-2">
+    <div class="card card-az">
+      <h3>Problems Azure Backup Solves</h3>
+      <div class="prose">
+        <p><strong>Data Loss:</strong> Accidental deletion, ransomware, corruption — backup gives you a time machine to roll back.</p>
+        <p><strong>Compliance Requirements:</strong> Many regulations (HIPAA, GDPR, MAS in Singapore) mandate data retention for years.</p>
+        <p><strong>Disaster Recovery:</strong> If an entire region goes down, your backups in another region let you restore.</p>
+        <p><strong>Operational Errors:</strong> A developer runs <code>DROP TABLE users;</code> in production. Backup saves the day.</p>
+        <p><strong>Infrastructure Complexity:</strong> No backup servers to manage, patch, or monitor.</p>
+      </div>
+    </div>
+    <div class="card card-green">
+      <h3>Key Benefits</h3>
+      <div class="prose">
+        <p><strong>Zero-infrastructure:</strong> No backup servers needed. Fully PaaS.</p>
+        <p><strong>Application-consistent:</strong> Uses VSS (Windows) or pre/post scripts (Linux) to ensure clean backups.</p>
+        <p><strong>Unlimited scale:</strong> No limits on backup data size. Storage grows automatically.</p>
+        <p><strong>Encryption at rest and in transit:</strong> AES-256 encryption always.</p>
+        <p><strong>Geo-redundant storage:</strong> Backups replicated to paired region (GRS/RA-GRS).</p>
+        <p><strong>Soft delete:</strong> Deleted backups retained for 14 extra days — ransomware protection.</p>
+      </div>
+    </div>
+  </div>
+  <div class="memory-tip">
+    <strong>Azure Backup = "Backup as a Service"</strong> — Mnemonic <strong>SECURE</strong>: <strong>S</strong>calable, <strong>E</strong>ncrypted, <strong>C</strong>ompliance-ready, <strong>U</strong>nlimited storage, <strong>R</strong>esilient (geo-redundant), <strong>E</strong>ffortless (no infra to manage).
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="service">
+  <div class="section-label">Chapter 02</div>
+  <h2 class="section-title">Azure Backup Service for VMs</h2>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 850 300" xmlns="http://www.w3.org/2000/svg" font-family="Sora,sans-serif">
+      <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0078d4"/></marker><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#5e6d87"/></marker></defs>
+      <text x="425" y="22" fill="#e2e8f4" font-size="14" font-weight="700" text-anchor="middle">Azure VM Backup — Two-Phase Internal Flow</text>
+      <rect x="30" y="60" width="160" height="100" rx="10" fill="#0c1019" stroke="#0078d4" stroke-width="2"/>
+      <text x="110" y="90" fill="#0078d4" font-size="12" font-weight="700" text-anchor="middle">Azure VM</text>
+      <text x="110" y="110" fill="#b0bcd4" font-size="9" text-anchor="middle">VM Agent + Backup Extension</text>
+      <text x="110" y="128" fill="#b0bcd4" font-size="9" text-anchor="middle">(VMSnapshot / VMSnapshotLinux)</text>
+      <line x1="190" y1="100" x2="280" y2="100" stroke="#0078d4" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="235" y="90" fill="#0078d4" font-size="9" font-weight="600" text-anchor="middle">① Snapshot</text>
+      <rect x="290" y="60" width="155" height="100" rx="10" fill="#0c1019" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="367" y="88" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">Local Snapshot</text>
+      <text x="367" y="108" fill="#b0bcd4" font-size="9" text-anchor="middle">Stored in your RG</text>
+      <text x="367" y="124" fill="#b0bcd4" font-size="9" text-anchor="middle">Instant restore: minutes</text>
+      <text x="367" y="140" fill="#5e6d87" font-size="8" text-anchor="middle">(Snapshot Tier: 1-5 days)</text>
+      <line x1="445" y1="100" x2="540" y2="100" stroke="#5e6d87" stroke-width="1.5" marker-end="url(#a2)"/>
+      <text x="490" y="90" fill="#5e6d87" font-size="9" font-weight="600" text-anchor="middle">② Transfer</text>
+      <rect x="550" y="50" width="170" height="120" rx="12" fill="#0c1019" stroke="#10b981" stroke-width="2"/>
+      <text x="635" y="80" fill="#10b981" font-size="12" font-weight="700" text-anchor="middle">Recovery Services</text>
+      <text x="635" y="97" fill="#10b981" font-size="12" font-weight="700" text-anchor="middle">Vault</text>
+      <text x="635" y="120" fill="#b0bcd4" font-size="9" text-anchor="middle">Long-term retention</text>
+      <text x="635" y="136" fill="#b0bcd4" font-size="9" text-anchor="middle">LRS / GRS / ZRS</text>
+      <text x="635" y="152" fill="#5e6d87" font-size="8" text-anchor="middle">(Standard Tier: days → years)</text>
+      <line x1="635" y1="170" x2="635" y2="205" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#a1)"/>
+      <rect x="560" y="210" width="150" height="40" rx="8" fill="#0c1019" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="635" y="230" fill="#8b5cf6" font-size="10" font-weight="600" text-anchor="middle">Archive Tier</text>
+      <text x="635" y="244" fill="#5e6d87" font-size="8" text-anchor="middle">99% cheaper • 180-day min</text>
+      <rect x="30" y="210" width="460" height="65" rx="10" fill="rgba(0,120,212,0.05)" stroke="rgba(0,120,212,0.2)"/>
+      <text x="260" y="232" fill="#0078d4" font-size="10" font-weight="700" text-anchor="middle">TWO-PHASE BACKUP PROCESS</text>
+      <text x="260" y="250" fill="#b0bcd4" font-size="9" text-anchor="middle">Phase 1: Snapshot (instant restore in minutes) → Phase 2: Vault transfer (long-term retention)</text>
+      <text x="260" y="265" fill="#5e6d87" font-size="8" text-anchor="middle">Subsequent backups are incremental (changed blocks only) — first backup is full</text>
+    </svg>
+    <div class="diagram-caption">Fig 1 — VM backup is a two-phase process: fast local snapshot, then vault transfer for long-term storage.</div>
+  </div>
+  <div class="card card-red">
+    <h3>Common Issues with Azure VM Backup</h3>
+    <div class="prose">
+      <p><strong>VM Agent not running:</strong> The Azure VM Agent must be healthy. If it crashes or is missing (custom images), backups fail silently.</p>
+      <p><strong>Extension failure:</strong> The backup extension may fail if NSG rules block outbound traffic, or antivirus software interferes.</p>
+      <p><strong>Disk limits:</strong> Maximum 32 disks per VM. NFS/network drives are NOT backed up — only attached Azure disks.</p>
+      <p><strong>Linux consistency:</strong> Without pre/post scripts, Linux backups are only crash-consistent, not application-consistent. MySQL/PostgreSQL need custom scripts to freeze I/O.</p>
+      <p><strong>Locked resource groups:</strong> Azure creates a restore point collection in a managed RG. A lock on that RG breaks backup cleanup and eventually stops backups.</p>
+      <p><strong>Snapshot tier cost:</strong> Snapshots for instant restore (1-5 days) are charged separately. This often-overlooked cost can be significant.</p>
+      <p><strong>Large disk first backup:</strong> A 32 TB disk takes hours for the initial full backup. Plan for this.</p>
+    </div>
+  </div>
+  <div class="memory-tip">
+    <strong>"Snap then Ship"</strong> — Phase 1 = Snap (local snapshot, fast restore). Phase 2 = Ship (to vault, long-term). Restore from snapshot tier = minutes. Restore from vault = hours.
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="policies">
+  <div class="section-label">Chapter 03</div>
+  <h2 class="section-title">Backup Policies</h2>
+  <div class="prose"><p>A <strong>backup policy</strong> defines WHEN backups happen and HOW LONG they're kept. Every backup item must be associated with exactly one policy.</p></div>
+  <div class="card card-az">
+    <h3>Components of a Backup Policy</h3>
+    <div class="prose">
+      <p><strong>Schedule (Frequency):</strong> Hourly (every 4/6/8/12 hrs — Enhanced), daily, or weekly.</p>
+      <p><strong>Retention layers:</strong> Daily (e.g., 30 days) → Weekly (e.g., 12 weeks) → Monthly (e.g., 12 months) → Yearly (e.g., 10 years). Each layer keeps one representative backup point.</p>
+      <p><strong>Snapshot retention:</strong> How many days to keep the local snapshot for instant restore. Standard: 1-5 days. Enhanced: 1-30 days. More days = faster restore, higher cost.</p>
+      <p><strong>Tiering policy:</strong> When to move older recovery points to Archive tier for ~99% cost savings (minimum 180-day commitment).</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card card-green">
+      <h3>Standard Policy</h3>
+      <p><span class="tag tag-green">DEFAULT</span> <span class="tag tag-green">1 BACKUP/DAY</span></p>
+      <p>One backup per day. Snapshot 1-5 days. Full retention layers. Good for most workloads with RPO of 24 hours.</p>
+    </div>
+    <div class="card card-purple">
+      <h3>Enhanced Policy</h3>
+      <p><span class="tag tag-purple">HOURLY</span> <span class="tag tag-purple">UP TO 6/DAY</span> <span class="tag tag-purple">ZONE-PIN</span></p>
+      <p>Multiple backups per day (every 4-12 hrs). Snapshot up to 30 days. Supports Trusted Launch VMs, Ultra SSD, zone-pinned restore. RPO as low as 4 hours.</p>
+    </div>
+  </div>
+  <div class="memory-tip">
+    <strong>"Standard = Simple, Enhanced = Enterprise"</strong> — Exam keyword: "multiple backups per day" or "hourly backup" or "RPO < 24 hours" → Always Enhanced Policy.
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="vaults">
+  <div class="section-label">Chapter 04</div>
+  <h2 class="section-title">Vaults — Types &amp; Differences</h2>
+  <div class="prose"><p>A <strong>vault</strong> is the central storage and management entity for backups. Think of it as a secure safe-deposit box in the cloud. Azure has two vault types serving different workloads.</p></div>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 850 300" xmlns="http://www.w3.org/2000/svg" font-family="Sora,sans-serif">
+      <text x="425" y="22" fill="#e2e8f4" font-size="14" font-weight="700" text-anchor="middle">Azure Vault Types — Side by Side</text>
+      <rect x="40" y="50" width="360" height="230" rx="14" fill="#0c1019" stroke="#0078d4" stroke-width="2"/>
+      <rect x="40" y="50" width="360" height="40" rx="14" fill="rgba(0,120,212,0.1)"/>
+      <text x="220" y="76" fill="#0078d4" font-size="14" font-weight="700" text-anchor="middle">Recovery Services Vault (RSV)</text>
+      <text x="60" y="108" fill="#e2e8f4" font-size="10" font-weight="600">Backs up:</text>
+      <text x="60" y="126" fill="#b0bcd4" font-size="9">• Azure VMs (full VM) • SQL in VM • SAP HANA in VM</text>
+      <text x="60" y="142" fill="#b0bcd4" font-size="9">• Azure Files shares • On-prem via MARS / MABS / DPM</text>
+      <text x="60" y="158" fill="#b0bcd4" font-size="9">• Azure Site Recovery (replication target)</text>
+      <text x="60" y="180" fill="#e2e8f4" font-size="10" font-weight="600">Redundancy: LRS · GRS · ZRS · RA-GRS</text>
+      <text x="60" y="200" fill="#e2e8f4" font-size="10" font-weight="600">Features:</text>
+      <text x="60" y="218" fill="#b0bcd4" font-size="9">• Soft delete (14 days) • Cross-Region Restore (CRR)</text>
+      <text x="60" y="234" fill="#b0bcd4" font-size="9">• Multi-User Authorization (MUA) • Immutable vaults</text>
+      <text x="60" y="250" fill="#b0bcd4" font-size="9">• Archive tier support • RBAC integration</text>
+      <text x="60" y="268" fill="#5e6d87" font-size="8" font-style="italic">The veteran — handles VMs, on-prem, ASR</text>
+      <rect x="440" y="50" width="370" height="230" rx="14" fill="#0c1019" stroke="#10b981" stroke-width="2"/>
+      <rect x="440" y="50" width="370" height="40" rx="14" fill="rgba(16,185,129,0.08)"/>
+      <text x="625" y="76" fill="#10b981" font-size="14" font-weight="700" text-anchor="middle">Backup Vault</text>
+      <text x="460" y="108" fill="#e2e8f4" font-size="10" font-weight="600">Backs up:</text>
+      <text x="460" y="126" fill="#b0bcd4" font-size="9">• Azure Managed Disks • Azure Blobs (operational + vaulted)</text>
+      <text x="460" y="142" fill="#b0bcd4" font-size="9">• Azure Database for PostgreSQL / MySQL Flexible</text>
+      <text x="460" y="158" fill="#b0bcd4" font-size="9">• Azure Kubernetes Service (AKS)</text>
+      <text x="460" y="180" fill="#e2e8f4" font-size="10" font-weight="600">Redundancy: LRS · GRS · ZRS</text>
+      <text x="460" y="200" fill="#e2e8f4" font-size="10" font-weight="600">Features:</text>
+      <text x="460" y="218" fill="#b0bcd4" font-size="9">• Managed Identity based access • Immutable vaults</text>
+      <text x="460" y="234" fill="#b0bcd4" font-size="9">• Cross-Region Restore (with GRS)</text>
+      <text x="460" y="250" fill="#b0bcd4" font-size="9">• Modern architecture (Azure Backup's future direction)</text>
+      <text x="460" y="268" fill="#5e6d87" font-size="8" font-style="italic">The newcomer — handles PaaS, disks, blobs, AKS</text>
+    </svg>
+    <div class="diagram-caption">Fig 2 — RSV is the veteran (VMs, on-prem, ASR). Backup Vault is the modern option (PaaS, disks, blobs, AKS).</div>
+  </div>
+  <div class="callout callout-amber">
+    <div class="callout-title">⚠️ EXAM TRAP — VAULT STORAGE REDUNDANCY</div>
+    You can only set the storage redundancy (LRS/GRS/ZRS) <strong>before the first backup item is registered</strong>. Once any backup is configured, you CANNOT change redundancy. Plan before you start.
+  </div>
+  <div class="memory-tip">
+    <strong>"RSV = VMs &amp; Veterans, BV = Blobs &amp; New Blood"</strong> — If it involves a VM or existed before 2021 → RSV. If it's a newer PaaS service (managed disks, blobs, PostgreSQL, AKS) → Backup Vault.
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="rto-rpo">
+  <div class="section-label">Chapter 05</div>
+  <h2 class="section-title">RTO &amp; RPO — The Two Sacred Numbers</h2>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 850 240" xmlns="http://www.w3.org/2000/svg" font-family="Sora,sans-serif">
+      <text x="425" y="22" fill="#e2e8f4" font-size="14" font-weight="700" text-anchor="middle">RPO vs RTO — Visualized on a Timeline</text>
+      <line x1="60" y1="110" x2="790" y2="110" stroke="#1a2236" stroke-width="2"/>
+      <line x1="200" y1="82" x2="200" y2="138" stroke="#10b981" stroke-width="2"/>
+      <circle cx="200" cy="110" r="6" fill="#10b981"/>
+      <text x="200" y="72" fill="#10b981" font-size="10" font-weight="700" text-anchor="middle">Last Backup</text>
+      <text x="200" y="155" fill="#5e6d87" font-size="9" text-anchor="middle">10:00 AM</text>
+      <line x1="450" y1="65" x2="450" y2="148" stroke="#ef4444" stroke-width="2.5"/>
+      <circle cx="450" cy="110" r="8" fill="#ef4444"/>
+      <text x="450" y="55" fill="#ef4444" font-size="12" font-weight="700" text-anchor="middle">⚡ DISASTER</text>
+      <text x="450" y="165" fill="#5e6d87" font-size="9" text-anchor="middle">2:00 PM</text>
+      <line x1="680" y1="82" x2="680" y2="138" stroke="#0078d4" stroke-width="2"/>
+      <circle cx="680" cy="110" r="6" fill="#0078d4"/>
+      <text x="680" y="72" fill="#0078d4" font-size="10" font-weight="700" text-anchor="middle">Fully Restored</text>
+      <text x="680" y="155" fill="#5e6d87" font-size="9" text-anchor="middle">4:30 PM</text>
+      <line x1="200" y1="190" x2="450" y2="190" stroke="#f59e0b" stroke-width="1.5"/>
+      <line x1="200" y1="185" x2="200" y2="195" stroke="#f59e0b" stroke-width="1.5"/>
+      <line x1="450" y1="185" x2="450" y2="195" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="325" y="210" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">← RPO: 4 hours →</text>
+      <text x="325" y="228" fill="#5e6d87" font-size="9" text-anchor="middle">Data LOST (max tolerable data loss)</text>
+      <line x1="450" y1="190" x2="680" y2="190" stroke="#8b5cf6" stroke-width="1.5"/>
+      <line x1="450" y1="185" x2="450" y2="195" stroke="#8b5cf6" stroke-width="1.5"/>
+      <line x1="680" y1="185" x2="680" y2="195" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="565" y="210" fill="#8b5cf6" font-size="11" font-weight="700" text-anchor="middle">← RTO: 2.5 hours →</text>
+      <text x="565" y="228" fill="#5e6d87" font-size="9" text-anchor="middle">Max downtime tolerated</text>
+    </svg>
+    <div class="diagram-caption">Fig 3 — RPO looks backward (data loss). RTO looks forward (downtime).</div>
+  </div>
+  <div class="grid-2">
+    <div class="card card-amber">
+      <h3>RPO — Recovery Point Objective</h3>
+      <div class="prose">
+        <p><strong>"How much data can you afford to lose?"</strong> Measured in time. RPO = 4h means you accept losing the last 4 hours of data. This dictates backup frequency. RPO = 0 requires synchronous replication (not backup).</p>
+      </div>
+    </div>
+    <div class="card card-purple">
+      <h3>RTO — Recovery Time Objective</h3>
+      <div class="prose">
+        <p><strong>"How long can your business be down?"</strong> Maximum acceptable downtime. RTO = 2h means the system must be back within 2 hours. RTO = 0 requires active-active architecture with auto failover.</p>
+      </div>
+    </div>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>RPO / RTO Target</th><th>Strategy Required</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>RPO: 24h / RTO: 24h</td><td>Daily backup to vault, manual restore</td><td>$</td></tr>
+      <tr><td>RPO: 4h / RTO: 4h</td><td>Enhanced backup policy, scripted restore</td><td>$$</td></tr>
+      <tr><td>RPO: 1h / RTO: 1h</td><td>Log shipping + ASR warm standby</td><td>$$$</td></tr>
+      <tr><td>RPO: ~0 / RTO: minutes</td><td>ASR continuous replication + auto failover</td><td>$$$$</td></tr>
+      <tr><td>RPO: 0 / RTO: 0</td><td>Active-Active multi-region + sync replication</td><td>$$$$$</td></tr>
+    </tbody>
+  </table>
+  <div class="memory-tip">
+    <strong>"RPO = P for Past (data lost), RTO = T for Time (time to recover)"</strong> — RPO answers "how far back do I rewind?" RTO answers "how fast do I come back?"
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="bcc">
+  <div class="section-label">Chapter 06</div>
+  <h2 class="section-title">Business Continuity Center (BCC)</h2>
+  <div class="prose">
+    <p>The <strong>Azure Business Continuity Center</strong> is the unified management portal for all backup and DR operations across your entire Azure estate. It replaced the fragmented experience of checking individual vaults, giving you a single pane of glass across all subscriptions.</p>
+  </div>
+  <div class="card card-az">
+    <h3>What BCC Shows You</h3>
+    <div class="prose">
+      <p><strong>Overview:</strong> Total protected items, vault count, backup health, ASR health — across ALL subscriptions at once.</p>
+      <p><strong>Security posture:</strong> Resources lacking backup, soft delete status, MUA status, immutable vault status. A security "score" for your backup estate.</p>
+      <p><strong>Protection coverage:</strong> % of VMs, SQL DBs, file shares, disks that are backed up vs. unprotected. Gaps highlighted with recommended actions.</p>
+      <p><strong>Backup jobs:</strong> Centralized view of all running, completed, and failed jobs across every vault.</p>
+      <p><strong>Compliance:</strong> Azure Policy compliance for backup — are all VMs covered? BCC shows violations.</p>
+      <p><strong>ASR dashboard:</strong> Replication health, failover readiness, test failover status.</p>
+      <p><strong>Vault management:</strong> Create vaults, configure policies, manage registrations — all from one place.</p>
+    </div>
+  </div>
+  <div class="callout callout-az">
+    <div class="callout-title">💡 BCC vs INDIVIDUAL VAULT VIEWS</div>
+    BCC doesn't replace individual vault blades — it aggregates them. BCC = executive dashboard (monitoring, governance). Individual vault = engineer's workbench (configuration, troubleshooting).
+  </div>
+  <div class="memory-tip">
+    <strong>"BCC = Boss's Command Center"</strong> — The control tower that sees all backup planes across all runways (vaults). For the exam, know it exists and what it shows.
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="asr">
+  <div class="section-label">Chapter 07</div>
+  <h2 class="section-title">Azure Site Recovery (ASR) — Deep Dive</h2>
+  <div class="prose">
+    <p><strong>Azure Site Recovery is NOT backup — it's disaster recovery.</strong> Backup creates point-in-time copies. ASR creates a live, near-real-time replica of your infrastructure in another region so you can failover in minutes if the primary region goes down.</p>
+    <p>Backup protects against "oops I deleted it." ASR protects against "the whole region is gone."</p>
+  </div>
+  <div class="grid-2">
+    <div class="card card-az">
+      <h3>What ASR Does</h3>
+      <div class="prose">
+        <p><strong>Continuous replication:</strong> Replicates VM disks asynchronously to target region. Every write is captured.</p>
+        <p><strong>Crash-consistent snapshots:</strong> Every few minutes — disk state as if power was pulled.</p>
+        <p><strong>App-consistent snapshots:</strong> Every 1-4 hours — flushes memory and in-flight I/O.</p>
+        <p><strong>Automated failover:</strong> Recovery plans failover dozens of VMs with scripted ordering (DB → App → Web).</p>
+        <p><strong>Test failover:</strong> Spin up replicas in isolated network without affecting production. Do this quarterly.</p>
+        <p><strong>Failback:</strong> After primary recovers, replicate back and switch traffic home.</p>
+      </div>
+    </div>
+    <div class="card card-green">
+      <h3>When to Use ASR</h3>
+      <div class="prose">
+        <p><strong>Region-level disasters:</strong> Entire Azure region down → failover to paired region.</p>
+        <p><strong>Compliance mandates:</strong> Regulations requiring tested DR plan with &lt; 1h RTO.</p>
+        <p><strong>Mission-critical workloads:</strong> ERP, banking, healthcare that cannot tolerate hours of downtime.</p>
+        <p><strong>Migration:</strong> Replicate on-prem (VMware/Hyper-V/physical) to Azure — migration tool.</p>
+        <p><strong>Azure-to-Azure DR:</strong> Most common — replicate between Azure regions.</p>
+      </div>
+    </div>
+  </div>
+  <div class="card card-red">
+    <h3>ASR Limitations &amp; Complications</h3>
+    <div class="prose">
+      <p><strong>RPO ≈ 15-30 minutes (not zero):</strong> Asynchronous replication means some in-transit writes are lost during real failover.</p>
+      <p><strong>IP address changes:</strong> Failover VMs get new IPs. Hardcoded IPs break. Always use DNS + Traffic Manager/Front Door.</p>
+      <p><strong>VM type restrictions:</strong> Some VM types (Gen2, Ultra Disks, ephemeral OS disks) may have restrictions. Check the support matrix.</p>
+      <p><strong>Network not replicated:</strong> You must pre-configure VNets, NSGs, public IPs, LBs in target region. ASR only replicates disk data.</p>
+      <p><strong>Cost:</strong> ~$25/month per protected instance + replicated storage + DR compute when running.</p>
+      <p><strong>No shared disk support:</strong> VMs using shared disks (clusters) are not supported.</p>
+      <p><strong>Capacity risk:</strong> During real regional disaster, target region may lack capacity. Use Capacity Reservations.</p>
+      <p><strong>Recovery plan complexity:</strong> Multi-tier apps need carefully ordered plans with automation scripts. Time-consuming to design and test.</p>
+      <p><strong>DNS propagation:</strong> Traffic Manager/DNS updates add minutes to effective RTO.</p>
+    </div>
+  </div>
+  <div class="callout callout-green">
+    <div class="callout-title">✅ ASR BENEFITS</div>
+    Near-zero RTO (minutes) • RPO ~15 min • Automated recovery plans • Test failover without production impact • Supports Azure-to-Azure, VMware-to-Azure, Hyper-V-to-Azure, Physical-to-Azure • BCC monitoring • Azure Automation runbook integration.
+  </div>
+  <div class="memory-tip">
+    <strong>"Backup = Time Machine (go back), ASR = Mirror Machine (live copy)"</strong> — You need BOTH. Backup protects data. ASR protects infrastructure.
+  </div>
+
+  <div class="callout callout-purple" style="margin-top:1rem">
+    <div class="callout-title">🔧 HOW TO DO PROPER SITE RECOVERY — STEP BY STEP</div>
+    <strong>1. Pre-requisites:</strong> Ensure target region VNets, subnets, NSGs exist. Reserve capacity if mission-critical. Configure Azure Traffic Manager or Front Door for DNS failover.<br><br>
+    <strong>2. Enable replication:</strong> RSV → Site Recovery → Enable replication → Select source VMs → Choose target region, VNet, subnet, storage → Configure replication policy (crash/app-consistent frequency).<br><br>
+    <strong>3. Customize target settings:</strong> Map source NICs to target subnets. Configure target VM sizes (can be different). Set up target availability sets/zones. Assign target public IPs and LBs.<br><br>
+    <strong>4. Create recovery plans:</strong> Group VMs by tier (Group 1: DB, Group 2: App, Group 3: Web). Add pre/post scripts (Azure Automation runbooks) for each group — e.g., pre-script to stop app before DB failover, post-script to update connection strings.<br><br>
+    <strong>5. Test failover (quarterly!):</strong> Recovery plan → Test failover → Select recovery point → Choose isolated test network → Verify all VMs start and apps work → Clean up test VMs.<br><br>
+    <strong>6. Document and drill:</strong> Document the procedure. Time each step. Compare against RTO target. Train the ops team. Repeat quarterly.
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="asr-arch">
+  <div class="section-label">Chapter 08</div>
+  <h2 class="section-title">ASR Architecture</h2>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" font-family="Sora,sans-serif">
+      <defs><marker id="b1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0078d4"/></marker></defs>
+      <text x="450" y="22" fill="#e2e8f4" font-size="14" font-weight="700" text-anchor="middle">Azure Site Recovery — Architecture (Azure-to-Azure)</text>
+      <rect x="20" y="45" width="380" height="280" rx="16" fill="rgba(0,120,212,0.04)" stroke="rgba(0,120,212,0.25)"/>
+      <text x="210" y="72" fill="#0078d4" font-size="12" font-weight="700" text-anchor="middle">SOURCE REGION (e.g., Southeast Asia)</text>
+      <rect x="40" y="85" width="340" height="95" rx="10" fill="#0c1019" stroke="#1a2236"/>
+      <text x="55" y="102" fill="#5e6d87" font-size="9">Source VNet</text>
+      <rect x="50" y="110" width="95" height="50" rx="6" fill="#0c1019" stroke="#0078d4" stroke-width="1.5"/>
+      <text x="97" y="132" fill="#0078d4" font-size="9" font-weight="600" text-anchor="middle">VM-Web</text>
+      <text x="97" y="148" fill="#5e6d87" font-size="7" text-anchor="middle">Mobility Service</text>
+      <rect x="160" y="110" width="95" height="50" rx="6" fill="#0c1019" stroke="#0078d4" stroke-width="1.5"/>
+      <text x="207" y="132" fill="#0078d4" font-size="9" font-weight="600" text-anchor="middle">VM-App</text>
+      <text x="207" y="148" fill="#5e6d87" font-size="7" text-anchor="middle">Mobility Service</text>
+      <rect x="270" y="110" width="95" height="50" rx="6" fill="#0c1019" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="317" y="132" fill="#f59e0b" font-size="9" font-weight="600" text-anchor="middle">VM-DB</text>
+      <text x="317" y="148" fill="#5e6d87" font-size="7" text-anchor="middle">Mobility Service</text>
+      <rect x="70" y="200" width="260" height="40" rx="8" fill="#0c1019" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="200" y="220" fill="#f59e0b" font-size="10" font-weight="600" text-anchor="middle">Cache Storage Account</text>
+      <text x="200" y="234" fill="#5e6d87" font-size="8" text-anchor="middle">Staging area for replication data</text>
+      <line x1="97" y1="160" x2="140" y2="200" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="207" y1="160" x2="200" y2="200" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="317" y1="160" x2="260" y2="200" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="70" y="260" width="120" height="30" rx="6" fill="#0c1019" stroke="#1a2236"/>
+      <text x="130" y="280" fill="#5e6d87" font-size="8" text-anchor="middle">NSG + PIPs</text>
+      <rect x="210" y="260" width="120" height="30" rx="6" fill="#0c1019" stroke="#1a2236"/>
+      <text x="270" y="280" fill="#5e6d87" font-size="8" text-anchor="middle">Load Balancer</text>
+      <rect x="500" y="45" width="380" height="280" rx="16" fill="rgba(16,185,129,0.04)" stroke="rgba(16,185,129,0.25)"/>
+      <text x="690" y="72" fill="#10b981" font-size="12" font-weight="700" text-anchor="middle">TARGET REGION (e.g., East Asia)</text>
+      <rect x="520" y="85" width="340" height="95" rx="10" fill="#0c1019" stroke="#1a2236"/>
+      <text x="535" y="102" fill="#5e6d87" font-size="9">Target VNet (pre-configured)</text>
+      <rect x="530" y="110" width="95" height="50" rx="6" fill="#0c1019" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="577" y="132" fill="#10b981" font-size="9" font-weight="600" text-anchor="middle">VM-Web</text>
+      <text x="577" y="148" fill="#5e6d87" font-size="7" text-anchor="middle">(on failover)</text>
+      <rect x="640" y="110" width="95" height="50" rx="6" fill="#0c1019" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="687" y="132" fill="#10b981" font-size="9" font-weight="600" text-anchor="middle">VM-App</text>
+      <text x="687" y="148" fill="#5e6d87" font-size="7" text-anchor="middle">(on failover)</text>
+      <rect x="750" y="110" width="95" height="50" rx="6" fill="#0c1019" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="797" y="132" fill="#10b981" font-size="9" font-weight="600" text-anchor="middle">VM-DB</text>
+      <text x="797" y="148" fill="#5e6d87" font-size="7" text-anchor="middle">(on failover)</text>
+      <rect x="550" y="200" width="260" height="40" rx="8" fill="#0c1019" stroke="#10b981" stroke-width="1.5"/>
+      <text x="680" y="220" fill="#10b981" font-size="10" font-weight="600" text-anchor="middle">Replica Managed Disks</text>
+      <text x="680" y="234" fill="#5e6d87" font-size="8" text-anchor="middle">Continuously updated from cache</text>
+      <line x1="330" y1="220" x2="540" y2="220" stroke="#0078d4" stroke-width="2.5" marker-end="url(#b1)"/>
+      <text x="435" y="212" fill="#0078d4" font-size="10" font-weight="600" text-anchor="middle">Async Replication</text>
+      <rect x="320" y="360" width="260" height="65" rx="12" fill="#0c1019" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="450" y="385" fill="#8b5cf6" font-size="12" font-weight="700" text-anchor="middle">Recovery Services Vault</text>
+      <text x="450" y="403" fill="#5e6d87" font-size="9" text-anchor="middle">Orchestrates replication · Recovery Plans</text>
+      <text x="450" y="418" fill="#5e6d87" font-size="9" text-anchor="middle">Stores recovery points (crash + app-consistent)</text>
+      <line x1="380" y1="360" x2="210" y2="310" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="520" y1="360" x2="690" y2="310" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="450" y="450" fill="#5e6d87" font-size="8" text-anchor="middle">Mobility Service captures writes → Cache Storage → Replicated to target disks. VMs created only on failover.</text>
+    </svg>
+    <div class="diagram-caption">Fig 4 — ASR replication: Source VMs → Cache Storage Account → Target Managed Disks. VMs exist in target only during failover (saves compute cost).</div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="same-region">
+  <div class="section-label">Chapter 09</div>
+  <h2 class="section-title">Same-Region DR — When You Can't Leave</h2>
+  <div class="prose"><p>In Singapore, data sovereignty laws may prevent replicating to another country/region. Here's how to achieve DR within a single Azure region:</p></div>
+  <div class="card card-az">
+    <h3>Option 1: Availability Zones + Zone-to-Zone ASR</h3>
+    <div class="prose">
+      <p><span class="tag tag-az">BEST OPTION</span> <span class="tag tag-green">99.99% SLA</span></p>
+      <p>Southeast Asia (Singapore) has <strong>3 Availability Zones</strong> — physically separate data centers with independent power, cooling, networking, connected by low-latency fiber (&lt; 2ms).</p>
+      <p><strong>Zone-to-Zone ASR:</strong> Replicate VMs from Zone 1 to Zone 3 within the same region. If Zone 1 goes down, failover to Zone 3 — still in Singapore, still compliant.</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card card-green">
+      <h3>Option 2: Zone-Redundant Architecture</h3>
+      <p>Deploy across all 3 zones with a load balancer natively. No failover needed — if one zone fails, others absorb. Requires zone-redundant VMSS, Standard LB, ZRS storage, zone-redundant SQL.</p>
+    </div>
+    <div class="card card-amber">
+      <h3>Option 3: ZRS Vault + Backup</h3>
+      <p>If ASR isn't feasible, use Azure Backup with ZRS vault. Backups spread across 3 zones. Slower recovery (hours vs minutes) but data survives zone failure.</p>
+    </div>
+  </div>
+  <div class="card card-purple">
+    <h3>Option 4: Paired Region with Legal Agreement</h3>
+    <div class="prose">
+      <p>Negotiate with legal/compliance to allow replication to Singapore ↔ Hong Kong (Azure's paired regions) with contractual controls. Gives true geographic diversity while remaining in APAC.</p>
+    </div>
+  </div>
+  <div class="memory-tip">
+    <strong>"Can't Leave? Go Zonal!"</strong> — Data sovereignty → Availability Zones. Zones = different buildings, same city. Regions = different cities.
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="backup-options">
+  <div class="section-label">Chapter 10</div>
+  <h2 class="section-title">Recovery Services Vault — Backup Options</h2>
+  <table class="tbl">
+    <thead><tr><th>Workload Location</th><th>What to Backup</th><th>Method / Agent</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="4"><strong>Azure</strong></td><td>Azure Virtual Machine (full VM)</td><td>Built-in VM backup (snapshot + vault)</td></tr>
+      <tr><td>SQL Server in Azure VM</td><td>SQL backup stream (auto-discovery)</td></tr>
+      <tr><td>SAP HANA in Azure VM</td><td>HANA backup via Backint plugin</td></tr>
+      <tr><td>Azure Files (file shares)</td><td>Share snapshot (no agent needed)</td></tr>
+      <tr><td rowspan="3"><strong>On-Premises</strong></td><td>Files &amp; Folders</td><td>MARS Agent</td></tr>
+      <tr><td>Windows System State</td><td>MARS Agent</td></tr>
+      <tr><td>Full workload (VMs, SQL, Exchange, SharePoint)</td><td>MABS or DPM</td></tr>
+    </tbody>
+  </table>
+  <div class="callout callout-az">
+    <div class="callout-title">💡 ARCHITECT'S ADDITIONS — WHAT ELSE TO BACKUP</div>
+    <strong>Azure Key Vault:</strong> Export and backup secrets/keys/certificates regularly (keys can be backed up to a file).<br>
+    <strong>Entra ID config:</strong> Conditional access policies, app registrations — export via Graph API or use third-party tools.<br>
+    <strong>IaC state:</strong> ARM templates, Bicep files, Terraform state — version control is your backup.<br>
+    <strong>DNS zone records:</strong> Export zone files periodically.<br>
+    <strong>NSG &amp; Firewall rules:</strong> Export as JSON templates.<br>
+    <strong>Container images (ACR):</strong> Geo-replicate your registry.<br>
+    <strong>AKS config:</strong> Use Velero or AKS Backup (Backup Vault) for cluster state and persistent volumes.
+  </div>
+</section>
+
+<!-- 11 -->
+<section id="backup-howto">
+  <div class="section-label">Chapter 11</div>
+  <h2 class="section-title">How to Backup VMs, Storage &amp; Data</h2>
+  <div class="card card-az">
+    <h3>Backing Up Azure VMs</h3>
+    <ol class="step-list">
+      <li><strong>Create RSV</strong> in same region as VM. Set storage redundancy (LRS/GRS/ZRS) BEFORE first backup item.</li>
+      <li><strong>Define Backup Policy</strong> — schedule, retention layers, snapshot retention, tiering rules.</li>
+      <li><strong>Enable Backup</strong> — VM → Operations → Backup → Select vault → Select policy → Enable. Extension auto-installs.</li>
+      <li><strong>Monitor</strong> — First backup is full, subsequent are incremental. Monitor in Backup Center/BCC.</li>
+      <li><strong>Restore</strong> — Options: Create new VM, replace existing disks, restore individual disks, or file-level recovery (mount as drive).</li>
+    </ol>
+  </div>
+  <div class="grid-2">
+    <div class="card card-green">
+      <h3>Backing Up Azure Blobs</h3>
+      <p><span class="tag tag-green">BACKUP VAULT</span></p>
+      <p><strong>Operational:</strong> Continuous point-in-time restore (any second, last 1-365 days). Same storage account only. Cheapest.</p>
+      <p><strong>Vaulted:</strong> Discrete recovery points in Backup Vault. Supports cross-region restore with GRS. Better for compliance.</p>
+    </div>
+    <div class="card card-amber">
+      <h3>Backing Up Managed Disks</h3>
+      <p><span class="tag tag-amber">BACKUP VAULT</span></p>
+      <p>Incremental snapshots (first full, then changes only). Stored in your subscription. Define frequency and retention via policy. Supports cross-region copy. Useful for disks not attached to VMs.</p>
+    </div>
+  </div>
+  <div class="card card-purple">
+    <h3>Backing Up SQL / SAP HANA in Azure VMs</h3>
+    <p><span class="tag tag-purple">RSV</span> <span class="tag tag-purple">STREAM-BASED</span></p>
+    <p>Auto-discovers SQL instances in registered VMs. Uses SQL's native backup stream but sends output to vault. Supports full, differential, and log backups. Transaction log backups every 15 minutes = RPO of 15 minutes for SQL databases. SAP HANA uses certified Backint interface.</p>
+  </div>
+  <div class="memory-tip">
+    <strong>Backup location cheat sheet:</strong> VM → RSV. Disk → Backup Vault. Blob → Backup Vault. Azure Files → RSV. SQL in VM → RSV. PostgreSQL → Backup Vault. AKS → Backup Vault. On-prem → RSV (via MARS/MABS/DPM).
+  </div>
+</section>
+
+<!-- 12 — HIGHLIGHTED SECTION -->
+<section id="mars-mabs-dpm">
+  <div class="section-label">★ Chapter 12 — KEY SECTION</div>
+  <h2 class="section-title">MARS, MABS &amp; DPM — Complete Breakdown</h2>
+
+  <div class="highlight-section">
+    <div class="prose" style="margin-top:1.5rem">
+      <p>These three agents/products handle <strong>on-premises and hybrid backup to Azure</strong>. Understanding their differences is critical for the AZ-104 exam and hybrid architecture design. They overlap — but each has a distinct purpose.</p>
+    </div>
+
+    <!-- MARS -->
+    <div class="agent-card agent-mars" style="margin-top:2rem">
+      <div class="agent-tag">AGENT-BASED · LIGHTWEIGHT · WINDOWS ONLY</div>
+      <h3>MARS — Microsoft Azure Recovery Services Agent</h3>
+      <div class="prose">
+        <p><strong>What it is:</strong> A lightweight agent installed directly on a Windows machine (physical or VM, on-prem or Azure). Backs up files, folders, and System State directly to RSV. No intermediate server needed.</p>
+        <p><strong>What it CAN backup:</strong> Files &amp; folders on Windows Server/client machines. Windows System State (registry, boot files, COM+, AD if DC).</p>
+        <p><strong>What it CANNOT backup:</strong></p>
+        <ul>
+          <li>❌ Full machine/bare-metal (no full VM restore from scratch)</li>
+          <li>❌ Application-aware (no SQL, Exchange, SharePoint — no VSS writer integration)</li>
+          <li>❌ Linux (Windows only)</li>
+          <li>❌ Azure VM disks (use native VM backup)</li>
+          <li>❌ Network shares or NAS (only local volumes)</li>
+        </ul>
+        <p><strong>How it works:</strong> Install → Register with RSV (vault credentials + passphrase) → Schedule backup &amp; retention → Agent compresses + encrypts → Sends to vault over HTTPS.</p>
+        <p><strong>Key limits:</strong> Max 3 backups/day. Max 54 recovery points. Passphrase is YOUR responsibility — lose it and Microsoft cannot recover your data. Uses ~6% CPU per core during backup.</p>
+      </div>
+    </div>
+    <div class="memory-tip">
+      <strong>"MARS = My files And Recovery of System state"</strong> — Files + folders + system state only. No apps, no Linux, no bare-metal. Think: smart robocopy to the cloud.
+    </div>
+
+    <!-- MABS -->
+    <div class="agent-card agent-mabs" style="margin-top:2rem">
+      <div class="agent-tag">DEDICATED SERVER · APPLICATION-AWARE · FREE</div>
+      <h3>MABS — Microsoft Azure Backup Server</h3>
+      <div class="prose">
+        <p><strong>What it is:</strong> A full backup server product (free with Azure subscription). Install on a dedicated Windows Server. Acts as centralized backup server protecting multiple machines and apps, then tiers data to Azure.</p>
+        <p><strong>What it CAN backup (everything MARS does, plus):</strong></p>
+        <ul>
+          <li>✅ Full machine/bare-metal recovery (BMR)</li>
+          <li>✅ Hyper-V VMs and VMware VMs</li>
+          <li>✅ SQL Server databases (application-consistent via VSS)</li>
+          <li>✅ Exchange Server databases</li>
+          <li>✅ SharePoint farms</li>
+          <li>✅ Windows client machines</li>
+          <li>✅ Linux machines (file-level)</li>
+        </ul>
+        <p><strong>What it CANNOT do:</strong></p>
+        <ul>
+          <li>❌ Tape backup (removed in MABS v3+)</li>
+          <li>❌ Oracle database backup</li>
+        </ul>
+        <p><strong>Architecture:</strong> Disk-to-Disk-to-Cloud (D2D2C). MABS stores backups on local disk first (fast restore), then tiers to RSV for long-term. Needs a protection agent on each protected server. MABS requires its own SQL instance (Express auto-installed or bring your own).</p>
+        <p><strong>Licensing:</strong> Free with Azure subscription. No System Center license needed.</p>
+      </div>
+    </div>
+    <div class="memory-tip">
+      <strong>"MABS = Mini Application Backup Server"</strong> — Free mini-DPM. Key differentiator from MARS: application-aware (SQL, Exchange) + bare-metal + Linux. Key differentiator from DPM: no tape, no Oracle, no System Center license.
+    </div>
+
+    <!-- DPM -->
+    <div class="agent-card agent-dpm" style="margin-top:2rem">
+      <div class="agent-tag">SYSTEM CENTER · ENTERPRISE · TAPE + ORACLE</div>
+      <h3>DPM — Data Protection Manager (System Center)</h3>
+      <div class="prose">
+        <p><strong>What it is:</strong> Enterprise-grade backup product, part of System Center suite. Everything MABS does plus tape and Oracle. Integrates with SCOM, SCCM, SCVMM.</p>
+        <p><strong>What it adds over MABS:</strong></p>
+        <ul>
+          <li>✅ Tape backup (D2D2T — Disk to Disk to Tape) for air-gapped compliance</li>
+          <li>✅ Oracle databases</li>
+          <li>✅ DPM-to-DPM chaining (replication across data centers)</li>
+          <li>✅ System Center integration (SCOM monitoring, SCCM deployment)</li>
+        </ul>
+        <p><strong>Licensing:</strong> Requires System Center license ($$). This is the key cost difference from MABS.</p>
+        <p><strong>When DPM over MABS:</strong> Tape for compliance (air-gapped storage), Oracle databases, existing System Center investment, multi-site DPM-to-DPM replication.</p>
+      </div>
+    </div>
+    <div class="memory-tip">
+      <strong>"DPM = Daddy of Protection Management"</strong> — The full workshop. Exam triggers: "tape" → DPM. "System Center" → DPM. "No additional license" → MABS. "Oracle" → DPM.
+    </div>
+
+    <!-- Comparison Table -->
+    <h3 style="color:var(--text-bright);margin-top:2.5rem;margin-bottom:1rem;font-size:1.3rem">MARS vs MABS vs DPM — Full Comparison</h3>
+    <table class="tbl">
+      <thead><tr><th>Capability</th><th style="color:var(--mars-color)">MARS</th><th style="color:var(--mabs-color)">MABS</th><th style="color:var(--dpm-color)">DPM</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Deployment</strong></td><td>Agent on each machine</td><td>Dedicated backup server</td><td>Dedicated backup server</td></tr>
+        <tr><td><strong>Files &amp; Folders</strong></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>System State</strong></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Bare Metal Recovery</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Hyper-V / VMware VMs</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>SQL Server</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Exchange / SharePoint</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Linux</strong></td><td>❌</td><td>✅ (file-level)</td><td>✅ (file-level)</td></tr>
+        <tr><td><strong>Tape Backup</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+        <tr><td><strong>Oracle</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+        <tr><td><strong>Local Disk Storage</strong></td><td>❌ (direct to cloud)</td><td>✅ (D2D2C)</td><td>✅ (D2D2C/T)</td></tr>
+        <tr><td><strong>License Cost</strong></td><td>Free</td><td>Free</td><td>System Center $$</td></tr>
+        <tr><td><strong>Needs Dedicated Server</strong></td><td>No</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td><strong>Application-Aware (VSS)</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Best For</strong></td><td>Simple file backup</td><td>SMB / cloud-first hybrid</td><td>Enterprise + System Center</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Decision Flow -->
+    <div class="diagram-wrap" style="margin-top:2rem">
+      <svg viewBox="0 0 850 340" xmlns="http://www.w3.org/2000/svg" font-family="Sora,sans-serif">
+        <defs><marker id="c1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#5e6d87"/></marker></defs>
+        <text x="425" y="22" fill="#e2e8f4" font-size="14" font-weight="700" text-anchor="middle">Which Agent? — Decision Flowchart</text>
+        <rect x="310" y="45" width="230" height="38" rx="19" fill="#0078d4"/>
+        <text x="425" y="69" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">What do you need to backup?</text>
+        <line x1="340" y1="83" x2="140" y2="120" stroke="#5e6d87" stroke-width="1.5" marker-end="url(#c1)"/>
+        <text x="220" y="100" fill="#5e6d87" font-size="9">Just files &amp; folders?</text>
+        <polygon points="140,125 205,155 140,185 75,155" fill="#111827" stroke="#e06030" stroke-width="1.5"/>
+        <text x="140" y="155" fill="#e06030" font-size="9" font-weight="600" text-anchor="middle">Windows?</text>
+        <line x1="140" y1="185" x2="140" y2="220" stroke="#5e6d87" stroke-width="1.5" marker-end="url(#c1)"/>
+        <text x="155" y="208" fill="#10b981" font-size="8">Yes</text>
+        <rect x="65" y="225" width="150" height="50" rx="10" fill="#0c1019" stroke="#e06030" stroke-width="2"/>
+        <text x="140" y="250" fill="#e06030" font-size="13" font-weight="700" text-anchor="middle">MARS</text>
+        <text x="140" y="267" fill="#5e6d87" font-size="8" text-anchor="middle">Direct to cloud. Simplest.</text>
+        <line x1="425" y1="83" x2="425" y2="120" stroke="#5e6d87" stroke-width="1.5" marker-end="url(#c1)"/>
+        <text x="440" y="108" fill="#5e6d87" font-size="9">Apps, VMs, SQL, BMR?</text>
+        <polygon points="425,125 500,155 425,185 350,155" fill="#111827" stroke="#2dd4bf" stroke-width="1.5"/>
+        <text x="425" y="152" fill="#2dd4bf" font-size="8" font-weight="600" text-anchor="middle">Need tape</text>
+        <text x="425" y="164" fill="#2dd4bf" font-size="8" font-weight="600" text-anchor="middle">or Oracle?</text>
+        <line x1="350" y1="155" x2="310" y2="155" stroke="#5e6d87" stroke-width="1" marker-end="url(#c1)"/>
+        <text x="328" y="148" fill="#10b981" font-size="8">No</text>
+        <rect x="240" y="225" width="150" height="50" rx="10" fill="#0c1019" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="315" y="250" fill="#2dd4bf" font-size="13" font-weight="700" text-anchor="middle">MABS</text>
+        <text x="315" y="267" fill="#5e6d87" font-size="8" text-anchor="middle">Free. Cloud-first. No tape.</text>
+        <line x1="315" y1="185" x2="315" y2="225" stroke="#5e6d87" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <line x1="500" y1="155" x2="570" y2="155" stroke="#5e6d87" stroke-width="1" marker-end="url(#c1)"/>
+        <text x="540" y="148" fill="#ef4444" font-size="8">Yes</text>
+        <rect x="520" y="225" width="150" height="50" rx="10" fill="#0c1019" stroke="#a78bfa" stroke-width="2"/>
+        <text x="595" y="250" fill="#a78bfa" font-size="13" font-weight="700" text-anchor="middle">DPM</text>
+        <text x="595" y="267" fill="#5e6d87" font-size="8" text-anchor="middle">System Center. Tape. Oracle.</text>
+        <line x1="595" y1="185" x2="595" y2="225" stroke="#5e6d87" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <line x1="500" y1="83" x2="720" y2="120" stroke="#5e6d87" stroke-width="1.5" marker-end="url(#c1)"/>
+        <text x="630" y="100" fill="#5e6d87" font-size="9">Azure VM or PaaS?</text>
+        <rect x="640" y="125" width="180" height="45" rx="10" fill="#0c1019" stroke="#0078d4" stroke-width="2"/>
+        <text x="730" y="148" fill="#0078d4" font-size="11" font-weight="700" text-anchor="middle">Azure Backup (native)</text>
+        <text x="730" y="163" fill="#5e6d87" font-size="8" text-anchor="middle">No agents for Azure workloads</text>
+        <rect x="50" y="295" width="200" height="35" rx="8" fill="rgba(224,96,48,0.06)" stroke="rgba(224,96,48,0.25)"/>
+        <text x="150" y="317" fill="#e06030" font-size="9" font-weight="700" text-anchor="middle">EXAM: Files → MARS | Apps → MABS | Tape → DPM</text>
+      </svg>
+      <div class="diagram-caption">Fig 5 — Decision flowchart: MARS for files, MABS for apps (free), DPM for enterprise + tape.</div>
+    </div>
+
+    <!-- Real-World Usage -->
+    <h3 style="color:var(--text-bright);margin-top:2rem;margin-bottom:1rem;font-size:1.2rem">Real-World Usage Scenarios</h3>
+    <div class="grid-3">
+      <div class="card" style="border-color:var(--mars-color)">
+        <h3 style="color:var(--mars-color);font-size:1rem">Where MARS is Used</h3>
+        <div class="prose">
+          <p><strong>Small offices:</strong> 5 Windows file servers need documents backed up to Azure. Install MARS on each, schedule, done.</p>
+          <p><strong>Individual machines:</strong> Critical files from developer workstations.</p>
+          <p><strong>Domain Controller System State:</strong> AD recovery from DC system state backup.</p>
+          <p><strong>Azure VM file-level:</strong> Specific folders inside an Azure VM (not whole VM).</p>
+        </div>
+      </div>
+      <div class="card" style="border-color:var(--mabs-color)">
+        <h3 style="color:var(--mabs-color);font-size:1rem">Where MABS is Used</h3>
+        <div class="prose">
+          <p><strong>SMBs going cloud-first:</strong> 20 servers, SQL databases, Hyper-V VMs — centralized backup without System Center cost.</p>
+          <p><strong>Hybrid environments:</strong> Local disk for fast restore + Azure vault for long-term.</p>
+          <p><strong>SQL/Exchange protection:</strong> Application-consistent backups without DPM licensing cost.</p>
+          <p><strong>VMware/Hyper-V VMs:</strong> Hypervisor-level VM backup.</p>
+        </div>
+      </div>
+      <div class="card" style="border-color:var(--dpm-color)">
+        <h3 style="color:var(--dpm-color);font-size:1rem">Where DPM is Used</h3>
+        <div class="prose">
+          <p><strong>Enterprise data centers:</strong> 500+ servers with tape libraries and System Center.</p>
+          <p><strong>Air-gapped compliance:</strong> Financial services, government mandating offline tape copies.</p>
+          <p><strong>Oracle databases:</strong> The only Microsoft backup tool supporting Oracle.</p>
+          <p><strong>Multi-site DR:</strong> DPM-to-DPM chaining across data centers → then to Azure.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-amber" style="margin-top:1.5rem">
+      <div class="callout-title">⚠️ EXAM TRAPS FOR MARS/MABS/DPM</div>
+      <strong>Trap 1:</strong> "Backup SQL on-premises to Azure, no additional license cost" → <strong>MABS</strong> (DPM needs System Center license).<br><br>
+      <strong>Trap 2:</strong> "File-level backup of Windows server with minimal infrastructure" → <strong>MARS</strong> (no dedicated server needed).<br><br>
+      <strong>Trap 3:</strong> "Backup to tape for regulatory compliance" → <strong>DPM</strong> (MABS removed tape support).<br><br>
+      <strong>Trap 4:</strong> "Can MARS backup Linux?" → <strong>No.</strong> MARS is Windows only. Linux files on-prem → MABS.<br><br>
+      <strong>Trap 5:</strong> "MABS stores data locally before sending to Azure" → <strong>True.</strong> D2D2C. MARS sends directly to cloud.
+    </div>
+
+    <div class="memory-tip" style="margin-top:1.5rem">
+      <strong>The Ultimate Video Game Memory Trick:</strong><br><br>
+      🟠 <strong>Level 1 — MARS (Beginner):</strong> Files only. No server. Direct to cloud. Windows only. Free.<br>
+      🟢 <strong>Level 2 — MABS (Intermediate):</strong> + Apps + VMs + BMR + Linux. Needs server. Cloud-first. Free.<br>
+      🟣 <strong>Level 3 — DPM (Boss Level):</strong> + Tape + Oracle + Multi-site. Needs System Center $$. Enterprise.<br><br>
+      <strong>Each level includes everything from the previous level plus more.</strong> MARS ⊂ MABS ⊂ DPM.
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section id="decision">
+  <div class="section-label">Chapter 13</div>
+  <h2 class="section-title">Architect's Decision Framework</h2>
+  <ol class="step-list">
+    <li><strong>What's your RPO?</strong> RPO 24h = daily backup. RPO 4h = Enhanced policy. RPO ~0 = ASR or sync replication.</li>
+    <li><strong>What's your RTO?</strong> RTO 24h = vault restore. RTO 4h = snapshot + automation. RTO minutes = ASR auto failover.</li>
+    <li><strong>Where does the workload run?</strong> Azure VM → native backup. On-prem files → MARS. On-prem apps → MABS/DPM. PaaS → Backup Vault.</li>
+    <li><strong>Data sovereignty?</strong> Must stay in-country → LRS/ZRS + zone-to-zone ASR. Can cross-border → GRS + cross-region ASR.</li>
+    <li><strong>Retention requirement?</strong> 30 days → standard. 7 years → yearly retention + Archive tier. 10+ years → immutable vaults.</li>
+    <li><strong>Budget?</strong> Tight → backup + LRS. Medium → backup GRS + ASR for critical VMs. Full → ASR all workloads + capacity reservations.</li>
+    <li><strong>TEST YOUR RECOVERY!</strong> Schedule quarterly test restores and ASR test failovers. Automate with Azure DevOps. Time the recovery. Compare against RTO/RPO.</li>
+  </ol>
+
+  <div class="callout callout-green" style="margin-top:2rem">
+    <div class="callout-title">🏁 ARCHITECT'S FINAL RULES</div>
+    <strong>Rule #1:</strong> A backup that hasn't been tested is not a backup — it's a hope. Test monthly. Document the procedure. Time the recovery.<br><br>
+    <strong>Rule #2:</strong> Enable Soft Delete + MUA + Immutable Vaults. If ransomware compromises your admin account, these are your last defense.<br><br>
+    <strong>Rule #3:</strong> Azure Backup is backup. ASR is DR. You need BOTH. Backup = "oops I deleted it." ASR = "the region is gone." Different problems, complementary solutions.
+  </div>
+
+  <div class="memory-tip" style="margin-top:1.5rem">
+    <strong>Master Summary — "VAULT MARS":</strong><br>
+    <strong>V</strong> = Vaults (RSV for VMs/on-prem, Backup Vault for PaaS)<br>
+    <strong>A</strong> = ASR (DR, not backup — replication to another region/zone)<br>
+    <strong>U</strong> = Understand RPO/RTO (they drive every decision)<br>
+    <strong>L</strong> = Layered retention (daily → weekly → monthly → yearly → archive)<br>
+    <strong>T</strong> = Test restores (untested = no backup)<br>
+    <strong>M</strong> = MARS (files, direct to cloud)<br>
+    <strong>A</strong> = Azure Backup Server / MABS (apps + VMs, free, no tape)<br>
+    <strong>R</strong> = Recovery with DPM (enterprise, tape, Oracle, System Center)<br>
+    <strong>S</strong> = Same-region DR via Availability Zones
+  </div>
+</section>
+
+</div>
+<footer>
+  <p>Azure Backup &amp; Recovery — Architect's perspective for engineers growing into the role.</p>
+  <p style="margin-top:.4rem">Covers AZ-104 exam topics with production-grade insights. Updated for 2025-2026.</p>
+</footer>
+</body>
+</html>

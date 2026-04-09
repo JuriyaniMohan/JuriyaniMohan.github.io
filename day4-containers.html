@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Day 4 — Containers & ACA</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2035;
+  --bg-card-hover: #1e2642;
+  --accent-cyan: #06d6a0;
+  --accent-orange: #ff6b35;
+  --accent-purple: #8b5cf6;
+  --accent-blue: #3b82f6;
+  --accent-pink: #ec4899;
+  --accent-yellow: #fbbf24;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #1e293b;
+  --glass: rgba(255,255,255,0.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+/* Animated background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: 
+    radial-gradient(ellipse 600px 600px at 20% 20%, rgba(6,214,160,0.06), transparent),
+    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(139,92,246,0.06), transparent),
+    radial-gradient(ellipse 400px 400px at 50% 50%, rgba(59,130,246,0.04), transparent);
+  z-index: -1;
+  animation: bgShift 20s ease-in-out infinite alternate;
+}
+@keyframes bgShift {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+/* Navigation */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,14,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.8rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  overflow-x: auto;
+}
+.top-nav .brand {
+  font-weight: 800;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.top-nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.top-nav a:hover, .top-nav a.active {
+  color: var(--accent-cyan);
+  background: rgba(6,214,160,0.1);
+}
+
+/* Hero */
+.hero {
+  padding: 4rem 2rem 3rem;
+  text-align: center;
+  position: relative;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  animation: fadeInUp 0.8s ease-out;
+}
+.hero .subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  font-weight: 300;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+.hero .badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));
+  color: #fff;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tab System */
+.tab-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.tab-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(6,214,160,0.15), rgba(59,130,246,0.1));
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(6,214,160,0.1);
+}
+.tab-content {
+  display: none;
+  animation: tabFadeIn 0.5s ease-out;
+}
+.tab-content.active { display: block; }
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Styles */
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+.section:hover {
+  border-color: rgba(6,214,160,0.3);
+  box-shadow: 0 4px 30px rgba(6,214,160,0.05);
+}
+.section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.section h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  margin: 1.5rem 0 0.7rem;
+}
+.section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-purple);
+  margin: 1.2rem 0 0.5rem;
+}
+.section p {
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
+/* Callout boxes */
+.callout {
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0;
+  border-left: 4px solid;
+  font-size: 0.9rem;
+}
+.callout-exam {
+  background: rgba(251,191,36,0.08);
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+.callout-architect {
+  background: rgba(139,92,246,0.08);
+  border-color: var(--accent-purple);
+  color: #c4b5fd;
+}
+.callout-aws {
+  background: rgba(255,107,53,0.08);
+  border-color: var(--accent-orange);
+  color: #fdba74;
+}
+.callout-tip {
+  background: rgba(6,214,160,0.08);
+  border-color: var(--accent-cyan);
+  color: #6ee7b7;
+}
+.callout-warning {
+  background: rgba(236,72,153,0.08);
+  border-color: var(--accent-pink);
+  color: #f9a8d4;
+}
+.callout .callout-title {
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Code block */
+.code-block {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #c9d1d9;
+}
+.code-block .comment { color: #8b949e; }
+.code-block .keyword { color: #ff7b72; }
+.code-block .string { color: #a5d6ff; }
+.code-block .cmd { color: #79c0ff; }
+
+/* Comparison Table */
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 0.85rem;
+}
+.comparison-table th {
+  background: linear-gradient(135deg, rgba(6,214,160,0.15), rgba(59,130,246,0.1));
+  color: var(--accent-cyan);
+  padding: 0.8rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.comparison-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.comparison-table tr:hover td {
+  background: rgba(6,214,160,0.03);
+}
+
+/* Architecture diagram */
+.arch-diagram {
+  background: linear-gradient(135deg, #0d1117, #111827);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.arch-diagram pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--accent-cyan);
+  display: inline-block;
+  text-align: left;
+}
+
+/* Memory Card */
+.memory-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.05));
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.memory-card h4 {
+  color: var(--accent-purple);
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
+.memory-card p {
+  color: #c4b5fd;
+  font-size: 0.9rem;
+}
+
+/* Quiz */
+.quiz-box {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,214,160,0.05));
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.quiz-box h4 { color: var(--accent-blue); margin-bottom: 1rem; }
+.quiz-q {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+}
+.quiz-a {
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent-cyan);
+  display: none;
+}
+.quiz-toggle {
+  background: rgba(6,214,160,0.1);
+  border: 1px solid rgba(6,214,160,0.3);
+  color: var(--accent-cyan);
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  font-family: 'Outfit', sans-serif;
+}
+.quiz-toggle:hover {
+  background: rgba(6,214,160,0.2);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 3rem;
+}
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+/* List styling */
+.styled-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+.styled-list li {
+  padding: 0.4rem 0 0.4rem 1.5rem;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.styled-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+/* Flow diagram inline */
+.flow-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  font-size: 0.82rem;
+}
+.flow-box {
+  background: rgba(6,214,160,0.1);
+  border: 1px solid rgba(6,214,160,0.3);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  color: var(--accent-cyan);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.flow-arrow { color: var(--text-muted); font-size: 1.1rem; }
+
+@media (max-width: 768px) {
+  .section { padding: 1.2rem; }
+  .hero { padding: 2.5rem 1rem 2rem; }
+  .tab-container { padding: 0 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <span class="brand">AZ-104 Day 4</span>
+  <a href="#" class="active" onclick="switchTab('containers-overview')">Overview</a>
+  <a href="#" onclick="switchTab('vm-vs-containers')">VM vs Containers</a>
+  <a href="#" onclick="switchTab('aci')">ACI</a>
+  <a href="#" onclick="switchTab('container-groups')">Container Groups</a>
+  <a href="#" onclick="switchTab('aca')">Container Apps</a>
+  <a href="#" onclick="switchTab('acr')">ACR & Registry</a>
+  <a href="#" onclick="switchTab('decision')">Decision Guide</a>
+  <a href="#" onclick="switchTab('quiz-containers')">Quiz</a>
+</nav>
+
+<div class="hero">
+  <h1>Containers & Azure Container Apps</h1>
+  <div class="subtitle">From an Architect's Lens — AZ-104 Day 4, Part 1</div>
+  <div class="badge">Compute Domain • 20-25% Exam Weight</div>
+</div>
+
+<div class="tab-container">
+
+<!-- ==================== TAB 1: OVERVIEW ==================== -->
+<div id="containers-overview" class="tab-content active">
+
+<div class="section">
+  <h2>🐳 What Are Containers?</h2>
+
+  <h3>The Problem They Solve</h3>
+  <p>Imagine you're a developer at a bank. Your app runs perfectly on your laptop, but when the ops team deploys it to production, it crashes — different OS version, different Python library, missing dependency. This is the classic <strong>"it works on my machine"</strong> problem. Containers solve this by packaging your application code, its runtime, libraries, and configuration into a single, portable unit that runs identically everywhere.</p>
+
+  <h3>What Exactly Is a Container?</h3>
+  <p>A container is a lightweight, isolated execution environment that shares the host operating system's kernel. Unlike a VM that runs a full guest OS, a container only includes the application and its dependencies. Think of it this way:</p>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Analogy</div>
+    A <strong>VM</strong> is like renting an entire apartment — you get your own kitchen, bathroom, plumbing, electricity. A <strong>Container</strong> is like renting a desk in a co-working space — you bring your laptop and setup, but share the building's infrastructure. Much cheaper, faster to set up, and easier to move.
+  </div>
+
+  <h3>Container Image vs Running Container</h3>
+  <p>A <strong>container image</strong> is a read-only template — like a class in OOP. A <strong>running container</strong> is an instance of that image — like an object created from that class. Images are built from a Dockerfile and stored in a container registry (like Azure Container Registry, Docker Hub).</p>
+
+  <div class="flow-inline">
+    <span class="flow-box">Dockerfile</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">docker build</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Container Image</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Push to ACR</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Run on ACI/ACA/AKS</span>
+  </div>
+
+  <h3>Core Concepts to Lock In</h3>
+  <ul class="styled-list">
+    <li><strong>Ephemeral by nature</strong> — containers can be destroyed and recreated instantly. Never store critical data inside a container filesystem.</li>
+    <li><strong>Immutable</strong> — you don't patch a container. You build a new image and redeploy.</li>
+    <li><strong>Stateless by default</strong> — if your app needs persistent data, you mount external volumes (Azure Files, managed disks).</li>
+    <li><strong>Portable</strong> — same image runs in dev, staging, production, any cloud.</li>
+    <li><strong>Microsecond startup</strong> — containers start in seconds vs minutes for VMs.</li>
+  </ul>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    The AZ-104 expects you to know WHEN to use containers vs VMs — not how to write Dockerfiles. Focus on use-case decisions, not Docker internals.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: "CLIPS"</h4>
+    <p>Containers are: <strong>C</strong>onsistent (same everywhere) • <strong>L</strong>ightweight (no OS overhead) • <strong>I</strong>mmutable (replace, don't patch) • <strong>P</strong>ortable (any cloud) • <strong>S</strong>tateless (use external storage)</p>
+  </div>
+</div>
+
+<div class="section">
+  <h2>🏗️ Azure's Container Ecosystem — The Big Picture</h2>
+  
+  <div class="arch-diagram">
+<pre>
+    ┌─────────────────────── Azure Container Ecosystem ───────────────────────┐
+    │                                                                         │
+    │   ┌──────────────┐    ┌──────────────┐    ┌──────────────┐             │
+    │   │     ACR       │    │     ACI       │    │     ACA       │             │
+    │   │  Container    │───▶│  Container    │    │  Container    │             │
+    │   │  Registry     │    │  Instances    │    │  Apps         │             │
+    │   │              │    │              │    │              │             │
+    │   │ Store images  │    │ Simple, fast  │    │ Serverless    │             │
+    │   │ Scan, sign    │    │ No orchestr.  │    │ Auto-scale    │             │
+    │   │ Geo-replicate │    │ Per-second $  │    │ Event-driven  │             │
+    │   └──────────────┘    └──────────────┘    └──────────────┘             │
+    │          │                                                              │
+    │          │            ┌──────────────┐    ┌──────────────┐             │
+    │          └───────────▶│     AKS       │    │  App Service  │             │
+    │                       │  Kubernetes   │    │  Containers   │             │
+    │                       │  Service      │    │              │             │
+    │                       │              │    │ Web apps only │             │
+    │                       │ Full K8s API  │    │ Managed PaaS  │             │
+    │                       │ Max control   │    │ Simplest      │             │
+    │                       └──────────────┘    └──────────────┘             │
+    │                                                                         │
+    │     Complexity:  ACI ◀── Low ─── Medium ───── High ──▶ AKS             │
+    │     Control:     ACI ◀── Least ─ Middle ──── Most ──▶ AKS             │
+    └─────────────────────────────────────────────────────────────────────────┘
+</pre>
+  </div>
+
+  <div class="callout callout-aws">
+    <div class="callout-title">☁️ AWS Cross-Reference</div>
+    <strong>ACR</strong> = Amazon ECR • <strong>ACI</strong> = AWS Fargate (single-task) • <strong>ACA</strong> = AWS App Runner / ECS Fargate • <strong>AKS</strong> = Amazon EKS
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 2: VM vs CONTAINERS ==================== -->
+<div id="vm-vs-containers" class="tab-content">
+
+<div class="section">
+  <h2>⚡ VM vs Containers — The Architect's Decision Framework</h2>
+
+  <h3>Why This Matters</h3>
+  <p>As an architect, you'll get asked "should we containerize this?" on every project. The answer isn't always "yes." Understanding the trade-offs is what separates an administrator from an architect.</p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr><th>Criteria</th><th>Virtual Machines</th><th>Containers</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Isolation</strong></td><td>Full hardware-level isolation via hypervisor. Each VM runs its own OS kernel.</td><td>Process-level isolation. Shares host OS kernel. Lighter but less isolated.</td></tr>
+      <tr><td><strong>Startup Time</strong></td><td>Minutes (boot entire OS)</td><td>Seconds or sub-second</td></tr>
+      <tr><td><strong>Size</strong></td><td>GBs (includes full OS)</td><td>MBs (just app + dependencies)</td></tr>
+      <tr><td><strong>Density</strong></td><td>~10-20 VMs per host</td><td>~100-1000 containers per host</td></tr>
+      <tr><td><strong>State</strong></td><td>Naturally stateful (data on disk persists)</td><td>Ephemeral by default — need external volumes for persistence</td></tr>
+      <tr><td><strong>Patching</strong></td><td>Patch in place (apt update, Windows Update)</td><td>Never patch — rebuild image and redeploy</td></tr>
+      <tr><td><strong>OS Support</strong></td><td>Any OS (Windows, Linux, custom)</td><td>Linux containers most common; Windows containers supported but heavier</td></tr>
+      <tr><td><strong>Licensing</strong></td><td>Need OS licenses (Windows Server, RHEL)</td><td>No guest OS license needed for Linux containers</td></tr>
+      <tr><td><strong>Best For</strong></td><td>Legacy apps, Windows-only workloads, apps needing kernel-level access, databases</td><td>Microservices, APIs, batch jobs, CI/CD pipelines, stateless web apps</td></tr>
+    </tbody>
+  </table>
+
+  <h3>When to Choose VMs — The Non-Negotiables</h3>
+  <ul class="styled-list">
+    <li><strong>Legacy applications</strong> that can't be refactored — monolithic .NET Framework apps, SAP systems</li>
+    <li><strong>Specific OS or kernel requirements</strong> — custom kernel modules, GPU passthrough configurations</li>
+    <li><strong>Compliance requirements mandating full isolation</strong> — some financial regulators require hypervisor-level separation</li>
+    <li><strong>Stateful workloads</strong> — SQL Server, Oracle DB, Active Directory Domain Controllers</li>
+    <li><strong>Windows-heavy shops</strong> — Windows containers exist but are limited and larger (~3-4 GB base image)</li>
+  </ul>
+
+  <h3>When to Choose Containers</h3>
+  <ul class="styled-list">
+    <li><strong>Microservices architectures</strong> — each service in its own container, independently deployable</li>
+    <li><strong>CI/CD pipelines</strong> — build once, test once, deploy everywhere</li>
+    <li><strong>High-density workloads</strong> — run hundreds of instances on same hardware</li>
+    <li><strong>Rapid scaling</strong> — add/remove instances in seconds, not minutes</li>
+    <li><strong>Dev/test environments</strong> — spin up identical environments instantly</li>
+    <li><strong>Event-driven processing</strong> — process a queue message, scale to zero when done</li>
+  </ul>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    The exam will present scenarios and ask you to choose between VM and container. Key signals: "minimize infrastructure management" → containers. "Legacy Windows app that can't be modified" → VM. "Scale rapidly to handle bursts" → containers. "Run SQL Server with persistent storage" → VM.
+  </div>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Real-World Insight</div>
+    In production at scale (10 years AWS/Azure experience speaking), I've found the sweet spot is often <strong>both</strong>. Databases and legacy systems on VMs, application microservices in containers. Don't force-fit everything into containers — it's not a religious decision, it's an engineering one.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: "VM = VISA, Container = CASH"</h4>
+    <p><strong>VM (VISA)</strong>: <strong>V</strong>erbose, <strong>I</strong>solated, <strong>S</strong>tateful, <strong>A</strong>ny-OS<br>
+    <strong>Container (CASH)</strong>: <strong>C</strong>ompact, <strong>A</strong>gile, <strong>S</strong>tateless, <strong>H</strong>igh-density</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 3: ACI ==================== -->
+<div id="aci" class="tab-content">
+
+<div class="section">
+  <h2>📦 Azure Container Instances (ACI)</h2>
+
+  <h3>What Is ACI?</h3>
+  <p>Azure Container Instances is the simplest, fastest way to run a container in Azure. No VM provisioning, no cluster management, no orchestration overhead. You give Azure an image, specify CPU and memory, and it runs. Think of it as "serverless containers" at the most fundamental level.</p>
+
+  <h3>The Problem ACI Solves</h3>
+  <p>Before ACI, running a single container in Azure meant: (1) create a VM, (2) install Docker, (3) pull your image, (4) run the container, (5) manage the VM's OS patches, networking, etc. ACI eliminates all of that. You go from image → running container in seconds.</p>
+
+  <h3>Key Features & Characteristics</h3>
+  <ul class="styled-list">
+    <li><strong>Per-second billing</strong> — you pay only for the CPU and memory allocated, billed from when image pull starts until container stops</li>
+    <li><strong>Fast startup</strong> — containers start in seconds, no VM boot time</li>
+    <li><strong>Hyper-V isolation</strong> — each container group gets its own Hyper-V isolated kernel (stronger than typical container isolation)</li>
+    <li><strong>Supports Linux AND Windows containers</strong> — but Windows containers have limitations (see below)</li>
+    <li><strong>Configurable CPU/Memory</strong> — you specify the exact vCPU and GiB you need</li>
+    <li><strong>Persistent storage via Azure Files</strong> — mount an Azure File Share for data that needs to survive container restarts</li>
+    <li><strong>VNet integration</strong> — deploy into an Azure Virtual Network for private communication</li>
+    <li><strong>Restart policies</strong> — Always, OnFailure, Never</li>
+    <li><strong>No built-in autoscaling</strong> — if you need 5 instances, you create 5 separate container instances</li>
+    <li><strong>No built-in load balancing</strong> — each instance gets its own IP</li>
+  </ul>
+
+  <h3>When to Use ACI — Use Cases</h3>
+  <ul class="styled-list">
+    <li><strong>Batch processing jobs</strong> — run a data transformation, then stop and pay nothing</li>
+    <li><strong>CI/CD build agents</strong> — spin up a build container, run tests, destroy</li>
+    <li><strong>Quick prototyping</strong> — test a container image without setting up infrastructure</li>
+    <li><strong>AKS burst overflow</strong> — AKS can use ACI as "virtual nodes" to handle overflow traffic</li>
+    <li><strong>Scheduled tasks</strong> — run a report generator every night via Logic Apps + ACI</li>
+    <li><strong>Sidecar containers</strong> — deploy logging/monitoring agents alongside your app in a container group</li>
+  </ul>
+
+  <h3>Resource Configuration</h3>
+  <p>Each container in ACI has two resource settings:</p>
+  <ul class="styled-list">
+    <li><strong>Resource Request</strong> — the guaranteed minimum CPU/memory allocated</li>
+    <li><strong>Resource Limit</strong> — the maximum CPU/memory the container can use</li>
+  </ul>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">⚠️ Critical Exam Point</div>
+    If you do NOT specify a resource limit, the container's maximum resource usage equals its resource request. You cannot dynamically change resource limits on a running container — you must delete and recreate the container group.
+  </div>
+
+  <h3>Networking Options</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Option</th><th>Description</th><th>Use Case</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Public</strong></td><td>Container gets a public IP and FQDN</td><td>Internet-facing APIs, demo apps</td></tr>
+      <tr><td><strong>Private</strong></td><td>Deploy into a VNet subnet (delegated)</td><td>Internal microservices, backend processing</td></tr>
+      <tr><td><strong>None</strong></td><td>No network interface</td><td>Background jobs with no inbound traffic</td></tr>
+    </tbody>
+  </table>
+
+  <h3>CLI Quick Reference</h3>
+  <div class="code-block">
+<span class="comment"># Create a simple public container instance</span>
+<span class="cmd">az container create</span> \
+  <span class="keyword">--resource-group</span> myRG \
+  <span class="keyword">--name</span> mycontainer \
+  <span class="keyword">--image</span> <span class="string">mcr.microsoft.com/azuredocs/aci-helloworld:latest</span> \
+  <span class="keyword">--cpu</span> 1 <span class="keyword">--memory</span> 1.5 \
+  <span class="keyword">--ports</span> 80 \
+  <span class="keyword">--dns-name-label</span> myapp-demo \
+  <span class="keyword">--restart-policy</span> Always
+
+<span class="comment"># View running container logs</span>
+<span class="cmd">az container logs</span> <span class="keyword">--resource-group</span> myRG <span class="keyword">--name</span> mycontainer
+
+<span class="comment"># Attach to a running container's console</span>
+<span class="cmd">az container attach</span> <span class="keyword">--resource-group</span> myRG <span class="keyword">--name</span> mycontainer
+
+<span class="comment"># Deploy into a VNet (private)</span>
+<span class="cmd">az container create</span> \
+  <span class="keyword">--resource-group</span> myRG \
+  <span class="keyword">--name</span> private-container \
+  <span class="keyword">--image</span> <span class="string">myacr.azurecr.io/myapp:v1</span> \
+  <span class="keyword">--vnet</span> myVNet <span class="keyword">--subnet</span> aci-subnet \
+  <span class="keyword">--cpu</span> 2 <span class="keyword">--memory</span> 4
+  </div>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    ACI persistent storage ONLY supports Azure File Shares — not Blob Storage, not Table Storage, not managed disks. This is a frequently tested point.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: ACI = "A Container Instantly"</h4>
+    <p>Simple. Fast. No cluster. Per-second billing. File Shares for persistence. No autoscale — you manage instance count yourself.</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 4: CONTAINER GROUPS ==================== -->
+<div id="container-groups" class="tab-content">
+
+<div class="section">
+  <h2>🔗 Azure Container Groups</h2>
+
+  <h3>What Is a Container Group?</h3>
+  <p>A container group is a collection of containers that get scheduled on the same host machine. They share the same lifecycle, local network, and storage volumes. Think of it as a Kubernetes "Pod" — but in ACI.</p>
+
+  <h3>Why Container Groups Exist</h3>
+  <p>Sometimes you need containers that work together closely — like your main app container plus a logging sidecar, or a web server plus a data sync container. Deploying them in a container group ensures they:</p>
+  <ul class="styled-list">
+    <li>Share the same <strong>network namespace</strong> — they can communicate via localhost</li>
+    <li>Share the same <strong>lifecycle</strong> — they start and stop together</li>
+    <li>Share <strong>mounted volumes</strong> — both can read/write the same Azure File Share</li>
+    <li>Are <strong>co-located</strong> — same host, minimal latency between them</li>
+  </ul>
+
+  <div class="arch-diagram">
+<pre>
+        ┌──────────────── Container Group ─────────────────┐
+        │                                                   │
+        │   ┌─────────────┐     ┌─────────────┐           │
+        │   │  Container 1 │     │  Container 2 │           │
+        │   │  (Web App)   │◀───▶│  (Log Agent)  │           │
+        │   │  Port: 80    │     │  Port: N/A    │           │
+        │   │  CPU: 1      │     │  CPU: 0.5     │           │
+        │   │  Mem: 1.5 GB │     │  Mem: 0.5 GB  │           │
+        │   └──────┬───────┘     └──────┬───────┘           │
+        │          │                     │                   │
+        │          └─────────┬───────────┘                   │
+        │                    │                               │
+        │          ┌─────────▼─────────┐                    │
+        │          │  Shared Volume     │                    │
+        │          │  (Azure File Share)│                    │
+        │          └───────────────────┘                    │
+        │                                                   │
+        │   Public IP: 20.xx.xx.xx  │  FQDN: myapp.eastus  │
+        │   Total Resources: 1.5 CPU, 2 GB Memory          │
+        └───────────────────────────────────────────────────┘
+</pre>
+  </div>
+
+  <h3>Critical Rules for Container Groups</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Rule</th><th>Details</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Multi-container groups: Linux ONLY</strong></td><td>Windows containers only support single-container groups. If exam asks "which can be in a container group?" — look for Linux OS.</td></tr>
+      <tr><td><strong>Resource allocation is at group level</strong></td><td>Total CPU/memory is the SUM of all containers in the group. Individual containers get their configured request/limit within that pool.</td></tr>
+      <tr><td><strong>Network: shared IP, unique ports</strong></td><td>All containers share one IP. Each container must use different ports. They talk to each other via localhost.</td></tr>
+      <tr><td><strong>Lifecycle: all or nothing</strong></td><td>You can't restart a single container — the entire group restarts. Can't add/remove containers from a running group.</td></tr>
+      <tr><td><strong>Deployment methods</strong></td><td>ARM templates, YAML files, or Azure CLI. YAML is recommended for multi-container groups.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Sidecar Pattern — The Key Architecture Pattern</h3>
+  <p>The most common container group pattern is the <strong>sidecar</strong>. Your main application container runs alongside helper containers that provide cross-cutting concerns:</p>
+  <ul class="styled-list">
+    <li><strong>Logging sidecar</strong> — collects and ships logs to a central system</li>
+    <li><strong>Monitoring sidecar</strong> — exports metrics to Azure Monitor</li>
+    <li><strong>Proxy sidecar</strong> — handles SSL termination or authentication</li>
+    <li><strong>Data sync sidecar</strong> — periodically pulls config from a remote source</li>
+  </ul>
+
+  <h3>YAML Deployment Example</h3>
+  <div class="code-block">
+<span class="comment"># container-group.yaml</span>
+<span class="keyword">apiVersion</span>: 2021-09-01
+<span class="keyword">name</span>: myContainerGroup
+<span class="keyword">location</span>: eastus
+<span class="keyword">properties</span>:
+  <span class="keyword">containers</span>:
+    - <span class="keyword">name</span>: webapp
+      <span class="keyword">properties</span>:
+        <span class="keyword">image</span>: <span class="string">nginx:latest</span>
+        <span class="keyword">ports</span>:
+          - <span class="keyword">port</span>: 80
+        <span class="keyword">resources</span>:
+          <span class="keyword">requests</span>:
+            <span class="keyword">cpu</span>: 1.0
+            <span class="keyword">memoryInGb</span>: 1.5
+        <span class="keyword">volumeMounts</span>:
+          - <span class="keyword">name</span>: shared-data
+            <span class="keyword">mountPath</span>: /var/log/nginx
+    - <span class="keyword">name</span>: log-shipper
+      <span class="keyword">properties</span>:
+        <span class="keyword">image</span>: <span class="string">fluentd:latest</span>
+        <span class="keyword">resources</span>:
+          <span class="keyword">requests</span>:
+            <span class="keyword">cpu</span>: 0.5
+            <span class="keyword">memoryInGb</span>: 0.5
+        <span class="keyword">volumeMounts</span>:
+          - <span class="keyword">name</span>: shared-data
+            <span class="keyword">mountPath</span>: /fluentd/log
+  <span class="keyword">volumes</span>:
+    - <span class="keyword">name</span>: shared-data
+      <span class="keyword">azureFile</span>:
+        <span class="keyword">shareName</span>: myshare
+        <span class="keyword">storageAccountName</span>: mystorageacct
+        <span class="keyword">storageAccountKey</span>: <span class="string">"xxxxx"</span>
+  <span class="keyword">ipAddress</span>:
+    <span class="keyword">type</span>: Public
+    <span class="keyword">ports</span>:
+      - <span class="keyword">protocol</span>: TCP
+        <span class="keyword">port</span>: 80
+  <span class="keyword">osType</span>: Linux
+
+<span class="comment"># Deploy:</span>
+<span class="cmd">az container create</span> <span class="keyword">--resource-group</span> myRG <span class="keyword">--file</span> container-group.yaml
+  </div>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip — Frequently Tested</div>
+    <strong>Q:</strong> "Which containers can be deployed to a container group?" → Only Linux containers support multi-container groups. Windows containers = single container only per group.<br><br>
+    <strong>Q:</strong> "A container group has Container A (request: 2 CPU, limit: 4 CPU) and Container B (request: 1 CPU, limit: 2 CPU). What is the total CPU for the group?" → The group total is the SUM of individual requests (3 CPU). Limits define how much each container can burst within the group's allocation.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: Container Group = "Pod in ACI"</h4>
+    <p><strong>S.L.I.N.</strong> — <strong>S</strong>hared lifecycle, <strong>L</strong>ocalhost networking, <strong>I</strong>P is shared, <strong>N</strong>o Windows multi-container. Remember: Groups = Pods, Sidecars = Helpers.</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 5: ACA ==================== -->
+<div id="aca" class="tab-content">
+
+<div class="section">
+  <h2>🚀 Azure Container Apps (ACA)</h2>
+
+  <h3>What Is ACA?</h3>
+  <p>Azure Container Apps is a fully managed, serverless container platform built on top of Kubernetes (but you never touch K8s). It's designed for microservices and event-driven workloads. Microsoft manages the infrastructure, scaling, networking, and service discovery — you just deploy your containers.</p>
+
+  <h3>The Problem ACA Solves</h3>
+  <p>AKS gives you full Kubernetes power but requires a team to manage clusters, node pools, upgrades, and networking. ACI is too simple — no autoscaling, no service discovery, no traffic splitting. ACA sits in the <strong>sweet spot</strong>: Kubernetes capabilities without Kubernetes complexity.</p>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Perspective</div>
+    Think of ACA as "managed Kubernetes without the PhD." In my 10 years, most teams don't need full K8s — they need auto-scaling, revisions, traffic splitting, and event triggers. ACA gives you that at 20% of the operational overhead.
+  </div>
+
+  <h3>Key Features</h3>
+  <ul class="styled-list">
+    <li><strong>Scale to zero</strong> — no traffic = no running instances = no cost (Consumption plan)</li>
+    <li><strong>KEDA-based autoscaling</strong> — scale based on HTTP traffic, queue length, CPU, memory, custom metrics</li>
+    <li><strong>Revisions</strong> — deploy new versions as "revisions." Split traffic between revisions (canary, blue-green)</li>
+    <li><strong>Dapr integration</strong> — built-in service-to-service invocation, pub/sub, state management</li>
+    <li><strong>Managed identity</strong> — authenticate to Azure services without credentials</li>
+    <li><strong>Built-in ingress</strong> — HTTPS endpoints with custom domains, no need for separate load balancer</li>
+    <li><strong>Container Apps Environment</strong> — a secure boundary for a group of container apps (like a namespace)</li>
+    <li><strong>Jobs</strong> — run on-demand, scheduled (cron), or event-driven tasks</li>
+    <li><strong>Linux only</strong> — does not support Windows containers</li>
+  </ul>
+
+  <h3>ACA Core Concepts</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Concept</th><th>What It Is</th><th>Analogy</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Environment</strong></td><td>Secure boundary around a group of container apps. Shares VNet and Log Analytics workspace.</td><td>Like a K8s namespace + cluster combined</td></tr>
+      <tr><td><strong>Container App</strong></td><td>Your deployed application with its configuration</td><td>Like a K8s Deployment</td></tr>
+      <tr><td><strong>Revision</strong></td><td>An immutable snapshot of your app at a point in time</td><td>Like a K8s ReplicaSet version</td></tr>
+      <tr><td><strong>Replica</strong></td><td>An individual running instance of a revision</td><td>Like a K8s Pod</td></tr>
+      <tr><td><strong>Ingress</strong></td><td>HTTP/HTTPS endpoint configuration</td><td>Like a K8s Ingress + Service</td></tr>
+      <tr><td><strong>Scale Rule</strong></td><td>Defines what triggers scaling (HTTP, queue, CPU, etc.)</td><td>Like KEDA ScaledObject</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Scaling in ACA</h3>
+  <div class="flow-inline">
+    <span class="flow-box">Event Source (HTTP, Queue, Timer)</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">KEDA Detects</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Scale Up Replicas</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Traffic Served</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Event Stops → Scale to Zero</span>
+  </div>
+
+  <h3>Traffic Splitting — Blue/Green & Canary</h3>
+  <div class="code-block">
+<span class="comment"># Split traffic: 80% to current, 20% to new revision</span>
+<span class="cmd">az containerapp ingress traffic set</span> \
+  <span class="keyword">--name</span> myapp \
+  <span class="keyword">--resource-group</span> myRG \
+  <span class="keyword">--revision-weight</span> <span class="string">myapp--rev1=80 myapp--rev2=20</span>
+  </div>
+
+  <h3>Pricing Plans</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Plan</th><th>Model</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Consumption</strong></td><td>Pay per vCPU-second and GiB-second. Free tier: 180K vCPU-sec + 360K GiB-sec/month.</td><td>Variable workloads, scale-to-zero scenarios</td></tr>
+      <tr><td><strong>Dedicated</strong></td><td>Pay per hour for reserved vCPU/memory</td><td>Predictable, always-on workloads</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    ACA supports <strong>Linux containers only</strong>. If a question mentions a Windows container needing autoscaling and event-driven triggers, ACA is NOT the answer — you'd need AKS with Windows node pools or App Service for Containers. Also: ACA supports "scale to zero" for HTTP — AKS does NOT natively (requires KEDA add-on).
+  </div>
+
+  <div class="callout callout-aws">
+    <div class="callout-title">☁️ AWS Comparison</div>
+    ACA ≈ AWS App Runner (for simple cases) or ECS Fargate with auto-scaling + event bridge. The traffic splitting/revision concept is similar to AWS CodeDeploy canary deployments.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: ACA = "Auto-Contained Apps"</h4>
+    <p><strong>S.E.R.V.E.</strong> — <strong>S</strong>cale to zero, <strong>E</strong>vent-driven (KEDA), <strong>R</strong>evisions & traffic split, <strong>V</strong>Net integration, <strong>E</strong>nvironment-scoped. Think: "ACA Serves microservices."</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 6: ACR ==================== -->
+<div id="acr" class="tab-content">
+
+<div class="section">
+  <h2>🗄️ Azure Container Registry (ACR)</h2>
+
+  <h3>What Is ACR?</h3>
+  <p>Azure Container Registry is a managed, private Docker registry service based on the open-source Docker Registry 2.0. You use it to store and manage your container images, Helm charts, and OCI artifacts. Every container service in Azure (ACI, ACA, AKS, App Service) can pull images from ACR.</p>
+
+  <h3>Why Not Just Use Docker Hub?</h3>
+  <ul class="styled-list">
+    <li><strong>Security</strong> — ACR is private by default. Docker Hub free tier images are public.</li>
+    <li><strong>Geo-replication</strong> — replicate images close to your deployment regions for faster pulls</li>
+    <li><strong>Network integration</strong> — ACR can be accessed via Private Endpoints (no public internet)</li>
+    <li><strong>Azure AD authentication</strong> — RBAC, managed identity, service principals — no shared credentials</li>
+    <li><strong>Image scanning</strong> — integrated vulnerability scanning with Microsoft Defender</li>
+    <li><strong>ACR Tasks</strong> — build container images in Azure without a local Docker daemon</li>
+  </ul>
+
+  <h3>SKU Tiers</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Feature</th><th>Basic</th><th>Standard</th><th>Premium</th></tr></thead>
+    <tbody>
+      <tr><td>Storage</td><td>10 GB</td><td>100 GB</td><td>500 GB</td></tr>
+      <tr><td>Throughput</td><td>Low</td><td>Medium</td><td>High</td></tr>
+      <tr><td>Geo-Replication</td><td>❌</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Private Link</td><td>❌</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Content Trust</td><td>❌</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Best For</td><td>Dev/test</td><td>Production (single region)</td><td>Enterprise (multi-region)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Key CLI Commands</h3>
+  <div class="code-block">
+<span class="comment"># Create a registry</span>
+<span class="cmd">az acr create</span> <span class="keyword">--resource-group</span> myRG <span class="keyword">--name</span> myACR <span class="keyword">--sku</span> Standard
+
+<span class="comment"># Login to ACR</span>
+<span class="cmd">az acr login</span> <span class="keyword">--name</span> myACR
+
+<span class="comment"># Tag and push an image</span>
+<span class="cmd">docker tag</span> myapp:v1 <span class="string">myacr.azurecr.io/myapp:v1</span>
+<span class="cmd">docker push</span> <span class="string">myacr.azurecr.io/myapp:v1</span>
+
+<span class="comment"># Build image in Azure (no local Docker needed!)</span>
+<span class="cmd">az acr build</span> <span class="keyword">--registry</span> myACR <span class="keyword">--image</span> <span class="string">myapp:v1</span> .
+
+<span class="comment"># List images in the registry</span>
+<span class="cmd">az acr repository list</span> <span class="keyword">--name</span> myACR
+  </div>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    To push an image to ACR, you must first TAG it with the registry's login server name. The correct order is: (1) Authenticate → (2) Tag → (3) Push. The admin account is disabled by default and should NOT be used in production — use managed identity or service principal instead.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: ACR SKUs = "B.S.P."</h4>
+    <p><strong>B</strong>asic (dev), <strong>S</strong>tandard (prod single-region), <strong>P</strong>remium (geo-replication + private link). Remember: Geo-replication and Private Link are PREMIUM only.</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 7: DECISION GUIDE ==================== -->
+<div id="decision" class="tab-content">
+
+<div class="section">
+  <h2>🧭 Container Service Decision Guide</h2>
+
+  <h3>The Decision Tree — From an Architect's Desk</h3>
+  <div class="arch-diagram">
+<pre>
+  START: "I need to run a container in Azure"
+    │
+    ├── Is it a short-lived batch/task/job?
+    │     └── YES → <strong style="color:#06d6a0">Azure Container Instances (ACI)</strong>
+    │
+    ├── Do you need autoscaling + event-driven + serverless?
+    │     ├── Is it Linux? → YES → <strong style="color:#06d6a0">Azure Container Apps (ACA)</strong>
+    │     └── Is it Windows? → <strong style="color:#fbbf24">App Service for Containers</strong> or <strong style="color:#fbbf24">AKS</strong>
+    │
+    ├── Do you need full Kubernetes API + custom CRDs + DaemonSets?
+    │     └── YES → <strong style="color:#06d6a0">Azure Kubernetes Service (AKS)</strong>
+    │
+    ├── Is it a traditional web app (HTTP only, no microservices)?
+    │     └── YES → <strong style="color:#06d6a0">App Service for Containers</strong>
+    │
+    └── Need AKS but want to burst for peak traffic?
+          └── <strong style="color:#06d6a0">AKS + ACI Virtual Nodes</strong>
+</pre>
+  </div>
+
+  <h3>Full Comparison Matrix</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Feature</th><th>ACI</th><th>ACA</th><th>AKS</th><th>App Service</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Complexity</strong></td><td>Lowest</td><td>Low-Medium</td><td>High</td><td>Low</td></tr>
+      <tr><td><strong>Autoscaling</strong></td><td>❌ Manual</td><td>✅ KEDA-based</td><td>✅ HPA + Cluster Autoscaler</td><td>✅ Built-in</td></tr>
+      <tr><td><strong>Scale to Zero</strong></td><td>✅ (stop = no cost)</td><td>✅ Native</td><td>❌ (nodes always run)</td><td>❌</td></tr>
+      <tr><td><strong>Windows Support</strong></td><td>✅ (limited)</td><td>❌ Linux only</td><td>✅</td><td>✅</td></tr>
+      <tr><td><strong>K8s API Access</strong></td><td>❌</td><td>❌</td><td>✅ Full</td><td>❌</td></tr>
+      <tr><td><strong>Traffic Splitting</strong></td><td>❌</td><td>✅ Revisions</td><td>✅ (Ingress)</td><td>✅ Deployment slots</td></tr>
+      <tr><td><strong>Service Discovery</strong></td><td>❌</td><td>✅ Built-in</td><td>✅ CoreDNS</td><td>❌</td></tr>
+      <tr><td><strong>Persistent Storage</strong></td><td>Azure Files only</td><td>Azure Files</td><td>Any (PV/PVC)</td><td>Mounted storage</td></tr>
+      <tr><td><strong>Pricing</strong></td><td>Per-second</td><td>Per-second or Dedicated</td><td>Per-node VM</td><td>Per-plan tier</td></tr>
+      <tr><td><strong>Best For</strong></td><td>Batch jobs, bursts</td><td>Microservices, APIs</td><td>Complex enterprise</td><td>Web apps</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Rule of Thumb</div>
+    <strong>If you don't know Kubernetes and don't want to learn it</strong> → ACA or App Service.<br>
+    <strong>If you know Kubernetes and need full control</strong> → AKS.<br>
+    <strong>If you just need to run one container quickly</strong> → ACI.<br>
+    <strong>If the exam says "minimize management overhead"</strong> → ACA (for containers) or App Service (for web).
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: "I Am King" → ACI, ACA, AKS</h4>
+    <p><strong>I</strong>nstant = ACI (just run it) → <strong>A</strong>uto = ACA (auto-scales, auto-manages) → <strong>K</strong>ing = AKS (king of control, full Kubernetes). As complexity grows, move right.</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 8: QUIZ ==================== -->
+<div id="quiz-containers" class="tab-content">
+
+<div class="section">
+  <h2>🎯 Containers Knowledge Check</h2>
+
+  <div class="quiz-box">
+    <h4>📋 Rapid-Fire Quiz — Test Yourself</h4>
+
+    <div class="quiz-q">Q1: Your company needs to run a nightly data processing job that takes 15 minutes. The container should start, process, and stop. Minimal infrastructure management is required. Which service?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Azure Container Instances (ACI)</strong> — perfect for short-lived, on-demand tasks with per-second billing and no cluster overhead. Use restart policy "Never" or "OnFailure."</div>
+
+    <div class="quiz-q">Q2: A development team wants to deploy 10 microservices that need to auto-scale based on queue depth and communicate with each other via service discovery. They don't want to manage Kubernetes. Which service?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Azure Container Apps (ACA)</strong> — KEDA-based scaling on queue depth, built-in service discovery, Dapr for service-to-service communication, no K8s management required.</div>
+
+    <div class="quiz-q">Q3: You have a container group with two containers: Container A (request 2 CPU, limit 3 CPU) and Container B (request 1 CPU, no limit set). What is Container B's maximum CPU usage?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>1 CPU</strong> — when no resource limit is specified, the maximum equals the resource request. Container B can use at most 1 CPU.</div>
+
+    <div class="quiz-q">Q4: You need to deploy a multi-container group (app + sidecar). One container runs Windows Server Core, the other runs Linux Alpine. Can they be in the same container group?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>No</strong> — a container group can only have ONE OS type. You cannot mix Windows and Linux in the same group. Additionally, multi-container groups only support Linux containers.</div>
+
+    <div class="quiz-q">Q5: Your ACI container needs persistent storage for log files. Which Azure storage service is supported?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Azure Files (File Share)</strong> only. ACI does not support Blob Storage, Table Storage, or managed disks for volume mounts.</div>
+
+    <div class="quiz-q">Q6: You need to push a container image to ACR. You've already authenticated. What must you do BEFORE running docker push?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Tag the image</strong> with the ACR login server name. Example: <code>docker tag myapp:v1 myacr.azurecr.io/myapp:v1</code>. Without this tag, Docker doesn't know which registry to push to.</div>
+
+    <div class="quiz-q">Q7: Your team needs geo-replication of container images and private endpoint access to the registry. Which ACR SKU is required?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Premium</strong> — geo-replication and Private Link are only available in the Premium SKU.</div>
+
+    <div class="quiz-q">Q8: An ACA app needs to deploy a new version and gradually shift 20% of traffic to it before full rollout. What feature enables this?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Revisions with traffic splitting</strong>. Deploy the new version as a new revision, then use ingress traffic rules to split 80/20 between revisions (canary deployment pattern).</div>
+
+    <div class="quiz-q">Q9: You want to run a Windows container with private networking in ACI. What should you check first?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">Historically, private networking was Linux-only in ACI. This is a frequently tested exam point. While recent updates have added Windows support for private networking, always verify current documentation. In the exam, if private networking is "unavailable" and OS is Windows, changing OS to Linux is typically the expected answer.</div>
+
+    <div class="quiz-q">Q10: Your AKS cluster is at capacity during peak hours, but you don't want to permanently add more nodes. What Azure-native solution can handle the burst?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>AKS Virtual Nodes (powered by ACI)</strong> — allows AKS to burst overflow pods to ACI, providing elastic scaling without permanently provisioning extra nodes. Requires Azure CNI networking.</div>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+</div><!-- tab-container -->
+
+<footer>
+  AZ-104 Day 4 — Containers & ACA Study Guide | Built for exam preparation and architect-level understanding<br>
+  Navigate to <a href="day4-monitoring.html" style="color: var(--accent-cyan);">Day 4 Part 2: Azure Monitor & Data Protection →</a>
+</footer>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

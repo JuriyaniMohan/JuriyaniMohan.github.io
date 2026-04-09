@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-104 Day 4 — Azure Monitor & Data Protection</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2035;
+  --bg-card-hover: #1e2642;
+  --accent-cyan: #06d6a0;
+  --accent-orange: #ff6b35;
+  --accent-purple: #8b5cf6;
+  --accent-blue: #3b82f6;
+  --accent-pink: #ec4899;
+  --accent-yellow: #fbbf24;
+  --accent-red: #ef4444;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #1e293b;
+  --glass: rgba(255,255,255,0.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(ellipse 600px 600px at 80% 20%, rgba(139,92,246,0.07), transparent),
+    radial-gradient(ellipse 500px 500px at 20% 80%, rgba(6,214,160,0.06), transparent),
+    radial-gradient(ellipse 400px 400px at 50% 40%, rgba(236,72,153,0.04), transparent);
+  z-index: -1;
+}
+
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,14,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.8rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  overflow-x: auto;
+}
+.top-nav .brand {
+  font-weight: 800;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.top-nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.top-nav a:hover, .top-nav a.active {
+  color: var(--accent-purple);
+  background: rgba(139,92,246,0.1);
+}
+
+.hero {
+  padding: 4rem 2rem 3rem;
+  text-align: center;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink), var(--accent-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  animation: fadeInUp 0.8s ease-out;
+}
+.hero .subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  font-weight: 300;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+.hero .badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  color: #fff;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+.tab-btn {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.tab-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--accent-purple);
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1));
+  color: var(--accent-purple);
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 20px rgba(139,92,246,0.1);
+}
+.tab-content {
+  display: none;
+  animation: tabFadeIn 0.5s ease-out;
+}
+.tab-content.active { display: block; }
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+.section:hover {
+  border-color: rgba(139,92,246,0.3);
+  box-shadow: 0 4px 30px rgba(139,92,246,0.05);
+}
+.section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.section h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent-purple);
+  margin: 1.5rem 0 0.7rem;
+}
+.section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  margin: 1.2rem 0 0.5rem;
+}
+.section p {
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
+.callout {
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0;
+  border-left: 4px solid;
+  font-size: 0.9rem;
+}
+.callout-exam {
+  background: rgba(251,191,36,0.08);
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+.callout-architect {
+  background: rgba(139,92,246,0.08);
+  border-color: var(--accent-purple);
+  color: #c4b5fd;
+}
+.callout-aws {
+  background: rgba(255,107,53,0.08);
+  border-color: var(--accent-orange);
+  color: #fdba74;
+}
+.callout-tip {
+  background: rgba(6,214,160,0.08);
+  border-color: var(--accent-cyan);
+  color: #6ee7b7;
+}
+.callout-warning {
+  background: rgba(236,72,153,0.08);
+  border-color: var(--accent-pink);
+  color: #f9a8d4;
+}
+.callout .callout-title {
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.code-block {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #c9d1d9;
+}
+.code-block .comment { color: #8b949e; }
+.code-block .keyword { color: #ff7b72; }
+.code-block .string { color: #a5d6ff; }
+.code-block .cmd { color: #79c0ff; }
+.code-block .func { color: #d2a8ff; }
+.code-block .op { color: #ff7b72; }
+
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 0.85rem;
+}
+.comparison-table th {
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1));
+  color: var(--accent-purple);
+  padding: 0.8rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.comparison-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+.comparison-table tr:hover td {
+  background: rgba(139,92,246,0.03);
+}
+
+.arch-diagram {
+  background: linear-gradient(135deg, #0d1117, #111827);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.arch-diagram pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--accent-purple);
+  display: inline-block;
+  text-align: left;
+}
+
+.memory-card {
+  background: linear-gradient(135deg, rgba(6,214,160,0.1), rgba(59,130,246,0.05));
+  border: 1px solid rgba(6,214,160,0.3);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.memory-card h4 {
+  color: var(--accent-cyan);
+  margin-bottom: 0.8rem;
+}
+.memory-card p {
+  color: #6ee7b7;
+  font-size: 0.9rem;
+}
+
+.quiz-box {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.05));
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.quiz-box h4 { color: var(--accent-blue); margin-bottom: 1rem; }
+.quiz-q {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+}
+.quiz-a {
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent-cyan);
+  display: none;
+}
+.quiz-toggle {
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.3);
+  color: var(--accent-purple);
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  font-family: 'Outfit', sans-serif;
+}
+.quiz-toggle:hover {
+  background: rgba(139,92,246,0.2);
+}
+
+.styled-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+.styled-list li {
+  padding: 0.4rem 0 0.4rem 1.5rem;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.styled-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-purple);
+  font-weight: 700;
+}
+
+.flow-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  font-size: 0.82rem;
+}
+.flow-box {
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.3);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  color: var(--accent-purple);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.flow-arrow { color: var(--text-muted); font-size: 1.1rem; }
+
+/* Severity cards */
+.severity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.severity-item {
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.sev-0 { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+.sev-1 { background: rgba(251,146,60,0.15); border: 1px solid rgba(251,146,60,0.4); color: #fdba74; }
+.sev-2 { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4); color: #fde68a; }
+.sev-3 { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.35); color: #93c5fd; }
+.sev-4 { background: rgba(148,163,184,0.1); border: 1px solid rgba(148,163,184,0.3); color: #cbd5e1; }
+
+footer {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 3rem;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+@media (max-width: 768px) {
+  .section { padding: 1.2rem; }
+  .hero { padding: 2.5rem 1rem 2rem; }
+  .tab-container { padding: 0 0.8rem; }
+  .severity-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <span class="brand">AZ-104 Day 4 Part 2</span>
+  <a href="#" class="active" onclick="switchTab('monitor-overview')">Monitor Intro</a>
+  <a href="#" onclick="switchTab('monitor-arch')">Architecture</a>
+  <a href="#" onclick="switchTab('metrics-logs')">Metrics & Logs</a>
+  <a href="#" onclick="switchTab('kql')">KQL</a>
+  <a href="#" onclick="switchTab('alerts')">Alerts & Actions</a>
+  <a href="#" onclick="switchTab('workspace')">Workspaces</a>
+  <a href="#" onclick="switchTab('architect-monitor')">Architect Guide</a>
+  <a href="#" onclick="switchTab('data-protection')">Data Protection</a>
+  <a href="#" onclick="switchTab('quiz-monitor')">Quiz</a>
+</nav>
+
+<div class="hero">
+  <h1>Azure Monitor & Data Protection</h1>
+  <div class="subtitle">From an Architect's Lens — AZ-104 Day 4, Part 2</div>
+  <div class="badge">Monitor & Maintain • 10-15% Exam Weight</div>
+</div>
+
+<div class="tab-container">
+
+<!-- ==================== TAB 1: MONITOR OVERVIEW ==================== -->
+<div id="monitor-overview" class="tab-content active">
+
+<div class="section">
+  <h2>📊 Azure Monitor — The Central Nervous System</h2>
+
+  <h3>What Is Azure Monitor?</h3>
+  <p>Azure Monitor is the <strong>unified monitoring platform</strong> for all of Azure. It collects, analyzes, and acts on telemetry from your cloud and on-premises environments. It's not a single tool — it's a comprehensive suite that ingests both metrics and logs from every layer of your stack: infrastructure, platform, application, and network.</p>
+
+  <h3>The Problem It Solves</h3>
+  <p>Without centralized monitoring, you'd have: separate dashboards for VMs, separate alerts for storage, separate logs for apps, and no way to correlate "why did CPU spike at the same time as the storage queue backed up?" Azure Monitor unifies all of this into one platform with one query language (KQL) and one alerting pipeline.</p>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Analogy</div>
+    Think of Azure Monitor as the <strong>central nervous system</strong> of your cloud environment. Just as your brain receives signals from every part of your body (pain, temperature, pressure), Azure Monitor receives telemetry from every Azure resource. It processes these signals, identifies anomalies, and triggers responses (alerts = reflexes, dashboards = consciousness).
+  </div>
+
+  <h3>What Azure Monitor Does — The 5 Pillars</h3>
+  <ul class="styled-list">
+    <li><strong>Collect</strong> — Gathers metrics and logs from Azure resources, applications, OS, custom sources</li>
+    <li><strong>Analyze</strong> — Uses Log Analytics (KQL) for deep analysis and Metrics Explorer for real-time visualization</li>
+    <li><strong>Visualize</strong> — Dashboards, Workbooks, Power BI, Grafana integration</li>
+    <li><strong>Alert</strong> — Proactive notification when conditions are met (metric thresholds, log patterns)</li>
+    <li><strong>Act</strong> — Trigger automated responses via Action Groups (email, SMS, webhook, Logic Apps, Functions)</li>
+  </ul>
+
+  <h3>Types of Monitoring Available</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Monitoring Type</th><th>What It Monitors</th><th>Azure Service</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Infrastructure Monitoring</strong></td><td>VMs, networks, storage performance, resource health</td><td>Azure Monitor Metrics, VM Insights</td></tr>
+      <tr><td><strong>Application Monitoring</strong></td><td>App performance, errors, user sessions, dependencies</td><td>Application Insights (part of Azure Monitor)</td></tr>
+      <tr><td><strong>Network Monitoring</strong></td><td>Connectivity, latency, NSG flow logs, traffic analytics</td><td>Network Watcher, Connection Monitor</td></tr>
+      <tr><td><strong>Security Monitoring</strong></td><td>Threats, anomalies, compliance violations</td><td>Microsoft Sentinel (SIEM, uses same Log Analytics workspace)</td></tr>
+      <tr><td><strong>Cost Monitoring</strong></td><td>Spending patterns, budget alerts, resource optimization</td><td>Cost Management + Budgets</td></tr>
+      <tr><td><strong>Container Monitoring</strong></td><td>AKS node/pod health, container logs, Prometheus metrics</td><td>Container Insights</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-aws">
+    <div class="callout-title">☁️ AWS Cross-Reference</div>
+    <strong>Azure Monitor</strong> = AWS CloudWatch (metrics + logs combined) • <strong>Application Insights</strong> = AWS X-Ray + CloudWatch RUM • <strong>Log Analytics</strong> = CloudWatch Logs Insights • <strong>Sentinel</strong> = AWS Security Hub + GuardDuty
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: "CAVAA" — What Azure Monitor Does</h4>
+    <p><strong>C</strong>ollect → <strong>A</strong>nalyze → <strong>V</strong>isualize → <strong>A</strong>lert → <strong>A</strong>ct. Think: "CAVAA — the monitoring JAVA" (Collection powers everything).</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 2: ARCHITECTURE ==================== -->
+<div id="monitor-arch" class="tab-content">
+
+<div class="section">
+  <h2>🏛️ Azure Monitor Architecture & Data Flow</h2>
+
+  <h3>Architecture Diagram</h3>
+  <div class="arch-diagram">
+<pre>
+┌─────────────────────────── DATA SOURCES ────────────────────────────┐
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ Azure    │  │ Guest OS │  │ Application│  │ Custom   │            │
+│  │ Platform │  │ (VM)     │  │ Code      │  │ Sources  │            │
+│  │          │  │          │  │           │  │          │            │
+│  │ Activity │  │ Perf     │  │ App       │  │ REST API │            │
+│  │ Log      │  │ Counters │  │ Insights  │  │ Logs     │            │
+│  │ Platform │  │ Event    │  │ SDK       │  │ Ingestion│            │
+│  │ Metrics  │  │ Logs     │  │ Traces    │  │ API      │            │
+│  └────┬─────┘  └────┬─────┘  └────┬──────┘  └────┬─────┘            │
+│       │              │              │              │                  │
+│       │     ┌────────▼──────────┐   │              │                  │
+│       │     │  Azure Monitor     │   │              │                  │
+│       │     │  Agent (AMA)       │   │              │                  │
+│       │     │  + Data Collection │   │              │                  │
+│       │     │    Rules (DCR)     │   │              │                  │
+│       │     └────────┬──────────┘   │              │                  │
+└───────┼──────────────┼──────────────┼──────────────┼──────────────────┘
+        │              │              │              │
+        ▼              ▼              ▼              ▼
+┌─────────────────── DATA STORES ─────────────────────┐
+│                                                       │
+│  ┌─────────────────┐    ┌────────────────────┐       │
+│  │   Azure Monitor  │    │  Log Analytics      │       │
+│  │   Metrics        │    │  Workspace           │       │
+│  │                  │    │  (Logs)              │       │
+│  │  Time-series DB  │    │  Kusto-based store   │       │
+│  │  Numeric values  │    │  Rich text/JSON      │       │
+│  │  93-day retain   │    │  Configurable retain │       │
+│  │  Near real-time  │    │  Complex queries     │       │
+│  └────────┬────────┘    └─────────┬────────────┘       │
+│           │                       │                     │
+└───────────┼───────────────────────┼─────────────────────┘
+            │                       │
+            ▼                       ▼
+┌──────────────────── CONSUMPTION ──────────────────────┐
+│                                                        │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐         │
+│  │Metrics │ │ Log    │ │ Alert  │ │Workbook│         │
+│  │Explorer│ │Analytics│ │ Rules  │ │& Dash- │         │
+│  │        │ │ (KQL)  │ │        │ │ boards │         │
+│  └────────┘ └────────┘ └───┬────┘ └────────┘         │
+│                             │                          │
+│                      ┌──────▼──────┐                   │
+│                      │ Action      │                   │
+│                      │ Groups      │                   │
+│                      │             │                   │
+│                      │ Email/SMS   │                   │
+│                      │ Webhook     │                   │
+│                      │ Logic App   │                   │
+│                      │ Function    │                   │
+│                      │ ITSM        │                   │
+│                      └─────────────┘                   │
+└────────────────────────────────────────────────────────┘
+</pre>
+  </div>
+
+  <h3>Data Sources — Where Telemetry Comes From</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Source</th><th>What It Produces</th><th>How It's Collected</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Azure Platform</strong></td><td>Activity Log (control plane ops), Platform Metrics (CPU, IOPS, etc.)</td><td>Automatically — no agent needed</td></tr>
+      <tr><td><strong>Guest OS (VMs)</strong></td><td>Performance counters, Windows Event Logs, Syslog, crash dumps</td><td>Azure Monitor Agent (AMA) + Data Collection Rules (DCR)</td></tr>
+      <tr><td><strong>Applications</strong></td><td>Request rates, response times, exceptions, dependency traces</td><td>Application Insights SDK or auto-instrumentation</td></tr>
+      <tr><td><strong>Custom Sources</strong></td><td>Any JSON data, custom metrics, third-party app logs</td><td>Logs Ingestion API (REST), custom metric API</td></tr>
+      <tr><td><strong>Azure AD / Entra ID</strong></td><td>Sign-in logs, audit logs, provisioning logs</td><td>Diagnostic Settings → Log Analytics</td></tr>
+      <tr><td><strong>Network</strong></td><td>NSG flow logs, DNS analytics, traffic analytics</td><td>Network Watcher + Diagnostic Settings</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Monitor Components Overview</h3>
+  <ul class="styled-list">
+    <li><strong>Azure Monitor Agent (AMA)</strong> — the current-generation agent that replaces the legacy Log Analytics Agent (MMA/OMS). Collects guest OS data using Data Collection Rules.</li>
+    <li><strong>Data Collection Rules (DCR)</strong> — define WHAT data to collect, HOW to transform it, and WHERE to send it. Each VM can have multiple DCRs.</li>
+    <li><strong>Log Analytics Workspace</strong> — the central repository where logs land. Queryable with KQL.</li>
+    <li><strong>Metrics Explorer</strong> — real-time visualization of numerical metrics (CPU, memory, requests/sec).</li>
+    <li><strong>Alerts</strong> — rules that evaluate conditions and fire notifications via Action Groups.</li>
+    <li><strong>Workbooks</strong> — interactive, customizable reports combining metrics, logs, and text.</li>
+    <li><strong>Insights</strong> — curated monitoring experiences (VM Insights, Container Insights, Network Insights).</li>
+  </ul>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">⚠️ Critical: AMA vs Legacy Agents</div>
+    The <strong>Azure Monitor Agent (AMA)</strong> is the current standard. The <strong>Log Analytics Agent (MMA)</strong> was deprecated in August 2024. For the AZ-104 exam, always choose AMA when given the option. AMA uses DCRs; the legacy agent used workspace-level configuration.
+  </div>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    Know the dependency chain: <strong>VM → needs AMA installed → AMA needs a DCR → DCR sends data to → Log Analytics Workspace → Alert Rule queries the workspace → triggers Action Group</strong>. The exam loves testing these connections.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: "AMA → DCR → LAW → ALERT → AG"</h4>
+    <p><strong>A</strong>gent → <strong>D</strong>ata Collection Rule → <strong>L</strong>og <strong>A</strong>nalytics <strong>W</strong>orkspace → <strong>A</strong>lert Rule → <strong>A</strong>ction <strong>G</strong>roup. Data flows left to right, always.</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 3: METRICS & LOGS ==================== -->
+<div id="metrics-logs" class="tab-content">
+
+<div class="section">
+  <h2>📈 Metrics vs Logs — The Two Data Types</h2>
+
+  <h3>What Are Metrics?</h3>
+  <p>Metrics are <strong>numerical values collected at regular intervals</strong> that describe some aspect of a resource at a point in time. They're lightweight, near real-time, and stored in a time-series database. Think: "how much CPU is being used right now?"</p>
+
+  <h3>What Are Logs?</h3>
+  <p>Logs are <strong>rich, structured text/JSON records</strong> that capture detailed information about events, errors, traces, and activities. They're stored in Log Analytics and queried with KQL. Think: "why did the app crash at 3:42 PM?"</p>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">💡 The Golden Rule</div>
+    <strong>Metrics tell you WHAT happened (measurement). Logs tell you WHY it happened (context).</strong> Use metrics for dashboards and threshold alerts. Use logs for root cause analysis and forensics.
+  </div>
+
+  <table class="comparison-table">
+    <thead><tr><th>Aspect</th><th>Metrics</th><th>Logs</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Data Type</strong></td><td>Numeric (float, integer)</td><td>Text, JSON, structured records</td></tr>
+      <tr><td><strong>Collection</strong></td><td>Regular intervals (1 min, 5 min)</td><td>Event-driven or scheduled</td></tr>
+      <tr><td><strong>Storage</strong></td><td>Azure Monitor Metrics (time-series DB)</td><td>Log Analytics Workspace</td></tr>
+      <tr><td><strong>Retention</strong></td><td>93 days (automatic)</td><td>30 days default, configurable up to 730 days (or archive)</td></tr>
+      <tr><td><strong>Query Language</strong></td><td>Metrics Explorer (visual) or API</td><td>KQL (Kusto Query Language)</td></tr>
+      <tr><td><strong>Latency</strong></td><td>Near real-time (~1 minute)</td><td>Minutes (ingestion + indexing delay)</td></tr>
+      <tr><td><strong>Cost</strong></td><td>Platform metrics: FREE. Custom metrics: paid.</td><td>Paid per GB ingested + retention</td></tr>
+      <tr><td><strong>Use Case</strong></td><td>CPU alerts, dashboard gauges, autoscaling triggers</td><td>Error investigation, compliance audit, security forensics</td></tr>
+    </tbody>
+  </table>
+
+  <h3>How Events Occur in Azure Monitor</h3>
+  <p>An "event" in monitoring terms is any discrete occurrence that Azure captures:</p>
+  <ul class="styled-list">
+    <li><strong>Platform events</strong> — Azure automatically emits these: a VM starting/stopping, a storage account key rotated, a deployment succeeding/failing</li>
+    <li><strong>Activity Log events</strong> — every control-plane operation (create, update, delete of resources) is recorded here</li>
+    <li><strong>Diagnostic events</strong> — resource-level events you opt into: request logs from App Service, query metrics from SQL Database</li>
+    <li><strong>Application events</strong> — your code emits custom events via Application Insights SDK: user login, payment processed, error caught</li>
+    <li><strong>Security events</strong> — sign-in failures, suspicious IP access, policy violations</li>
+  </ul>
+
+  <h3>Alert Severity Levels</h3>
+  <div class="severity-grid">
+    <div class="severity-item sev-0">
+      <strong>Sev 0 — Critical</strong><br>
+      Production down, data loss imminent. Page the on-call immediately.
+    </div>
+    <div class="severity-item sev-1">
+      <strong>Sev 1 — Error</strong><br>
+      Service degraded, users impacted. Needs attention within 1 hour.
+    </div>
+    <div class="severity-item sev-2">
+      <strong>Sev 2 — Warning</strong><br>
+      Potential issue detected. May become critical if not addressed.
+    </div>
+    <div class="severity-item sev-3">
+      <strong>Sev 3 — Informational</strong><br>
+      Notable event, no action needed now. Useful for trending.
+    </div>
+    <div class="severity-item sev-4">
+      <strong>Sev 4 — Verbose</strong><br>
+      Debug-level information. Used during troubleshooting only.
+    </div>
+  </div>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    Severity levels range from <strong>0 (Critical/most severe)</strong> to <strong>4 (Verbose/least severe)</strong>. This is COUNTER-INTUITIVE — lower number = higher severity. The exam may test this in scenario questions about alert prioritization.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: Metrics = "M for Measurement", Logs = "L for Logic"</h4>
+    <p>Metrics answer "how much/many?" → numerical, fast, cheap. Logs answer "what happened and why?" → detailed, rich, queryable. Severity: "0 is Oh-No!" (most critical) down to "4 is For-details" (verbose).</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 4: KQL ==================== -->
+<div id="kql" class="tab-content">
+
+<div class="section">
+  <h2>🔍 KQL — Kusto Query Language</h2>
+
+  <h3>What Is KQL?</h3>
+  <p>KQL (Kusto Query Language) is a <strong>read-only query language</strong> designed for exploring large volumes of structured, semi-structured, and unstructured data in Azure Monitor Logs. Think of it as SQL for logs — but optimized for time-series analysis, text searching, and aggregation at massive scale.</p>
+
+  <h3>Where KQL Is Used</h3>
+  <ul class="styled-list">
+    <li><strong>Azure Monitor — Log Analytics</strong> — primary use, querying log data</li>
+    <li><strong>Application Insights</strong> — querying app telemetry</li>
+    <li><strong>Microsoft Sentinel</strong> — security analytics and threat hunting</li>
+    <li><strong>Azure Data Explorer</strong> — big data analytics</li>
+    <li><strong>Azure Resource Graph</strong> — querying Azure resource metadata at scale</li>
+    <li><strong>Microsoft Defender for Cloud</strong> — security posture queries</li>
+  </ul>
+
+  <h3>Is KQL Available Across Cloud Providers?</h3>
+  <p>KQL is a <strong>Microsoft-proprietary language</strong>. It's NOT available in AWS or GCP natively. However:</p>
+  <table class="comparison-table">
+    <thead><tr><th>Cloud</th><th>Log Query Language</th><th>Comparison</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Azure</strong></td><td>KQL (Kusto Query Language)</td><td>Most powerful for log analytics. Pipe-based syntax similar to PowerShell.</td></tr>
+      <tr><td><strong>AWS</strong></td><td>CloudWatch Logs Insights</td><td>Simpler syntax, less powerful. No pipe operator. Good for basic queries.</td></tr>
+      <tr><td><strong>GCP</strong></td><td>Cloud Logging Query Language</td><td>Simple filter-based syntax. Can also use BigQuery SQL for exported logs.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Take</div>
+    KQL is one of Azure's genuine competitive advantages. Once you learn it, you can query logs, investigate security incidents, analyze app performance, and audit resource changes — all with the same syntax. In AWS, you'd need different tools for each of these.
+  </div>
+
+  <h3>KQL Fundamentals — The Structure</h3>
+  <p>Every KQL query follows a pipe-based flow: <strong>Source → Filter → Transform → Aggregate → Visualize</strong></p>
+  
+  <div class="code-block">
+<span class="comment">// Basic structure: Table | filter | project | sort</span>
+
+<span class="comment">// 1. Find all failed requests in the last 24 hours</span>
+<span class="func">requests</span>
+<span class="op">|</span> <span class="keyword">where</span> timestamp <span class="op">></span> <span class="func">ago</span>(<span class="string">24h</span>)
+<span class="op">|</span> <span class="keyword">where</span> success <span class="op">==</span> <span class="string">false</span>
+<span class="op">|</span> <span class="keyword">project</span> timestamp, name, resultCode, duration
+<span class="op">|</span> <span class="keyword">order by</span> duration <span class="keyword">desc</span>
+
+<span class="comment">// 2. Average CPU by VM over last 1 hour</span>
+<span class="func">Perf</span>
+<span class="op">|</span> <span class="keyword">where</span> ObjectName <span class="op">==</span> <span class="string">"Processor"</span>
+<span class="op">|</span> <span class="keyword">where</span> CounterName <span class="op">==</span> <span class="string">"% Processor Time"</span>
+<span class="op">|</span> <span class="keyword">where</span> TimeGenerated <span class="op">></span> <span class="func">ago</span>(<span class="string">1h</span>)
+<span class="op">|</span> <span class="keyword">summarize</span> AvgCPU <span class="op">=</span> <span class="func">avg</span>(CounterValue) <span class="keyword">by</span> Computer
+<span class="op">|</span> <span class="keyword">order by</span> AvgCPU <span class="keyword">desc</span>
+
+<span class="comment">// 3. Count events by severity in Activity Log</span>
+<span class="func">AzureActivity</span>
+<span class="op">|</span> <span class="keyword">where</span> TimeGenerated <span class="op">></span> <span class="func">ago</span>(<span class="string">7d</span>)
+<span class="op">|</span> <span class="keyword">summarize</span> Count <span class="op">=</span> <span class="func">count</span>() <span class="keyword">by</span> Level
+<span class="op">|</span> <span class="keyword">order by</span> Count <span class="keyword">desc</span>
+
+<span class="comment">// 4. Find top 5 error messages</span>
+<span class="func">AppExceptions</span>
+<span class="op">|</span> <span class="keyword">where</span> TimeGenerated <span class="op">></span> <span class="func">ago</span>(<span class="string">24h</span>)
+<span class="op">|</span> <span class="keyword">summarize</span> Count <span class="op">=</span> <span class="func">count</span>() <span class="keyword">by</span> problemId
+<span class="op">|</span> <span class="keyword">top</span> 5 <span class="keyword">by</span> Count
+  </div>
+
+  <h3>Activity Log Queries — Scoping</h3>
+  <p>The Activity Log captures <strong>control-plane operations</strong> — everything done to your Azure resources (create, delete, update, RBAC changes). When querying it, <strong>scoping is critical</strong> because:</p>
+  <ul class="styled-list">
+    <li><strong>Without scope</strong>, you query ALL subscriptions you have access to — massive data volume, slow queries, confusing results</li>
+    <li><strong>Scope to subscription</strong> — see all operations in a specific subscription</li>
+    <li><strong>Scope to resource group</strong> — narrower, focused on a specific workload</li>
+    <li><strong>Scope to resource</strong> — see only operations on a specific VM, storage account, etc.</li>
+  </ul>
+
+  <div class="code-block">
+<span class="comment">// Query Activity Log scoped to a specific resource group</span>
+<span class="func">AzureActivity</span>
+<span class="op">|</span> <span class="keyword">where</span> ResourceGroup <span class="op">==</span> <span class="string">"myResourceGroup"</span>
+<span class="op">|</span> <span class="keyword">where</span> ActivityStatusValue <span class="op">==</span> <span class="string">"Failed"</span>
+<span class="op">|</span> <span class="keyword">where</span> TimeGenerated <span class="op">></span> <span class="func">ago</span>(<span class="string">24h</span>)
+<span class="op">|</span> <span class="keyword">project</span> TimeGenerated, OperationNameValue, Caller, ActivityStatusValue
+<span class="op">|</span> <span class="keyword">order by</span> TimeGenerated <span class="keyword">desc</span>
+  </div>
+
+  <h3>Log Query Best Practices</h3>
+  <ul class="styled-list">
+    <li><strong>Always filter time FIRST</strong> — <code>where TimeGenerated > ago(24h)</code> should be your first filter to minimize scanned data</li>
+    <li><strong>Use project early</strong> — select only the columns you need to reduce data transfer</li>
+    <li><strong>Avoid wildcards on large tables</strong> — <code>search *</code> scans everything, extremely expensive</li>
+    <li><strong>Use summarize for aggregation</strong> — don't pull raw records when you need counts/averages</li>
+    <li><strong>Test queries before using in alerts</strong> — run them in Log Analytics first to verify results</li>
+    <li><strong>Scope your queries</strong> — always scope to the narrowest resource/group needed</li>
+  </ul>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    The AZ-104 does NOT require you to write complex KQL. But you MUST be able to: (1) read a basic KQL query and understand what it does, (2) identify the correct table name for a given scenario (e.g., AzureActivity for control-plane, Perf for VM metrics, requests for app telemetry), (3) understand the pipe (|) operator chains filters sequentially.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: KQL = "K-ueue of Queries in a Line"</h4>
+    <p>Data flows through a pipeline: <strong>Table → where (filter) → summarize (aggregate) → project (select columns) → order by (sort)</strong>. Each pipe (|) refines the data further. Think of it as an assembly line for data.</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 5: ALERTS & ACTIONS ==================== -->
+<div id="alerts" class="tab-content">
+
+<div class="section">
+  <h2>🔔 Alert Rules & Action Groups</h2>
+
+  <h3>How Alerting Works — The Flow</h3>
+  <div class="flow-inline">
+    <span class="flow-box">Data Source</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Alert Rule (condition)</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Condition Met?</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Fire Alert</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Action Group (notify/act)</span>
+  </div>
+
+  <h3>Types of Alert Rules</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Type</th><th>What It Monitors</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Metric Alert</strong></td><td>Numeric metric crosses a threshold</td><td>"Alert when CPU > 90% for 5 minutes"</td></tr>
+      <tr><td><strong>Log Search Alert</strong></td><td>KQL query returns results matching criteria</td><td>"Alert when error count > 10 in last 15 min"</td></tr>
+      <tr><td><strong>Activity Log Alert</strong></td><td>Specific control-plane operation occurs</td><td>"Alert when someone deletes an NSG"</td></tr>
+      <tr><td><strong>Prometheus Alert</strong></td><td>Kubernetes/AKS metrics via Prometheus</td><td>"Alert when pod restart count > 3"</td></tr>
+      <tr><td><strong>Resource Health Alert</strong></td><td>Azure platform health events</td><td>"Alert when my VM becomes unavailable"</td></tr>
+    </tbody>
+  </table>
+
+  <h3>What Are Action Groups?</h3>
+  <p>An Action Group is a <strong>reusable collection of notification and automation actions</strong> that get triggered when an alert fires. You create an action group once and attach it to multiple alert rules.</p>
+
+  <h4>Notification Types</h4>
+  <ul class="styled-list">
+    <li><strong>Email</strong> — send to up to 1,000 email addresses</li>
+    <li><strong>SMS</strong> — text message to phone numbers</li>
+    <li><strong>Push notification</strong> — Azure mobile app</li>
+    <li><strong>Voice call</strong> — phone call to a number</li>
+  </ul>
+
+  <h4>Action Types (Automation)</h4>
+  <ul class="styled-list">
+    <li><strong>Webhook</strong> — POST request to any HTTP endpoint (Slack, PagerDuty, custom API)</li>
+    <li><strong>Azure Function</strong> — trigger serverless code to auto-remediate</li>
+    <li><strong>Logic App</strong> — trigger a workflow (create ticket in ServiceNow, restart VM)</li>
+    <li><strong>Automation Runbook</strong> — execute a PowerShell/Python script</li>
+    <li><strong>ITSM Connector</strong> — create incidents in ITSM tools</li>
+    <li><strong>Event Hub</strong> — stream alert data to external systems</li>
+  </ul>
+
+  <h3>Alert Processing Rules</h3>
+  <p>Alert Processing Rules (APRs) modify alert behavior <strong>after</strong> the alert is generated. They do NOT change the condition — they change the response.</p>
+  <ul class="styled-list">
+    <li><strong>Suppression</strong> — silence all alerts for a resource during maintenance windows ("Don't wake me up Sunday 2-4 AM during backup")</li>
+    <li><strong>Add Action Group</strong> — attach additional notification channels to existing alerts</li>
+    <li><strong>Remove Action Group</strong> — remove notification for specific time periods</li>
+  </ul>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip — Frequently Tested</div>
+    <strong>Action Groups can be REUSED</strong> across multiple alert rules. This is a key design principle — don't create a separate AG for every alert. Also: Alert Processing Rules are used to SUPPRESS alerts during maintenance, not to change alert conditions.
+  </div>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ Architect's Best Practice</div>
+    Design action groups by severity and team: <strong>AG-Critical-OnCall</strong> (SMS + voice + PagerDuty), <strong>AG-Warning-Team</strong> (email + Teams), <strong>AG-Info-Log</strong> (Event Hub for analytics). Don't send SMS for every info-level alert — you'll create alert fatigue and people will ignore real emergencies.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: Action Groups = "WHEN-WHO-HOW"</h4>
+    <p><strong>WHEN</strong> = Alert Rule defines the condition. <strong>WHO</strong> = Action Group defines who gets notified. <strong>HOW</strong> = Notification/Action type defines the channel. Alert Processing Rules = "EXCEPT during maintenance."</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 6: WORKSPACES ==================== -->
+<div id="workspace" class="tab-content">
+
+<div class="section">
+  <h2>🗃️ Log Analytics Workspaces</h2>
+
+  <h3>What Is a Log Analytics Workspace?</h3>
+  <p>A Log Analytics Workspace (LAW) is a <strong>unique environment for Azure Monitor log data</strong>. It's essentially a massive, queryable data lake for all your operational telemetry. Every log that enters Azure Monitor eventually lands in a LAW where it can be queried with KQL.</p>
+
+  <h3>Why Not Just One Giant Workspace?</h3>
+  <p>While you CAN put everything in one workspace, architects design workspace strategies based on:</p>
+  <ul class="styled-list">
+    <li><strong>Data sovereignty</strong> — workspace region determines where data is stored. Singapore data stays in Singapore LAW.</li>
+    <li><strong>Access control</strong> — RBAC is applied at the workspace level. Dev team shouldn't see prod security logs.</li>
+    <li><strong>Retention requirements</strong> — different data types may need different retention periods (30 days for dev, 2 years for compliance).</li>
+    <li><strong>Cost management</strong> — each workspace has its own billing. Separate workspaces make cost attribution clearer.</li>
+    <li><strong>Query performance</strong> — extremely large workspaces can have slower queries.</li>
+  </ul>
+
+  <h3>Common Workspace Architectures</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Pattern</th><th>Description</th><th>When to Use</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Centralized</strong></td><td>One workspace for all resources</td><td>Small orgs, < 50 resources, single team, simple RBAC</td></tr>
+      <tr><td><strong>Decentralized</strong></td><td>One workspace per team/subscription</td><td>Large orgs with strict team boundaries, different retention needs</td></tr>
+      <tr><td><strong>Hybrid (Recommended)</strong></td><td>Centralized ops workspace + separate security workspace</td><td>Enterprise: ops team queries operational data, security team has isolated SOC workspace</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Workspace Key Settings</h3>
+  <ul class="styled-list">
+    <li><strong>Retention</strong> — 30 days free, configurable up to 730 days (2 years). Beyond that, archive to storage.</li>
+    <li><strong>Daily Cap</strong> — limit data ingestion to prevent cost spikes (use carefully — you'll lose visibility)</li>
+    <li><strong>Pricing Tier</strong> — Pay-as-you-go or Commitment Tiers (100 GB/day+) for discounts</li>
+    <li><strong>Access Control Mode</strong> — Workspace-context (RBAC on entire workspace) vs Resource-context (RBAC per resource)</li>
+  </ul>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    A common exam scenario: "Your organization has resources in East US and West Europe. Compliance requires that log data stays in the same region as the resource. What should you do?" → Create a separate Log Analytics Workspace in each region.
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: LAW = "Logs Always Welcome"</h4>
+    <p>The Log Analytics Workspace is where ALL logs go. Design by: <strong>R.A.C.E.</strong> — <strong>R</strong>egion (data sovereignty), <strong>A</strong>ccess (RBAC boundaries), <strong>C</strong>ompliance (retention), <strong>E</strong>fficiency (cost/performance).</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 7: ARCHITECT GUIDE ==================== -->
+<div id="architect-monitor" class="tab-content">
+
+<div class="section">
+  <h2>🏗️ Architecting a Monitoring Solution — The Process</h2>
+
+  <h3>Step-by-Step Framework</h3>
+  <p>Here's the process I follow with every client engagement when designing monitoring from scratch:</p>
+
+  <h4>Step 1: Define What Matters (SLOs & KPIs)</h4>
+  <p>Before configuring anything, define: What does "healthy" look like? What are the Service Level Objectives?</p>
+  <ul class="styled-list">
+    <li>API response time &lt; 200ms at P95</li>
+    <li>Availability &gt; 99.9% measured monthly</li>
+    <li>Error rate &lt; 0.1% of total requests</li>
+    <li>Database query time &lt; 50ms average</li>
+  </ul>
+
+  <h4>Step 2: Design Workspace Strategy</h4>
+  <ul class="styled-list">
+    <li>How many workspaces? (Follow R.A.C.E. framework above)</li>
+    <li>What retention for each workspace?</li>
+    <li>Which pricing tier? (Commitment tier if &gt; 100 GB/day)</li>
+  </ul>
+
+  <h4>Step 3: Configure Data Collection</h4>
+  <ul class="styled-list">
+    <li>Deploy AMA to all VMs via Azure Policy (automated, at-scale)</li>
+    <li>Create DCRs for: performance counters, event logs, syslog</li>
+    <li>Enable diagnostic settings on all Azure resources (storage, SQL, App Service)</li>
+    <li>Integrate Application Insights into application code</li>
+  </ul>
+
+  <h4>Step 4: Build Alert Rules by Severity</h4>
+  <ul class="styled-list">
+    <li><strong>Sev 0</strong>: System down → metric alerts (availability = 0) → AG: SMS + Voice + PagerDuty</li>
+    <li><strong>Sev 1</strong>: Degraded performance → metric alerts (CPU > 90%) → AG: Email + Teams</li>
+    <li><strong>Sev 2</strong>: Warning signs → log search alerts (error spike) → AG: Email</li>
+    <li><strong>Sev 3-4</strong>: Informational → log search alerts → AG: Event Hub (for analytics)</li>
+  </ul>
+
+  <h4>Step 5: Create Dashboards & Workbooks</h4>
+  <ul class="styled-list">
+    <li>Executive dashboard — high-level health, SLO compliance</li>
+    <li>Ops dashboard — real-time metrics, active alerts, recent deployments</li>
+    <li>Investigation workbook — drill-down KQL queries for incident response</li>
+  </ul>
+
+  <h4>Step 6: Set Up Alert Processing Rules</h4>
+  <ul class="styled-list">
+    <li>Suppress alerts during known maintenance windows</li>
+    <li>Route after-hours alerts to on-call rotation via webhook</li>
+  </ul>
+
+  <h4>Step 7: Continuous Improvement</h4>
+  <ul class="styled-list">
+    <li>Review alert noise monthly — suppress or tune noisy alerts</li>
+    <li>Track Mean Time to Detect (MTTD) and Mean Time to Resolve (MTTR)</li>
+    <li>Add new data sources as new services are deployed</li>
+  </ul>
+
+  <div class="callout callout-architect">
+    <div class="callout-title">🏗️ The Monitoring Anti-Patterns I've Seen in 10 Years</div>
+    <strong>1. Alert fatigue</strong> — 500 emails/day means everyone ignores alerts. Fix: tune thresholds, use severity properly.<br>
+    <strong>2. No baseline</strong> — alerting on 80% CPU when your app normally runs at 75%. Fix: observe for 2 weeks before setting thresholds.<br>
+    <strong>3. Missing correlation</strong> — separate dashboards for app, infra, network with no cross-reference. Fix: centralized workspace + workbooks.<br>
+    <strong>4. Monitoring without action</strong> — alerts fire but nobody has a runbook. Fix: every Sev 0/1 alert must have a documented response procedure.
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 8: DATA PROTECTION ==================== -->
+<div id="data-protection" class="tab-content">
+
+<div class="section">
+  <h2>🛡️ Data Protection in Azure</h2>
+
+  <h3>What Data Protection Covers</h3>
+  <p>Data protection in Azure encompasses ensuring your data is: encrypted at rest and in transit, backed up for disaster recovery, compliant with regulatory requirements, and protected from accidental or malicious deletion. Day 4 focuses on the monitoring and operational aspects of data protection.</p>
+
+  <h3>Azure Data Protection Key Services</h3>
+  <table class="comparison-table">
+    <thead><tr><th>Service</th><th>What It Protects</th><th>Key Feature</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Azure Backup</strong></td><td>VMs, SQL, Files, Blobs, Disks</td><td>Policy-based backup with vaulted & snapshot tiers</td></tr>
+      <tr><td><strong>Azure Site Recovery</strong></td><td>VMs, physical servers</td><td>Replication to secondary region for DR</td></tr>
+      <tr><td><strong>Soft Delete</strong></td><td>Blobs, containers, backup data</td><td>Recoverable deletion (14-365 day retention)</td></tr>
+      <tr><td><strong>Immutable Storage</strong></td><td>Blob data</td><td>WORM compliance — data cannot be modified or deleted</td></tr>
+      <tr><td><strong>Resource Locks</strong></td><td>Any Azure resource</td><td>Prevent accidental deletion (CanNotDelete) or modification (ReadOnly)</td></tr>
+      <tr><td><strong>Azure Key Vault</strong></td><td>Keys, secrets, certificates</td><td>Centralized secret management, HSM-backed keys</td></tr>
+      <tr><td><strong>Encryption</strong></td><td>All Azure storage</td><td>SSE with Microsoft-managed or customer-managed keys (CMK)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Data Protection Monitoring with Azure Monitor</h3>
+  <p>Data protection isn't just about configuring backups — it's about <strong>monitoring that protection is working</strong>:</p>
+  <ul class="styled-list">
+    <li><strong>Backup Reports</strong> — configure diagnostic settings on Recovery Services Vault → send to Log Analytics → build dashboards showing backup success/failure rates</li>
+    <li><strong>Activity Log Alerts</strong> — alert when someone removes a resource lock or disables soft delete</li>
+    <li><strong>Key Vault monitoring</strong> — enable diagnostic logging to detect unauthorized access to secrets/keys</li>
+    <li><strong>Azure Policy</strong> — enforce that all VMs must have backup enabled, all storage must have soft delete, all resources must have locks</li>
+  </ul>
+
+  <h3>Monitoring + Data Protection Integration</h3>
+  <div class="flow-inline">
+    <span class="flow-box">Azure Backup</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Diagnostic Settings</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Log Analytics</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Alert Rule (backup failed)</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box">Action Group (email ops)</span>
+  </div>
+
+  <div class="code-block">
+<span class="comment">// KQL: Find all failed backup jobs in the last 7 days</span>
+<span class="func">AddonAzureBackupJobs</span>
+<span class="op">|</span> <span class="keyword">where</span> TimeGenerated <span class="op">></span> <span class="func">ago</span>(<span class="string">7d</span>)
+<span class="op">|</span> <span class="keyword">where</span> JobStatus <span class="op">==</span> <span class="string">"Failed"</span>
+<span class="op">|</span> <span class="keyword">project</span> TimeGenerated, BackupItemUniqueId, JobOperation, JobStatus, JobFailureCode
+<span class="op">|</span> <span class="keyword">order by</span> TimeGenerated <span class="keyword">desc</span>
+  </div>
+
+  <div class="callout callout-exam">
+    <div class="callout-title">📝 Exam Tip</div>
+    The exam may ask: "How do you get notified when a VM backup fails?" → Answer: Configure diagnostic settings on the Recovery Services Vault to send data to a Log Analytics Workspace, then create a log search alert rule with a KQL query filtering for failed jobs, linked to an action group.
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">💡 Defense in Depth for Data</div>
+    Layer your protection: <strong>Encryption</strong> (always on) → <strong>Backup</strong> (recovery from data loss) → <strong>Soft Delete</strong> (recovery from accidental deletion) → <strong>Immutable Storage</strong> (regulatory compliance) → <strong>Resource Locks</strong> (prevent accidental changes) → <strong>Azure Policy</strong> (enforce all of the above organization-wide).
+  </div>
+
+  <div class="memory-card">
+    <h4>🧠 Memory Mnemonic: Data Protection = "EBSIRL"</h4>
+    <p><strong>E</strong>ncryption → <strong>B</strong>ackup → <strong>S</strong>oft Delete → <strong>I</strong>mmutable → <strong>R</strong>esource Locks → <strong>L</strong>og & Alert. Remember: "Every Backup Should Include Real Logging."</p>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+<!-- ==================== TAB 9: QUIZ ==================== -->
+<div id="quiz-monitor" class="tab-content">
+
+<div class="section">
+  <h2>🎯 Monitor & Data Protection Knowledge Check</h2>
+
+  <div class="quiz-box">
+    <h4>📋 Rapid-Fire Quiz</h4>
+
+    <div class="quiz-q">Q1: What are the two primary data types in Azure Monitor?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Metrics</strong> (numerical time-series data) and <strong>Logs</strong> (rich structured text/JSON records). Metrics = WHAT happened. Logs = WHY it happened.</div>
+
+    <div class="quiz-q">Q2: A VM needs to send performance counters to Log Analytics. What must be installed on the VM, and what configuration is required?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">Install the <strong>Azure Monitor Agent (AMA)</strong> and create a <strong>Data Collection Rule (DCR)</strong> that specifies which counters to collect and which Log Analytics Workspace to send them to.</div>
+
+    <div class="quiz-q">Q3: What is the severity level for the most critical alerts? What number?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Severity 0 (Sev 0)</strong> is the most critical. Counter-intuitive: lower number = higher severity. Sev 4 is the least severe (verbose/informational).</div>
+
+    <div class="quiz-q">Q4: Your organization has resources in US East and EU West. Compliance requires log data to stay in the same region as the resource. How should you design your workspace strategy?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">Create <strong>separate Log Analytics Workspaces in each region</strong> (one in East US, one in West Europe). The workspace region determines where data is stored. Use cross-workspace queries if you need a unified view.</div>
+
+    <div class="quiz-q">Q5: What is KQL and where is it used? Is it available in AWS?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Kusto Query Language</strong> — a read-only query language for Azure Monitor Logs, Application Insights, Sentinel, and Azure Data Explorer. It is <strong>Microsoft-proprietary</strong> and NOT available in AWS (which uses CloudWatch Logs Insights) or GCP (which uses Cloud Logging Query Language).</div>
+
+    <div class="quiz-q">Q6: What is the difference between an Action Group and an Alert Processing Rule?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a"><strong>Action Group</strong> = defines WHO gets notified and HOW (email, SMS, webhook, automation). <strong>Alert Processing Rule</strong> = modifies alert behavior AFTER firing (suppress during maintenance, add/remove action groups). Action Groups define the response; APRs modify when/whether the response happens.</div>
+
+    <div class="quiz-q">Q7: You want to be notified when a VM backup fails. Walk through the full configuration path.</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">1. <strong>Enable Diagnostic Settings</strong> on the Recovery Services Vault → send to Log Analytics Workspace. 2. Create a <strong>Log Search Alert Rule</strong> with a KQL query filtering AddonAzureBackupJobs where JobStatus == "Failed". 3. Attach an <strong>Action Group</strong> with email/SMS notification. 4. Set appropriate severity (Sev 1 or Sev 2).</div>
+
+    <div class="quiz-q">Q8: When querying the Activity Log, why is scoping important?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">Without scoping, the query runs across ALL subscriptions you have access to — resulting in massive data volumes, slow performance, and irrelevant results. Always scope to the narrowest level needed: subscription → resource group → individual resource.</div>
+
+    <div class="quiz-q">Q9: What's the default log retention in a Log Analytics Workspace, and what's the maximum?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">Default: <strong>30 days</strong> (free). Maximum interactive retention: <strong>730 days</strong> (2 years). Beyond that, you can archive data to cheaper storage.</div>
+
+    <div class="quiz-q">Q10: A KQL query starts with: <code>Perf | where ObjectName == "Processor" | where CounterName == "% Processor Time" | summarize avg(CounterValue) by Computer</code>. What does this return?</div>
+    <button class="quiz-toggle" onclick="this.nextElementSibling.style.display='block'">Show Answer</button>
+    <div class="quiz-a">It queries the <strong>Perf</strong> table, filters for CPU processor time metrics, then calculates the <strong>average CPU usage per computer (VM)</strong>. The result is a table with two columns: Computer name and AvgCPU value.</div>
+  </div>
+</div>
+
+</div><!-- end tab -->
+
+</div><!-- tab-container -->
+
+<footer>
+  AZ-104 Day 4 — Azure Monitor & Data Protection Study Guide<br>
+  ← <a href="day4-containers.html" style="color: var(--accent-purple);">Day 4 Part 1: Containers & ACA</a>
+</footer>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 300, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

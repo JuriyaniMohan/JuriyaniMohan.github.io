@@ -386,4 +386,35 @@ svg text { font-family: 'DM Sans', sans-serif; }
   .hero h1 { -webkit-text-fill-color: #1a1a1a; }
 }
 
+/* Enhanced hover effects */
+.sidebar a { position: relative; overflow: hidden; }
+.sidebar a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: #38bdf8;
+  transition: width 0.3s;
+}
+.sidebar a:hover::after { width: 100%; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid #1e293b;
+  }
+  .main {
+    margin-left: 0;
+  }
+  .hero { padding: 60px 20px; }
+  .hero h1 { font-size: 2rem; }
+  footer { margin-left: 0 !important; }
+}
+
 

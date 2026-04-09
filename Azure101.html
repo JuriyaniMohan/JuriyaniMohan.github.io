@@ -23,6 +23,9 @@
     .container {
       max-width: 900px;
       width: 100%;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
     h1 {
@@ -94,6 +97,7 @@
       background: #4caf96;
       color: #0a0f1e;
       transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(76, 175, 150, 0.25);
     }
 
     /* STACK */
@@ -139,8 +143,13 @@
       color: #10b981;
       margin-right: 6px;
       animation: blink 1s step-end infinite;
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
     }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* SCROLL REVEAL */
+    .reveal { opacity: 0; transform: translateY(25px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
     /* RESPONSIVE */
     @media (max-width: 600px) {
@@ -167,7 +176,7 @@
 </div>
 
 <!-- DAYS SECTION -->
-<div class="card">
+<div class="card reveal">
   <h2>📅 Sections</h2>
 
   <div class="badges">
@@ -184,7 +193,7 @@
 </div>
 
 <!-- STACK SECTION -->
-<div class="card">
+<div class="card reveal">
   <h2>🛠️ Tech Stack</h2>
 
   <div class="stack">
@@ -204,16 +213,41 @@
     </div>
 
     <div class="stack-item">
-      <div class="label">SSL</div>
-      <div class="value">HTTPS (Free)</div>
+      <div class="label">Connect</div>
+      <div class="value">
+        <a href="https://linkedin.com/in/mohanjuriyani" target="_blank" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="20" alt="LinkedIn">
+          LinkedIn
+        </a>
+      </div>
     </div>
   </div>
 </div>
 
-<footer>
-  © 2026 Mohan Juriyani | Cloud Infrastructure Engineer
+<footer class="reveal">
+  <div style="margin-bottom:10px;">
+    <a href="https://linkedin.com/in/mohanjuriyani" target="_blank" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:#4fc3f7; font-weight:600; font-size:0.95rem; transition:0.3s;">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="18" alt="LinkedIn" style="border-radius:4px;">
+      Connect on LinkedIn
+    </a>
+  </div>
+  <p>&copy; 2026 Mohan Juriyani | Cloud Infrastructure Engineer</p>
 </footer>
 
   </div>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Page load
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.container').style.opacity = '1';
+    document.querySelector('.container').style.transform = 'translateY(0)';
+  });
+</script>
 </body>
 </html>

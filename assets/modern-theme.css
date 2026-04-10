@@ -1,0 +1,481 @@
+/* Shared modern theme for modern-branch01. */
+:root {
+  --modern-ink: #10202b;
+  --modern-muted: #355269;
+  --modern-surface: rgba(255, 255, 255, 0.92);
+  --modern-surface-strong: rgba(255, 255, 255, 0.98);
+  --modern-border: rgba(0, 139, 214, 0.22);
+  --modern-cyan: #00d9ff;
+  --modern-blue: #236bfe;
+  --modern-green: #2bff88;
+  --modern-pink: #ff3fd4;
+  --modern-yellow: #ffe94a;
+  --modern-red: #ff4d6d;
+  --modern-shadow: 0 18px 50px rgba(16, 32, 43, 0.16);
+  --modern-glow: 0 0 22px rgba(0, 217, 255, 0.28), 0 0 38px rgba(43, 255, 136, 0.14);
+  --bg: #f7fff9;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-2: #f3fffb;
+  --border: rgba(0, 139, 214, 0.22);
+  --text: #10202b;
+  --muted: #355269;
+  --cyan: #0077ff;
+  --green: #00b95f;
+  --green-soft: rgba(43, 255, 136, 0.18);
+  --shadow: var(--modern-shadow);
+}
+
+*,
+*::before,
+*::after {
+  letter-spacing: 0 !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--modern-ink) !important;
+  background:
+    linear-gradient(120deg, rgba(0, 217, 255, 0.25), rgba(43, 255, 136, 0.17) 32%, rgba(255, 63, 212, 0.16) 68%, rgba(255, 233, 74, 0.24)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px 86px),
+    linear-gradient(180deg, #ffffff 0%, #effdff 48%, #f5fff4 100%) !important;
+  background-attachment: fixed !important;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 217, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 63, 212, 0.10) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.36;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+h1,
+h2,
+h3,
+h4,
+.card-title,
+.section-title,
+.chapter-title,
+.module-title,
+.hero-title {
+  color: var(--modern-blue) !important;
+  text-shadow: 0 0 18px rgba(0, 217, 255, 0.20);
+}
+
+h1 {
+  font-size: 3.1rem !important;
+  line-height: 1.08 !important;
+  background: linear-gradient(90deg, #006bff 0%, #00b95f 34%, #ff2ab8 68%, #ffb800 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+h2 {
+  font-size: 2rem !important;
+  line-height: 1.18 !important;
+}
+
+h3 {
+  font-size: 1.45rem !important;
+  line-height: 1.25 !important;
+}
+
+p,
+li,
+td,
+th,
+label,
+.subtitle,
+.meta-label,
+.meta-value,
+.value,
+.label,
+.text,
+.p-desc,
+.section-subtitle {
+  color: var(--modern-ink) !important;
+}
+
+.subtitle,
+.section-subtitle,
+.meta-label,
+.label {
+  color: var(--modern-muted) !important;
+}
+
+a {
+  color: #005eff !important;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+a:hover,
+a:focus-visible {
+  color: #d900a8 !important;
+  text-shadow: 0 0 14px rgba(255, 63, 212, 0.24);
+}
+
+.container,
+.wrap,
+.main,
+.content,
+.content-area,
+.prose {
+  color: var(--modern-ink) !important;
+}
+
+.hero,
+.card,
+.panel,
+.info-card,
+.meta-box,
+.box,
+.note,
+.tip,
+.tip-box,
+.callout,
+.callout-info,
+.callout-tip,
+.callout-warning,
+.callout-exam,
+.lab,
+.scenario,
+.solution-box,
+.question,
+.quiz-box,
+.quiz-container,
+.score-card,
+.module,
+.chapter,
+.accordion-item,
+.diagram,
+.diagram-box,
+.diagram-container,
+.arch-diagram,
+.compare-box,
+.issue-card,
+.issue-box,
+.policy-box,
+.memory-card,
+.pillar-card,
+.agent-card,
+.step-card,
+.stack-item,
+.kv-item,
+.severity-item,
+.highlight-section {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 255, 251, 0.90)) !important;
+  border: 1px solid var(--modern-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--modern-shadow) !important;
+  color: var(--modern-ink) !important;
+}
+
+.hero,
+.panel,
+.info-card,
+.card,
+.highlight-section {
+  position: relative;
+}
+
+.hero::after,
+.panel::after,
+.info-card::after,
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), inset 0 -1px 0 rgba(0, 217, 255, 0.10);
+}
+
+.sidebar,
+.nav,
+.navbar,
+.nav-bar,
+.top-nav,
+.nav-tabs,
+.toc {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(232, 255, 247, 0.88)) !important;
+  border: 1px solid var(--modern-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--modern-shadow) !important;
+  color: var(--modern-ink) !important;
+}
+
+.chip,
+.badge,
+.tag,
+.nav-link,
+.nav-btn,
+.nav-tab,
+.tab-btn,
+.back-btn,
+.copy-btn,
+.linkedin-btn,
+button,
+input[type="button"],
+input[type="submit"],
+.quiz-option,
+.quiz-next-btn,
+.retry-btn {
+  border-radius: 8px !important;
+  border: 1px solid rgba(0, 139, 214, 0.34) !important;
+  background:
+    linear-gradient(135deg, rgba(0, 217, 255, 0.92), rgba(43, 255, 136, 0.86) 48%, rgba(255, 233, 74, 0.88)) !important;
+  color: #07151f !important;
+  box-shadow: 0 10px 26px rgba(0, 217, 255, 0.20), 0 0 20px rgba(43, 255, 136, 0.16) !important;
+  font-weight: 800 !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+}
+
+.chip:hover,
+.badge:hover,
+.tag:hover,
+.nav-link:hover,
+.nav-btn:hover,
+.nav-tab:hover,
+.tab-btn:hover,
+.back-btn:hover,
+.copy-btn:hover,
+.linkedin-btn:hover,
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+.quiz-option:hover,
+.quiz-next-btn:hover,
+.retry-btn:hover {
+  transform: translateY(-2px);
+  filter: saturate(1.12);
+  box-shadow: 0 14px 34px rgba(255, 63, 212, 0.20), var(--modern-glow) !important;
+}
+
+.badge-aws,
+.orange,
+.card-amber,
+.tag-amber,
+.callout-amber {
+  background: linear-gradient(135deg, rgba(255, 233, 74, 0.88), rgba(255, 77, 109, 0.22)) !important;
+}
+
+.badge-azure,
+.az,
+.card-az,
+.box-blue,
+.blue {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.82), rgba(35, 107, 254, 0.18)) !important;
+}
+
+.green,
+.card-green,
+.box-green,
+.callout-green,
+.tag-green,
+.ok,
+.success {
+  background: linear-gradient(135deg, rgba(43, 255, 136, 0.78), rgba(0, 217, 255, 0.15)) !important;
+}
+
+.purple,
+.pink,
+.card-purple,
+.box-purple,
+.callout-purple,
+.tag-purple {
+  background: linear-gradient(135deg, rgba(255, 63, 212, 0.72), rgba(255, 233, 74, 0.18)) !important;
+}
+
+.red,
+.danger,
+.badge-error,
+.card-red,
+.box-red {
+  background: linear-gradient(135deg, rgba(255, 77, 109, 0.78), rgba(255, 233, 74, 0.18)) !important;
+}
+
+table,
+.compare-table,
+.comparison-table,
+.comp-table,
+.cmd-table {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  overflow: hidden;
+  background: var(--modern-surface-strong) !important;
+  border: 1px solid var(--modern-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--modern-shadow) !important;
+}
+
+th {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.86), rgba(43, 255, 136, 0.72)) !important;
+  color: #07151f !important;
+}
+
+td {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-color: rgba(0, 139, 214, 0.16) !important;
+}
+
+pre,
+code,
+.code-block,
+.code-body,
+.terminal,
+.cli,
+.cmd,
+.shell,
+.output {
+  background: #101820 !important;
+  color: #eaffff !important;
+  border-color: rgba(0, 217, 255, 0.38) !important;
+  border-radius: 8px !important;
+}
+
+pre,
+.code-block,
+.terminal,
+.shell {
+  box-shadow: 0 16px 36px rgba(16, 24, 32, 0.26), 0 0 24px rgba(0, 217, 255, 0.18) !important;
+}
+
+input,
+select,
+textarea,
+#search,
+.search-box {
+  border-radius: 8px !important;
+  border: 1px solid rgba(0, 139, 214, 0.32) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: var(--modern-ink) !important;
+  box-shadow: 0 8px 18px rgba(16, 32, 43, 0.10) !important;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.progress-track,
+.progress-bar,
+.score-bar {
+  background: rgba(16, 32, 43, 0.10) !important;
+  border-radius: 8px !important;
+}
+
+.progress-fill,
+.score-fill {
+  background: linear-gradient(90deg, var(--modern-cyan), var(--modern-green), var(--modern-yellow)) !important;
+}
+
+footer,
+.footer,
+.site-footer {
+  color: var(--modern-muted) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  border-top: 1px solid rgba(0, 139, 214, 0.18) !important;
+}
+
+body:has(.modern-motto) {
+  background:
+    linear-gradient(120deg, rgba(0, 217, 255, 0.36), rgba(43, 255, 136, 0.28) 35%, rgba(255, 63, 212, 0.24) 70%, rgba(255, 233, 74, 0.36)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0 2px, transparent 2px 70px),
+    linear-gradient(180deg, #ffffff 0%, #ecfffb 46%, #f8fff0 100%) !important;
+}
+
+body:has(.modern-motto) .hero {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(232, 255, 247, 0.88)),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.36), rgba(255, 63, 212, 0.22)) !important;
+  padding: 36px 24px !important;
+  border: 1px solid rgba(0, 139, 214, 0.25) !important;
+  box-shadow: 0 22px 60px rgba(0, 217, 255, 0.16), 0 0 40px rgba(255, 63, 212, 0.14) !important;
+}
+
+body:has(.modern-motto) .cloud-icon {
+  color: var(--modern-yellow) !important;
+  text-shadow: 0 0 18px rgba(255, 233, 74, 0.72), 0 0 28px rgba(0, 217, 255, 0.42);
+}
+
+body:has(.modern-motto) h1 {
+  font-size: 3.8rem !important;
+}
+
+.modern-motto {
+  width: min(760px, 100%);
+  margin: 14px auto 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 139, 214, 0.22);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--modern-ink) !important;
+  font-size: 1.08rem;
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(16, 32, 43, 0.10);
+}
+
+body:has(.modern-motto) .chip-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px !important;
+}
+
+body:has(.modern-motto) .chip {
+  min-height: 54px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 760px) {
+  h1 {
+    font-size: 2.35rem !important;
+  }
+
+  h2 {
+    font-size: 1.65rem !important;
+  }
+
+  h3 {
+    font-size: 1.28rem !important;
+  }
+
+  body:has(.modern-motto) h1 {
+    font-size: 2.7rem !important;
+  }
+
+  .hero,
+  .card,
+  .panel,
+  .info-card,
+  .main,
+  .content,
+  .content-area {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+}

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Part 3 — Labs & Architecture Patterns | AlienOps SAA-C03</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e17;--surface:#111827;--surface2:#1a2234;--border:#1e2d45;--text:#e2e8f0;--text-dim:#8899aa;--accent:#22c55e;--accent2:#f97316;--accent3:#a855f7;--accent4:#06b6d4;--danger:#ef4444;--code-bg:#0d1117}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.hero{position:relative;padding:80px 40px 60px;text-align:center;background:linear-gradient(180deg,#0d1520 0%,var(--bg) 100%);border-bottom:1px solid var(--border);overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(34,197,94,0.06) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(168,85,247,0.06) 0%,transparent 50%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);padding:6px 16px;border-radius:999px;font-size:13px;font-weight:600;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:24px}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:700;background:linear-gradient(135deg,#fff 0%,#94a3b8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+.hero p{color:var(--text-dim);font-size:1.05rem;max-width:700px;margin:0 auto}
+.container{max-width:1200px;margin:0 auto;padding:40px 24px}
+.nav-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:40px;overflow-x:auto;position:sticky;top:8px;z-index:100;backdrop-filter:blur(12px)}
+.nav-tab{flex:1;min-width:120px;padding:12px 16px;border:none;background:transparent;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .3s;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.active{background:var(--accent);color:#fff}
+.tab-content{display:none;animation:fadeIn .4s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section-header{display:flex;align-items:center;gap:16px;margin:48px 0 24px}
+.section-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.section-header h2{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700}
+.section-header h3{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:600}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;transition:border-color .3s}
+.card:hover{border-color:rgba(34,197,94,0.3)}
+.card h4{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;margin-bottom:12px;color:var(--accent)}
+.card p{color:var(--text-dim);margin-bottom:8px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.callout{border-radius:12px;padding:20px 24px;margin:20px 0;border-left:4px solid}
+.callout-exam{background:rgba(249,115,22,0.06);border-color:var(--accent2)}
+.callout-why{background:rgba(6,182,212,0.06);border-color:var(--accent4)}
+.callout-danger{background:rgba(239,68,68,0.06);border-color:var(--danger)}
+.callout-pro{background:rgba(34,197,94,0.06);border-color:var(--accent)}
+.callout-label{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.callout-exam .callout-label{color:var(--accent2)}
+.callout-why .callout-label{color:var(--accent4)}
+.callout-danger .callout-label{color:var(--danger)}
+.callout-pro .callout-label{color:var(--accent)}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;color:#c9d1d9;white-space:pre}
+.code-label{display:inline-block;background:rgba(34,197,94,0.15);color:var(--accent);padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;letter-spacing:.5px}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,0.15);color:var(--accent);font-weight:700;font-size:14px;margin-right:12px;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.step{display:flex;align-items:flex-start;margin:16px 0;padding:16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+.step-content h5{font-family:'Space Grotesk',sans-serif;font-size:15px;margin-bottom:6px;color:var(--text)}
+.step-content p{font-size:14px;color:var(--text-dim)}
+.comparison-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px;border-radius:12px;overflow:hidden}
+.comparison-table thead th{background:var(--surface2);color:var(--accent);padding:14px 16px;text-align:left;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border)}
+.comparison-table td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-dim);vertical-align:top}
+.comparison-table .highlight{color:var(--accent4);font-weight:600}
+.arch-diagram{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin:24px 0;text-align:center}
+.arch-diagram h4{font-family:'Space Grotesk',sans-serif;color:var(--accent4);margin-bottom:20px;font-size:1.1rem}
+.diagram-svg{width:100%;max-width:900px;margin:0 auto;display:block}
+.lab-progress{display:flex;gap:6px;margin:16px 0}
+.lab-dot{width:12px;height:12px;border-radius:50%;background:var(--surface2);border:2px solid var(--border)}
+.lab-dot.done{background:var(--accent);border-color:var(--accent)}
+ul,ol{padding-left:24px;margin:10px 0}
+li{margin:6px 0;color:var(--text-dim)}
+li strong{color:var(--text)}
+strong{color:var(--text)}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent4)}
+@media(max-width:768px){.hero{padding:48px 20px 40px}.container{padding:24px 16px}.card{padding:20px}.grid-2,.grid-3{grid-template-columns:1fr}.nav-tab{font-size:12px;padding:10px 12px;min-width:90px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">🔬 Week 2 · Part 3 of 3</div>
+  <h1>Labs & Architecture Patterns</h1>
+  <p>Hands-on labs, real-world architecture patterns, Terraform integration, and the ultimate Week 2 cheat sheet to cement your knowledge.</p>
+</div>
+
+<div class="container">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('labs')">🔬 Hands-On Labs</button>
+    <button class="nav-tab" onclick="showTab('arch')">🏗️ Architecture Patterns</button>
+    <button class="nav-tab" onclick="showTab('terraform')">🔧 Terraform Labs</button>
+    <button class="nav-tab" onclick="showTab('cheat')">📋 Cheat Sheet</button>
+  </div>
+
+  <!-- ====== LABS TAB ====== -->
+  <div class="tab-content active" id="tab-labs">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(34,197,94,0.15)">🔬</div>
+      <h2>Week 2 Hands-On Labs</h2>
+    </div>
+
+    <div class="callout callout-pro">
+      <div class="callout-label">Why Labs Matter</div>
+      <p>The exam tests conceptual understanding, but building these services yourself creates <strong>muscle memory</strong> that makes exam questions feel like recalling lived experience instead of memorized facts. Every lab below is achievable within AWS Free Tier.</p>
+    </div>
+
+    <!-- Lab 1 -->
+    <div class="card" style="border-left: 4px solid #3b82f6;">
+      <h4 style="color:#3b82f6;">Lab 1: S3 Lifecycle & Versioning</h4>
+      <p><strong>Goal:</strong> Create a bucket with versioning, lifecycle policies, and cross-region replication.</p>
+
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h5>Create S3 Bucket with Versioning</h5>
+          <p>Create a bucket in your primary region. Enable versioning. Upload a file, modify it, upload again. Observe the version history in the console. Delete the file — note the delete marker. Restore by deleting the delete marker.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h5>Configure Lifecycle Policy</h5>
+          <p>Create a lifecycle rule: transition objects to Standard-IA after 30 days, Glacier Flexible after 90 days, and expire (delete) after 365 days. Apply to the entire bucket. Verify the rule appears in the Lifecycle configuration tab.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <h5>Enable Cross-Region Replication (CRR)</h5>
+          <p>Create a destination bucket in another region with versioning enabled. Set up a replication rule on the source bucket. Upload a new file to the source — verify it appears in the destination. Note: existing objects are NOT replicated automatically.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <h5>Test Encryption</h5>
+          <p>Set default encryption to SSE-S3. Upload a file — check the properties to confirm encryption. Change default to SSE-KMS with the default <code>aws/s3</code> key. Upload another file. Compare the encryption headers.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-danger" style="margin-top:12px;">
+        <div class="callout-label">⚠️ Cleanup</div>
+        <p>Delete all objects (including versions and delete markers), then delete both buckets. Empty a versioned bucket by going to Versions view and deleting all.</p>
+      </div>
+    </div>
+
+    <!-- Lab 2 -->
+    <div class="card" style="border-left: 4px solid #f59e0b;">
+      <h4 style="color:#f59e0b;">Lab 2: EBS Volume Operations</h4>
+      <p><strong>Goal:</strong> Attach volumes, create snapshots, encrypt, and move across AZs.</p>
+
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h5>Launch EC2 + Attach EBS</h5>
+          <p>Launch a t2.micro in AZ-A. Create a separate gp3 volume (10 GiB) in AZ-A. Attach it to the instance. SSH in, format with <code>mkfs.ext4</code>, mount it, write data.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h5>Create Snapshot & Restore in Different AZ</h5>
+          <p>Create a snapshot of the volume. Go to another AZ (AZ-B). Create a new volume from the snapshot in AZ-B. Launch an EC2 in AZ-B, attach and mount — verify your data is there. This is how you migrate data across AZs.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <h5>Encrypt an Unencrypted Volume</h5>
+          <p>Take the unencrypted volume → Create snapshot → Copy snapshot with encryption → Create new encrypted volume from the encrypted snapshot. This is the only way to encrypt an existing unencrypted EBS volume.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lab 3 -->
+    <div class="card" style="border-left: 4px solid #3b82f6;">
+      <h4 style="color:#3b82f6;">Lab 3: RDS Multi-AZ + Read Replica</h4>
+      <p><strong>Goal:</strong> Deploy a production-grade RDS setup with HA and read scaling.</p>
+
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h5>Create RDS MySQL with Multi-AZ</h5>
+          <p>Use Free Tier (db.t3.micro, 20 GiB gp2). Check "Create a standby instance" for Multi-AZ. Deploy in your VPC's private subnets. Create a DB subnet group spanning 2+ AZs. Set up a security group allowing MySQL (3306) from your app subnet only.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h5>Create a Read Replica</h5>
+          <p>From the RDS console, select your DB → Actions → Create Read Replica. Note: it gets its own endpoint. Connect from your EC2 and run SELECT queries against the replica endpoint. Run INSERT queries only against the primary endpoint.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <h5>Simulate Failover</h5>
+          <p>Go to RDS → Actions → Reboot → Check "Reboot With Failover." Monitor the Events tab. Note: the DNS endpoint stays the same, but it now points to the former standby. Connection briefly drops (60-120 sec).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <h5>Test Automated Backup & Restore</h5>
+          <p>Check automated backups are enabled (retention = 7 days). Go to Snapshots → select a recent automated backup → Restore to Point in Time. This creates a NEW RDS instance. Verify data, then delete the restored instance.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lab 4 -->
+    <div class="card" style="border-left: 4px solid #f59e0b;">
+      <h4 style="color:#f59e0b;">Lab 4: DynamoDB Essentials</h4>
+      <p><strong>Goal:</strong> Create a table, understand capacity modes, work with indexes and TTL.</p>
+
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h5>Create a Table with Composite Key</h5>
+          <p>Create table <code>UserSessions</code> with Partition Key: <code>UserID</code> (String) and Sort Key: <code>SessionTimestamp</code> (Number). Use On-Demand mode. Add items with different attributes per item (schemaless nature).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h5>Create a Global Secondary Index</h5>
+          <p>Add GSI with PK: <code>DeviceType</code>, SK: <code>SessionTimestamp</code>. This lets you query by device type across all users. Note: GSI has its own capacity.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <h5>Enable TTL</h5>
+          <p>Enable TTL on attribute <code>ExpirationTime</code>. Add items with <code>ExpirationTime</code> set to a Unix timestamp a few minutes in the future. Wait and observe automatic deletion. Free cleanup!</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">
+          <h5>Enable DynamoDB Streams</h5>
+          <p>Turn on Streams (NEW_AND_OLD_IMAGES). Create/update/delete items. Go to the Streams tab and observe the change records. In production, you'd connect a Lambda function here for event-driven processing.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lab 5 -->
+    <div class="card" style="border-left: 4px solid #ef4444;">
+      <h4 style="color:#ef4444;">Lab 5: ElastiCache Redis</h4>
+      <p><strong>Goal:</strong> Deploy a Redis cluster and understand caching patterns.</p>
+
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <h5>Create Redis Cluster</h5>
+          <p>Use ElastiCache console → Create cluster → Redis. Choose <code>cache.t3.micro</code> (free tier eligible). Deploy in your VPC private subnets. Security group: allow port 6379 from your app subnet.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <h5>Connect & Test</h5>
+          <p>SSH into an EC2 in the same VPC. Install <code>redis-cli</code>. Connect: <code>redis-cli -h &lt;endpoint&gt; -p 6379</code>. Test: <code>SET mykey "hello"</code> → <code>GET mykey</code>. Try: <code>ZADD leaderboard 100 "player1" 250 "player2"</code> → <code>ZREVRANGE leaderboard 0 -1 WITHSCORES</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== ARCHITECTURE PATTERNS TAB ====== -->
+  <div class="tab-content" id="tab-arch">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(168,85,247,0.15);">🏗️</div>
+      <h2>Real-World Architecture Patterns</h2>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">Why Patterns Matter</div>
+      <p>The SAA-C03 exam presents scenarios and asks you to design or identify the correct architecture. These patterns appear repeatedly. Internalize them, and 70% of scenario questions become pattern-matching exercises.</p>
+    </div>
+
+    <!-- Pattern 1 -->
+    <div class="arch-diagram">
+      <h4>Pattern 1: Three-Tier Web Application</h4>
+      <svg viewBox="0 0 900 380" class="diagram-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="900" height="380" fill="url(#grid)"/>
+
+        <!-- Users -->
+        <rect x="20" y="140" width="100" height="50" rx="8" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1.5"/>
+        <text x="70" y="160" text-anchor="middle" fill="#fdba74" font-family="DM Sans" font-size="11" font-weight="600">Users</text>
+        <text x="70" y="178" text-anchor="middle" fill="#f97316" font-family="JetBrains Mono" font-size="9">Worldwide</text>
+
+        <!-- CloudFront -->
+        <rect x="160" y="140" width="120" height="50" rx="8" fill="rgba(168,85,247,0.15)" stroke="#a855f7" stroke-width="1.5"/>
+        <text x="220" y="160" text-anchor="middle" fill="#c4b5fd" font-family="DM Sans" font-size="11" font-weight="600">CloudFront</text>
+        <text x="220" y="178" text-anchor="middle" fill="#a855f7" font-family="JetBrains Mono" font-size="9">CDN + S3 Static</text>
+        <line x1="120" y1="165" x2="160" y2="165" stroke="#475569" stroke-width="1.5"/>
+
+        <!-- ALB -->
+        <rect x="320" y="140" width="120" height="50" rx="8" fill="rgba(6,182,212,0.15)" stroke="#06b6d4" stroke-width="1.5"/>
+        <text x="380" y="160" text-anchor="middle" fill="#67e8f9" font-family="DM Sans" font-size="11" font-weight="600">ALB</text>
+        <text x="380" y="178" text-anchor="middle" fill="#06b6d4" font-family="JetBrains Mono" font-size="9">Multi-AZ</text>
+        <line x1="280" y1="165" x2="320" y2="165" stroke="#475569" stroke-width="1.5"/>
+
+        <!-- Auto Scaling Group -->
+        <rect x="470" y="40" width="200" height="250" rx="12" fill="rgba(34,197,94,0.05)" stroke="#14532d" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="570" y="65" text-anchor="middle" fill="#22c55e" font-family="Space Grotesk" font-size="12" font-weight="600">Auto Scaling Group</text>
+
+        <rect x="490" y="80" width="80" height="40" rx="6" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="1"/>
+        <text x="530" y="105" text-anchor="middle" fill="#86efac" font-family="JetBrains Mono" font-size="10">EC2 (AZ-A)</text>
+
+        <rect x="490" y="135" width="80" height="40" rx="6" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="1"/>
+        <text x="530" y="160" text-anchor="middle" fill="#86efac" font-family="JetBrains Mono" font-size="10">EC2 (AZ-B)</text>
+
+        <rect x="580" y="80" width="80" height="40" rx="6" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1"/>
+        <text x="620" y="105" text-anchor="middle" fill="#86efac" font-family="JetBrains Mono" font-size="10">EC2 (AZ-C)</text>
+
+        <line x1="440" y1="165" x2="490" y2="155" stroke="#475569" stroke-width="1.5"/>
+
+        <!-- ElastiCache -->
+        <rect x="490" y="200" width="160" height="40" rx="6" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1"/>
+        <text x="570" y="225" text-anchor="middle" fill="#fca5a5" font-family="DM Sans" font-size="11" font-weight="600">ElastiCache Redis</text>
+
+        <!-- Database Layer -->
+        <rect x="710" y="40" width="170" height="250" rx="12" fill="rgba(59,130,246,0.05)" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="795" y="65" text-anchor="middle" fill="#3b82f6" font-family="Space Grotesk" font-size="12" font-weight="600">Database Layer</text>
+
+        <rect x="725" y="80" width="140" height="45" rx="8" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="795" y="100" text-anchor="middle" fill="#c4b5fd" font-family="DM Sans" font-size="11" font-weight="600">Aurora Writer</text>
+        <text x="795" y="117" text-anchor="middle" fill="#8b5cf6" font-family="JetBrains Mono" font-size="9">Multi-AZ</text>
+
+        <rect x="725" y="140" width="140" height="35" rx="6" fill="rgba(139,92,246,0.08)" stroke="#4c1d95" stroke-width="1"/>
+        <text x="795" y="163" text-anchor="middle" fill="#a855f7" font-family="JetBrains Mono" font-size="10">Read Replica 1</text>
+
+        <rect x="725" y="185" width="140" height="35" rx="6" fill="rgba(139,92,246,0.08)" stroke="#4c1d95" stroke-width="1"/>
+        <text x="795" y="208" text-anchor="middle" fill="#a855f7" font-family="JetBrains Mono" font-size="10">Read Replica 2</text>
+
+        <line x1="670" y1="120" x2="725" y2="100" stroke="#475569" stroke-width="1.5"/>
+
+        <!-- S3 Static -->
+        <rect x="160" y="40" width="120" height="40" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1"/>
+        <text x="220" y="55" text-anchor="middle" fill="#93c5fd" font-family="DM Sans" font-size="11" font-weight="600">S3 Static Assets</text>
+        <text x="220" y="72" text-anchor="middle" fill="#3b82f6" font-family="JetBrains Mono" font-size="9">Images, CSS, JS</text>
+        <line x1="220" y1="80" x2="220" y2="140" stroke="#1e3a5f" stroke-width="1"/>
+
+        <!-- Bottom labels -->
+        <rect x="150" y="330" width="600" height="35" rx="8" fill="rgba(249,115,22,0.06)" stroke="rgba(249,115,22,0.15)" stroke-width="1"/>
+        <text x="450" y="352" text-anchor="middle" fill="#fdba74" font-family="Space Grotesk" font-size="11" font-weight="600">Web Tier (public) → App Tier (private) → Data Tier (private) + Caching</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h4>Pattern 1 Explained</h4>
+      <p>This is the <strong>#1 most tested architecture</strong> on the SAA-C03. Key decisions the exam tests:</p>
+      <ul>
+        <li><strong>Static content:</strong> S3 + CloudFront (never serve static files from EC2)</li>
+        <li><strong>Web tier:</strong> ALB across multiple AZs for HA. Auto Scaling for elasticity.</li>
+        <li><strong>Caching:</strong> ElastiCache Redis between app tier and database to reduce DB load</li>
+        <li><strong>Database:</strong> Aurora Multi-AZ (writer) + Read Replicas for read-heavy workloads</li>
+        <li><strong>Subnets:</strong> ALB in public subnets, EC2 and DB in private subnets</li>
+      </ul>
+    </div>
+
+    <!-- Pattern 2 -->
+    <div class="card" style="border-left: 4px solid #f59e0b;">
+      <h4 style="color:#f59e0b;">Pattern 2: Serverless API with DynamoDB</h4>
+      <p>When the exam says "serverless," "auto-scaling," "minimal operational overhead," or "event-driven," this is the architecture:</p>
+      <ul>
+        <li><strong>API Gateway</strong> → <strong>Lambda</strong> → <strong>DynamoDB</strong></li>
+        <li>API Gateway handles REST API, throttling, auth (Cognito)</li>
+        <li>Lambda processes business logic (no servers to manage)</li>
+        <li>DynamoDB in on-demand mode (auto-scales, pay per request)</li>
+        <li>Add DAX for microsecond caching if read-heavy</li>
+        <li>Add DynamoDB Streams → Lambda for event-driven processing</li>
+      </ul>
+    </div>
+
+    <!-- Pattern 3 -->
+    <div class="card" style="border-left: 4px solid #a855f7;">
+      <h4 style="color:#a855f7;">Pattern 3: Data Lake on S3</h4>
+      <p>When the exam mentions "analytics," "query data in place," "data lake," or "cost-effective analysis of large datasets":</p>
+      <ul>
+        <li><strong>S3</strong> as the central data lake (all data lands here)</li>
+        <li><strong>Kinesis Data Firehose</strong> for streaming data ingestion</li>
+        <li><strong>Glue</strong> for ETL and schema discovery (Glue Crawlers)</li>
+        <li><strong>Athena</strong> for serverless SQL queries directly on S3</li>
+        <li><strong>QuickSight</strong> for BI dashboards</li>
+        <li><strong>Lifecycle policies:</strong> Standard → IA → Glacier for cost optimization</li>
+      </ul>
+    </div>
+
+    <!-- Pattern 4 -->
+    <div class="card" style="border-left: 4px solid #ef4444;">
+      <h4 style="color:#ef4444;">Pattern 4: Disaster Recovery Strategies</h4>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Strategy</th><th>RPO/RTO</th><th>Cost</th><th>How</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight">Backup & Restore</td>
+            <td>Hours</td>
+            <td>💰 Lowest</td>
+            <td>S3 cross-region backups, RDS snapshots, AMIs. Restore when needed.</td>
+          </tr>
+          <tr>
+            <td class="highlight">Pilot Light</td>
+            <td>10s of minutes</td>
+            <td>💰💰</td>
+            <td>Core DB running in DR region (RDS replica). Scale up compute on failure.</td>
+          </tr>
+          <tr>
+            <td class="highlight">Warm Standby</td>
+            <td>Minutes</td>
+            <td>💰💰💰</td>
+            <td>Reduced-capacity copy running in DR region. Scale up on failure.</td>
+          </tr>
+          <tr>
+            <td class="highlight">Multi-Site Active-Active</td>
+            <td>Near-zero</td>
+            <td>💰💰💰💰 Highest</td>
+            <td>Full copy in both regions. Route 53 failover routing.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-exam" style="margin-top:12px;">
+        <div class="callout-label">🎯 Exam Tip</div>
+        <p>"Minimize cost, can tolerate hours of downtime" → Backup & Restore. "Minimize RTO, budget allows" → Multi-Site. "Balance cost and recovery" → Warm Standby. The exam always provides cost constraints — use them to eliminate options.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TERRAFORM TAB ====== -->
+  <div class="tab-content" id="tab-terraform">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(168,85,247,0.15);">🔧</div>
+      <h2>Terraform Integration — AlienOps Week 2</h2>
+    </div>
+
+    <div class="callout callout-pro">
+      <div class="callout-label">Bridging Your Terraform Knowledge</div>
+      <p>You've covered Terraform fundamentals in Days 10-12. Now let's apply it to the storage and database services you learned this week. These snippets are production-grade patterns you'll use in your AlienOps capstone.</p>
+    </div>
+
+    <div class="card">
+      <h4>S3 Bucket with Lifecycle & Versioning</h4>
+      <div class="code-label">TERRAFORM</div>
+      <div class="code-block"><span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_s3_bucket"</span> <span style="color:#a5d6ff">"app_data"</span> {
+  bucket = <span style="color:#a5d6ff">"alienops-app-data-${var.environment}"</span>
+}
+
+<span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_s3_bucket_versioning"</span> <span style="color:#a5d6ff">"app_data"</span> {
+  bucket = aws_s3_bucket.app_data.id
+  versioning_configuration {
+    status = <span style="color:#a5d6ff">"Enabled"</span>
+  }
+}
+
+<span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_s3_bucket_lifecycle_configuration"</span> <span style="color:#a5d6ff">"app_data"</span> {
+  bucket = aws_s3_bucket.app_data.id
+
+  rule {
+    id     = <span style="color:#a5d6ff">"archive-old-data"</span>
+    status = <span style="color:#a5d6ff">"Enabled"</span>
+
+    transition {
+      days          = <span style="color:#79c0ff">30</span>
+      storage_class = <span style="color:#a5d6ff">"STANDARD_IA"</span>
+    }
+    transition {
+      days          = <span style="color:#79c0ff">90</span>
+      storage_class = <span style="color:#a5d6ff">"GLACIER"</span>
+    }
+    expiration {
+      days = <span style="color:#79c0ff">365</span>
+    }
+  }
+}</div>
+    </div>
+
+    <div class="card">
+      <h4>RDS Aurora Cluster with Read Replica</h4>
+      <div class="code-label">TERRAFORM</div>
+      <div class="code-block"><span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_rds_cluster"</span> <span style="color:#a5d6ff">"alienops"</span> {
+  cluster_identifier     = <span style="color:#a5d6ff">"alienops-${var.environment}"</span>
+  engine                 = <span style="color:#a5d6ff">"aurora-mysql"</span>
+  engine_version         = <span style="color:#a5d6ff">"8.0.mysql_aurora.3.04.0"</span>
+  master_username        = <span style="color:#a5d6ff">"admin"</span>
+  master_password        = var.db_password  <span style="color:#6a737d"># From secrets</span>
+  db_subnet_group_name   = aws_db_subnet_group.private.name
+  vpc_security_group_ids = [aws_security_group.db.id]
+  storage_encrypted      = <span style="color:#79c0ff">true</span>
+  skip_final_snapshot    = var.environment != <span style="color:#a5d6ff">"prod"</span>
+
+  backup_retention_period = var.environment == <span style="color:#a5d6ff">"prod"</span> ? <span style="color:#79c0ff">35</span> : <span style="color:#79c0ff">7</span>
+}
+
+<span style="color:#6a737d"># Writer Instance</span>
+<span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_rds_cluster_instance"</span> <span style="color:#a5d6ff">"writer"</span> {
+  identifier         = <span style="color:#a5d6ff">"alienops-writer"</span>
+  cluster_identifier = aws_rds_cluster.alienops.id
+  instance_class     = <span style="color:#a5d6ff">"db.r6g.large"</span>
+  engine             = aws_rds_cluster.alienops.engine
+}
+
+<span style="color:#6a737d"># Read Replicas</span>
+<span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_rds_cluster_instance"</span> <span style="color:#a5d6ff">"readers"</span> {
+  count              = var.reader_count  <span style="color:#6a737d"># e.g., 2</span>
+  identifier         = <span style="color:#a5d6ff">"alienops-reader-${count.index}"</span>
+  cluster_identifier = aws_rds_cluster.alienops.id
+  instance_class     = <span style="color:#a5d6ff">"db.r6g.large"</span>
+  engine             = aws_rds_cluster.alienops.engine
+}</div>
+    </div>
+
+    <div class="card">
+      <h4>DynamoDB Table with GSI and TTL</h4>
+      <div class="code-label">TERRAFORM</div>
+      <div class="code-block"><span style="color:#ff7b72">resource</span> <span style="color:#a5d6ff">"aws_dynamodb_table"</span> <span style="color:#a5d6ff">"sessions"</span> {
+  name         = <span style="color:#a5d6ff">"alienops-sessions-${var.environment}"</span>
+  billing_mode = <span style="color:#a5d6ff">"PAY_PER_REQUEST"</span>  <span style="color:#6a737d"># On-demand</span>
+  hash_key     = <span style="color:#a5d6ff">"UserID"</span>
+  range_key    = <span style="color:#a5d6ff">"SessionTimestamp"</span>
+
+  attribute {
+    name = <span style="color:#a5d6ff">"UserID"</span>
+    type = <span style="color:#a5d6ff">"S"</span>
+  }
+  attribute {
+    name = <span style="color:#a5d6ff">"SessionTimestamp"</span>
+    type = <span style="color:#a5d6ff">"N"</span>
+  }
+  attribute {
+    name = <span style="color:#a5d6ff">"DeviceType"</span>
+    type = <span style="color:#a5d6ff">"S"</span>
+  }
+
+  global_secondary_index {
+    name            = <span style="color:#a5d6ff">"DeviceIndex"</span>
+    hash_key        = <span style="color:#a5d6ff">"DeviceType"</span>
+    range_key       = <span style="color:#a5d6ff">"SessionTimestamp"</span>
+    projection_type = <span style="color:#a5d6ff">"ALL"</span>
+  }
+
+  ttl {
+    attribute_name = <span style="color:#a5d6ff">"ExpirationTime"</span>
+    enabled        = <span style="color:#79c0ff">true</span>
+  }
+
+  point_in_time_recovery {
+    enabled = <span style="color:#79c0ff">true</span>
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ====== CHEAT SHEET TAB ====== -->
+  <div class="tab-content" id="tab-cheat">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(249,115,22,0.15);">📋</div>
+      <h2>Week 2 Ultimate Cheat Sheet</h2>
+    </div>
+
+    <div class="callout callout-exam">
+      <div class="callout-label">🎯 Review This Before the Exam</div>
+      <p>This is your one-page rapid review for all Week 2 Storage & Database content. Read it the night before, the morning of, and during any breaks.</p>
+    </div>
+
+    <div class="card">
+      <h4>🔵 S3 Quick Recall</h4>
+      <ul>
+        <li>11 nines durability | Object max = 5TB | Multipart > 100MB</li>
+        <li><strong>Standard</strong> (frequent) → <strong>IA</strong> (30 day min) → <strong>Glacier Instant</strong> (90d) → <strong>Glacier Flexible</strong> (1-12 hr) → <strong>Deep Archive</strong> (12-48 hr, 180d min)</li>
+        <li><strong>Intelligent-Tiering</strong> = auto-moves, no retrieval fees, monitoring cost</li>
+        <li><strong>One Zone-IA</strong> = cheapest IA, 1 AZ only, for re-creatable data</li>
+        <li><strong>Encryption:</strong> SSE-S3 (default) | SSE-KMS (audit trail) | SSE-C (you manage keys)</li>
+        <li><strong>Versioning:</strong> Can't disable, only suspend. MFA Delete = root only.</li>
+        <li><strong>Object Lock:</strong> Governance (special perms override) vs Compliance (NOBODY overrides)</li>
+        <li><strong>Replication:</strong> CRR (cross-region) / SRR (same-region). Requires versioning. New objects only.</li>
+        <li><strong>Event Notifications:</strong> Lambda, SQS, SNS, EventBridge</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>🟡 EBS Quick Recall</h4>
+      <ul>
+        <li><strong>AZ-locked.</strong> Move = Snapshot → Restore in new AZ.</li>
+        <li><strong>gp3</strong> = default, independent IOPS/throughput, up to 16K IOPS</li>
+        <li><strong>io2</strong> = highest perf, up to 256K IOPS (Block Express), Multi-Attach</li>
+        <li><strong>st1</strong> = throughput HDD (big data). <strong>sc1</strong> = cold HDD (cheapest).</li>
+        <li><strong>HDD (st1/sc1) CANNOT be boot volumes.</strong></li>
+        <li><strong>Snapshots:</strong> Incremental, stored in S3, cross-region copy possible</li>
+        <li><strong>Encrypt unencrypted:</strong> Snapshot → Copy w/ encryption → Create volume</li>
+        <li><strong>Instance Store:</strong> Ephemeral. Highest perf (local NVMe). Data lost on stop/terminate.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>🟢 EFS / FSx Quick Recall</h4>
+      <ul>
+        <li><strong>EFS:</strong> NFS, Linux only, multi-AZ, auto-scales, pay per use</li>
+        <li><strong>FSx Windows:</strong> SMB + Active Directory. Windows shared storage.</li>
+        <li><strong>FSx Lustre:</strong> HPC / ML. Sub-ms latency. Integrates with S3.</li>
+        <li><strong>FSx NetApp ONTAP:</strong> Multi-protocol (NFS + SMB + iSCSI).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>🔵 RDS / Aurora Quick Recall</h4>
+      <ul>
+        <li><strong>Multi-AZ</strong> = HA (failover). Standby NOT readable. Sync replication.</li>
+        <li><strong>Read Replicas</strong> = Read scaling. Async replication. Up to 5 (RDS) / 15 (Aurora).</li>
+        <li><strong>Aurora:</strong> 6 copies × 3 AZs, 128 TiB auto-scale, <30s failover, Backtrack</li>
+        <li><strong>Aurora Serverless v2:</strong> Auto-scale compute. ACU-based pricing. Min ACU = 0 pauses.</li>
+        <li><strong>Aurora Global:</strong> < 1s cross-region replication. < 1 min promotion for DR.</li>
+        <li><strong>Restore = NEW instance.</strong> Can't restore to existing DB.</li>
+        <li><strong>IAM Auth:</strong> MySQL + PostgreSQL. Token-based, 15-min lifetime.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>🟡 DynamoDB Quick Recall</h4>
+      <ul>
+        <li>Serverless NoSQL. Key-value + document. Max item = 400 KB.</li>
+        <li><strong>On-Demand:</strong> No capacity planning. 2.5x cost. For unpredictable traffic.</li>
+        <li><strong>Provisioned:</strong> Set RCU/WCU. Auto Scaling available. Cheaper for steady workloads.</li>
+        <li><strong>1 RCU</strong> = 1 strong read/s (4KB) or 2 eventual reads/s (4KB)</li>
+        <li><strong>1 WCU</strong> = 1 write/s (1KB)</li>
+        <li><strong>GSI:</strong> Different PK. Own throughput. Eventually consistent only. Can add anytime.</li>
+        <li><strong>LSI:</strong> Same PK, different SK. Created at table creation ONLY. Shares throughput.</li>
+        <li><strong>DAX:</strong> In-memory cache for DynamoDB. Microsecond latency. Minimal code change.</li>
+        <li><strong>Global Tables:</strong> Multi-region active-active. Requires Streams.</li>
+        <li><strong>Streams:</strong> 24hr ordered changelog. Triggers Lambda.</li>
+        <li><strong>TTL:</strong> Auto-delete items by timestamp. No cost.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>🔴 ElastiCache Quick Recall</h4>
+      <ul>
+        <li><strong>Redis:</strong> Persistence ✅ | Multi-AZ ✅ | Replicas ✅ | Sorted Sets ✅ | Pub/Sub ✅ | Backup ✅</li>
+        <li><strong>Memcached:</strong> Multi-threaded ✅ | Simple k/v ✅ | Everything else ❌</li>
+        <li><strong>Default choice = Redis</strong> unless "multi-threaded simple cache" is mentioned.</li>
+        <li><strong>Lazy Loading:</strong> Read cache → miss → read DB → write cache. Stale data risk.</li>
+        <li><strong>Write-Through:</strong> Write to both. Always current. Extra write latency.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>❄️ Snow Family & Gateway Quick Recall</h4>
+      <ul>
+        <li><strong>Snowcone:</strong> 8-14 TB. Edge + small migration.</li>
+        <li><strong>Snowball Edge Storage:</strong> 80 TB. Large migrations.</li>
+        <li><strong>Snowball Edge Compute:</strong> 42 TB + GPU. Edge ML.</li>
+        <li><strong>Snowmobile:</strong> 100 PB. Data center migration.</li>
+        <li><strong>Rule:</strong> < 10 TB online → DataSync. 10 TB - 10 PB → Snowball. > 10 PB → Snowmobile.</li>
+        <li><strong>Storage Gateway S3 File:</strong> NFS/SMB → S3. On-prem file access.</li>
+        <li><strong>Storage Gateway Volume:</strong> iSCSI → S3 (cached or stored mode).</li>
+        <li><strong>Storage Gateway Tape:</strong> Virtual tapes → S3 + Glacier. Replace physical tapes.</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border: 2px solid var(--accent2);">
+      <h4 style="color:var(--accent2);">🧠 Week 2 Mnemonics</h4>
+      <ul>
+        <li><strong>"SSD for Speed, HDD for Heap"</strong> — SSD volumes (gp/io) for IOPS-intensive. HDD (st/sc) for throughput/archival.</li>
+        <li><strong>"Multi-AZ = Insurance, Read Replica = Performance"</strong> — Never confuse the two.</li>
+        <li><strong>"Aurora = RDS on Steroids"</strong> — More replicas, faster failover, auto-scale storage, backtrack.</li>
+        <li><strong>"DynamoDB = Scale without Tears"</strong> — Serverless, any scale, ms latency, on-demand.</li>
+        <li><strong>"Redis Has Everything"</strong> — When in doubt between Redis and Memcached, pick Redis.</li>
+        <li><strong>"FedEx > Internet"</strong> — For large data, physical shipping (Snow) beats uploading.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: document.querySelector('.nav-tabs').offsetTop - 20, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

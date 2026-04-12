@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Part 1 — AWS Storage Services | AlienOps SAA-C03</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e17;
+  --surface: #111827;
+  --surface2: #1a2234;
+  --border: #1e2d45;
+  --text: #e2e8f0;
+  --text-dim: #8899aa;
+  --accent: #f97316;
+  --accent2: #06b6d4;
+  --accent3: #a855f7;
+  --accent4: #22c55e;
+  --s3: #3b82f6;
+  --ebs: #f59e0b;
+  --efs: #10b981;
+  --snow: #8b5cf6;
+  --danger: #ef4444;
+  --code-bg: #0d1117;
+  --gradient1: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  --gradient2: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+.hero {
+  position: relative;
+  padding: 80px 40px 60px;
+  text-align: center;
+  background: linear-gradient(180deg, #0d1520 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 40%, rgba(249,115,22,0.06) 0%, transparent 50%),
+              radial-gradient(circle at 70% 60%, rgba(6,182,212,0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(249,115,22,0.1);
+  border: 1px solid rgba(249,115,22,0.3);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+.hero p {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 40px;
+  overflow-x: auto;
+  position: sticky;
+  top: 8px;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.nav-tab {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--text); background: var(--surface2); }
+.nav-tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+.tab-content { display: none; animation: fadeIn 0.4s ease; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 48px 0 24px;
+}
+.section-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.section-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.section-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: rgba(249,115,22,0.3); }
+.card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+.card p { color: var(--text-dim); margin-bottom: 8px; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+
+/* Comparison Tables */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.comparison-table thead th {
+  background: var(--surface2);
+  color: var(--accent);
+  padding: 14px 16px;
+  text-align: left;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+}
+.comparison-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+}
+.comparison-table tr:hover td { background: rgba(249,115,22,0.03); }
+.comparison-table .highlight { color: var(--accent2); font-weight: 600; }
+
+/* Callout boxes */
+.callout {
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0;
+  border-left: 4px solid;
+}
+.callout-exam {
+  background: rgba(249,115,22,0.06);
+  border-color: var(--accent);
+}
+.callout-why {
+  background: rgba(6,182,212,0.06);
+  border-color: var(--accent2);
+}
+.callout-danger {
+  background: rgba(239,68,68,0.06);
+  border-color: var(--danger);
+}
+.callout-pro {
+  background: rgba(34,197,94,0.06);
+  border-color: var(--accent4);
+}
+.callout-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.callout-exam .callout-label { color: var(--accent); }
+.callout-why .callout-label { color: var(--accent2); }
+.callout-danger .callout-label { color: var(--danger); }
+.callout-pro .callout-label { color: var(--accent4); }
+
+/* Code blocks */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 16px 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c9d1d9;
+}
+.code-block .comment { color: #6a737d; }
+.code-block .keyword { color: #ff7b72; }
+.code-block .string { color: #a5d6ff; }
+.code-block .value { color: #79c0ff; }
+
+/* Architecture Diagram */
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 24px 0;
+  text-align: center;
+}
+.arch-diagram h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--accent2);
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+/* SVG Diagram Styles */
+.diagram-svg {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Flow items */
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 12px 0;
+}
+.flow-box {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.flow-arrow {
+  color: var(--text-dim);
+  font-size: 18px;
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-s3 { background: rgba(59,130,246,0.15); color: var(--s3); }
+.badge-ebs { background: rgba(245,158,11,0.15); color: var(--ebs); }
+.badge-efs { background: rgba(16,185,129,0.15); color: var(--efs); }
+.badge-snow { background: rgba(139,92,246,0.15); color: var(--snow); }
+
+/* Expand/Collapse */
+.expandable { margin: 12px 0; }
+.expand-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.expand-header:hover { border-color: var(--accent); }
+.expand-header .arrow { transition: transform 0.3s; font-size: 12px; }
+.expand-header.open .arrow { transform: rotate(90deg); }
+.expand-body {
+  display: none;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: var(--surface);
+}
+.expand-body.open { display: block; }
+
+/* Quiz */
+.quiz-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin: 20px 0;
+}
+.quiz-card h4 { color: var(--accent3); margin-bottom: 16px; font-family: 'Space Grotesk', sans-serif; }
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 18px;
+  margin: 8px 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'DM Sans', sans-serif;
+}
+.quiz-option:hover { border-color: var(--accent3); }
+.quiz-option.correct { background: rgba(34,197,94,0.15); border-color: var(--accent4); color: var(--accent4); }
+.quiz-option.wrong { background: rgba(239,68,68,0.1); border-color: var(--danger); color: var(--danger); }
+.quiz-explanation {
+  display: none;
+  margin-top: 14px;
+  padding: 14px 18px;
+  background: rgba(6,182,212,0.06);
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.quiz-explanation.show { display: block; }
+
+ul, ol { padding-left: 24px; margin: 10px 0; }
+li { margin: 6px 0; color: var(--text-dim); }
+li strong { color: var(--text); }
+strong { color: var(--text); }
+a { color: var(--accent2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero { padding: 48px 20px 40px; }
+  .container { padding: 24px 16px; }
+  .card { padding: 20px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .nav-tabs { flex-wrap: nowrap; }
+  .nav-tab { font-size: 12px; padding: 10px 12px; min-width: 90px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">📦 Week 2 · Part 1 of 3</div>
+  <h1>AWS Storage Services</h1>
+  <p>S3 · EBS · EFS · Storage Gateway · Snow Family — Master every storage class, volume type, and data transfer strategy for the SAA-C03 exam and production architectures.</p>
+</div>
+
+<div class="container">
+  <div class="nav-tabs" id="mainNav">
+    <button class="nav-tab active" onclick="showTab('overview')">Overview</button>
+    <button class="nav-tab" onclick="showTab('s3')">Amazon S3</button>
+    <button class="nav-tab" onclick="showTab('ebs')">EBS</button>
+    <button class="nav-tab" onclick="showTab('efs')">EFS & FSx</button>
+    <button class="nav-tab" onclick="showTab('snow')">Snow & Gateway</button>
+    <button class="nav-tab" onclick="showTab('compare')">Comparisons</button>
+    <button class="nav-tab" onclick="showTab('quiz')">Exam Prep</button>
+  </div>
+
+  <!-- ====== OVERVIEW TAB ====== -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(249,115,22,0.15);">🗺️</div>
+      <h2>Why Storage Matters on the SAA-C03</h2>
+    </div>
+    <div class="card">
+      <p>Storage questions make up roughly <strong>20-25% of the exam</strong>. AWS doesn't just test "which service to use" — they test <strong>when to choose one storage class over another</strong>, how to optimize cost, how to design for durability vs. availability, and how to migrate data at scale.</p>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">🧠 The Architect's Mindset</div>
+      <p>When you see a storage question, always ask: <strong>(1) How much data?</strong> → (2) <strong>How is it accessed? (frequency, latency)</strong> → (3) <strong>Who/what accesses it? (single EC2? multiple? serverless?)</strong> → (4) <strong>Durability & availability requirements?</strong> → (5) <strong>Cost constraints?</strong></p>
+    </div>
+
+    <div class="arch-diagram">
+      <h4>🏗️ AWS Storage Decision Tree</h4>
+      <svg viewBox="0 0 900 520" class="diagram-svg" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background grid -->
+        <defs>
+          <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="900" height="520" fill="url(#grid)"/>
+
+        <!-- Root question -->
+        <rect x="300" y="20" width="300" height="50" rx="10" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1.5"/>
+        <text x="450" y="50" text-anchor="middle" fill="#f97316" font-family="Space Grotesk" font-size="14" font-weight="600">What type of storage do you need?</text>
+
+        <!-- Lines from root -->
+        <line x1="350" y1="70" x2="150" y2="120" stroke="#334155" stroke-width="1.5"/>
+        <line x1="450" y1="70" x2="450" y2="120" stroke="#334155" stroke-width="1.5"/>
+        <line x1="550" y1="70" x2="750" y2="120" stroke="#334155" stroke-width="1.5"/>
+
+        <!-- Object Storage -->
+        <rect x="50" y="120" width="200" height="45" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="150" y="147" text-anchor="middle" fill="#3b82f6" font-family="Space Grotesk" font-size="13" font-weight="600">Object Storage</text>
+
+        <!-- Block Storage -->
+        <rect x="350" y="120" width="200" height="45" rx="8" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="450" y="147" text-anchor="middle" fill="#f59e0b" font-family="Space Grotesk" font-size="13" font-weight="600">Block Storage</text>
+
+        <!-- File Storage -->
+        <rect x="650" y="120" width="200" height="45" rx="8" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="750" y="147" text-anchor="middle" fill="#10b981" font-family="Space Grotesk" font-size="13" font-weight="600">File Storage</text>
+
+        <!-- S3 Branch -->
+        <line x1="150" y1="165" x2="150" y2="200" stroke="#334155" stroke-width="1.5"/>
+        <rect x="50" y="200" width="200" height="40" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="1"/>
+        <text x="150" y="225" text-anchor="middle" fill="#93c5fd" font-family="DM Sans" font-size="13" font-weight="600">Amazon S3</text>
+
+        <!-- S3 sub-questions -->
+        <line x1="100" y1="240" x2="80" y2="270" stroke="#1e3a5f" stroke-width="1"/>
+        <line x1="150" y1="240" x2="150" y2="270" stroke="#1e3a5f" stroke-width="1"/>
+        <line x1="200" y1="240" x2="220" y2="270" stroke="#1e3a5f" stroke-width="1"/>
+
+        <rect x="10" y="270" width="130" height="55" rx="6" fill="rgba(59,130,246,0.08)" stroke="#1e3a5f" stroke-width="1"/>
+        <text x="75" y="290" text-anchor="middle" fill="#93c5fd" font-family="DM Sans" font-size="11" font-weight="500">Frequent access</text>
+        <text x="75" y="310" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="10">S3 Standard</text>
+
+        <rect x="85" y="340" width="130" height="55" rx="6" fill="rgba(59,130,246,0.08)" stroke="#1e3a5f" stroke-width="1"/>
+        <text x="150" y="360" text-anchor="middle" fill="#93c5fd" font-family="DM Sans" font-size="11" font-weight="500">Infrequent access</text>
+        <text x="150" y="380" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="10">S3 IA / One-Zone IA</text>
+
+        <rect x="160" y="270" width="130" height="55" rx="6" fill="rgba(59,130,246,0.08)" stroke="#1e3a5f" stroke-width="1"/>
+        <text x="225" y="290" text-anchor="middle" fill="#93c5fd" font-family="DM Sans" font-size="11" font-weight="500">Archive</text>
+        <text x="225" y="310" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="10">Glacier / Deep</text>
+
+        <line x1="150" y1="325" x2="150" y2="340" stroke="#1e3a5f" stroke-width="1"/>
+
+        <!-- Auto-tiering -->
+        <rect x="10" y="410" width="280" height="40" rx="6" fill="rgba(168,85,247,0.1)" stroke="#a855f7" stroke-width="1"/>
+        <text x="150" y="435" text-anchor="middle" fill="#c084fc" font-family="DM Sans" font-size="12" font-weight="600">S3 Intelligent-Tiering — auto-moves data</text>
+        <line x1="150" y1="395" x2="150" y2="410" stroke="#1e3a5f" stroke-width="1"/>
+
+
+        <!-- EBS Branch -->
+        <line x1="450" y1="165" x2="450" y2="200" stroke="#334155" stroke-width="1.5"/>
+        <rect x="350" y="200" width="200" height="40" rx="8" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="450" y="225" text-anchor="middle" fill="#fcd34d" font-family="DM Sans" font-size="13" font-weight="600">Amazon EBS</text>
+
+        <line x1="410" y1="240" x2="390" y2="280" stroke="#3d2800" stroke-width="1"/>
+        <line x1="490" y1="240" x2="510" y2="280" stroke="#3d2800" stroke-width="1"/>
+
+        <rect x="320" y="280" width="120" height="50" rx="6" fill="rgba(245,158,11,0.08)" stroke="#3d2800" stroke-width="1"/>
+        <text x="380" y="300" text-anchor="middle" fill="#fcd34d" font-family="DM Sans" font-size="11" font-weight="500">SSD (gp3/io2)</text>
+        <text x="380" y="316" text-anchor="middle" fill="#f59e0b" font-family="JetBrains Mono" font-size="10">IOPS-intensive</text>
+
+        <rect x="460" y="280" width="120" height="50" rx="6" fill="rgba(245,158,11,0.08)" stroke="#3d2800" stroke-width="1"/>
+        <text x="520" y="300" text-anchor="middle" fill="#fcd34d" font-family="DM Sans" font-size="11" font-weight="500">HDD (st1/sc1)</text>
+        <text x="520" y="316" text-anchor="middle" fill="#f59e0b" font-family="JetBrains Mono" font-size="10">Throughput</text>
+
+        <!-- EBS note -->
+        <rect x="340" y="360" width="220" height="35" rx="6" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+        <text x="450" y="382" text-anchor="middle" fill="#fca5a5" font-family="DM Sans" font-size="11">⚠️ Attached to ONE EC2 (same AZ)</text>
+        <line x1="450" y1="330" x2="450" y2="360" stroke="#3d2800" stroke-width="1"/>
+
+        <!-- EFS Branch -->
+        <line x1="750" y1="165" x2="750" y2="200" stroke="#334155" stroke-width="1.5"/>
+        <rect x="650" y="200" width="200" height="40" rx="8" fill="rgba(16,185,129,0.2)" stroke="#10b981" stroke-width="1"/>
+        <text x="750" y="225" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans" font-size="13" font-weight="600">Amazon EFS / FSx</text>
+
+        <line x1="710" y1="240" x2="680" y2="280" stroke="#064e3b" stroke-width="1"/>
+        <line x1="790" y1="240" x2="820" y2="280" stroke="#064e3b" stroke-width="1"/>
+
+        <rect x="610" y="280" width="140" height="55" rx="6" fill="rgba(16,185,129,0.08)" stroke="#064e3b" stroke-width="1"/>
+        <text x="680" y="300" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans" font-size="11" font-weight="500">EFS (NFS)</text>
+        <text x="680" y="316" text-anchor="middle" fill="#10b981" font-family="JetBrains Mono" font-size="10">Linux shared FS</text>
+        <text x="680" y="330" text-anchor="middle" fill="#10b981" font-family="JetBrains Mono" font-size="9">Multi-AZ</text>
+
+        <rect x="760" y="280" width="140" height="55" rx="6" fill="rgba(16,185,129,0.08)" stroke="#064e3b" stroke-width="1"/>
+        <text x="830" y="300" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans" font-size="11" font-weight="500">FSx</text>
+        <text x="830" y="316" text-anchor="middle" fill="#10b981" font-family="JetBrains Mono" font-size="10">Windows / Lustre</text>
+        <text x="830" y="330" text-anchor="middle" fill="#10b981" font-family="JetBrains Mono" font-size="9">High-perf / SMB</text>
+
+        <!-- Shared note -->
+        <rect x="630" y="360" width="250" height="35" rx="6" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.3)" stroke-width="1"/>
+        <text x="755" y="382" text-anchor="middle" fill="#86efac" font-family="DM Sans" font-size="11">✅ Shared across MULTIPLE EC2 instances</text>
+        <line x1="750" y1="335" x2="750" y2="360" stroke="#064e3b" stroke-width="1"/>
+
+        <!-- Bottom summary -->
+        <rect x="200" y="470" width="500" height="40" rx="8" fill="rgba(249,115,22,0.08)" stroke="rgba(249,115,22,0.2)" stroke-width="1"/>
+        <text x="450" y="495" text-anchor="middle" fill="#fdba74" font-family="Space Grotesk" font-size="12" font-weight="600">KEY: Object = S3 | Block = EBS | File = EFS/FSx | Transfer = Snow/Gateway</text>
+      </svg>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="border-top: 3px solid var(--s3);">
+        <h4 style="color:var(--s3)">📦 S3 — Object Storage</h4>
+        <p>Unlimited storage of objects (files) up to <strong>5TB</strong> each. Flat namespace with bucket/key structure. 11 9's durability. Perfect for: static assets, backups, data lakes, log storage.</p>
+        <span class="badge badge-s3">~30% of storage questions</span>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--ebs);">
+        <h4 style="color:var(--ebs)">💾 EBS — Block Storage</h4>
+        <p>Virtual hard drives attached to EC2. Persist independently from instance lifecycle. Supports snapshots to S3. Perfect for: databases, boot volumes, high-IOPS workloads.</p>
+        <span class="badge badge-ebs">~20% of storage questions</span>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--efs);">
+        <h4 style="color:var(--efs)">📁 EFS — File Storage</h4>
+        <p>Managed NFS that multiple EC2 instances can mount simultaneously across AZs. Auto-scales. Perfect for: shared content repos, CMS, container storage, home dirs.</p>
+        <span class="badge badge-efs">~15% of storage questions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== S3 TAB ====== -->
+  <div class="tab-content" id="tab-s3">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(59,130,246,0.15);">📦</div>
+      <h2>Amazon S3 — Deep Dive</h2>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">Why S3 Exists</div>
+      <p>Before S3, companies had to buy storage arrays, manage RAID, handle backups, and plan capacity months in advance. S3 gave you <strong>unlimited, 11-nines durable storage accessible via HTTP</strong> — pay only for what you use. It became the backbone of AWS: other services (CloudFront, Athena, EMR, Lambda) all integrate with S3 natively.</p>
+    </div>
+
+    <div class="card">
+      <h4>S3 Core Concepts</h4>
+      <ul>
+        <li><strong>Bucket</strong> — Container for objects. Globally unique name. Region-specific.</li>
+        <li><strong>Object</strong> — File + metadata. Key = full path (e.g., <code>photos/2024/cat.jpg</code>). Max size: 5TB.</li>
+        <li><strong>Multipart Upload</strong> — Required for files >5GB, recommended for >100MB. Uploads parts in parallel.</li>
+        <li><strong>Versioning</strong> — Keeps all versions of an object. Can't be disabled once enabled (only suspended).</li>
+        <li><strong>S3 is NOT a file system</strong> — it's an object store. No directory structure — the "/" in keys is just a naming convention.</li>
+      </ul>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(59,130,246,0.15);">💰</div>
+      <h3>Storage Classes — The Cost Optimization Engine</h3>
+    </div>
+
+    <div class="callout callout-exam">
+      <div class="callout-label">🎯 Exam Hot Spot</div>
+      <p>You WILL get 3-5 questions on choosing the right S3 storage class. The exam tests your ability to match <strong>access patterns → storage class → cost optimization</strong>. Memorize the retrieval times and minimum storage durations.</p>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Storage Class</th>
+          <th>Use Case</th>
+          <th>Availability</th>
+          <th>Min Storage</th>
+          <th>Retrieval</th>
+          <th>Cost (GB/mo)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="highlight">S3 Standard</td>
+          <td>Frequently accessed data</td>
+          <td>99.99%</td>
+          <td>None</td>
+          <td>Instant</td>
+          <td>$0.023</td>
+        </tr>
+        <tr>
+          <td class="highlight">S3 Intelligent-Tiering</td>
+          <td>Unknown or changing access patterns</td>
+          <td>99.9%</td>
+          <td>None</td>
+          <td>Instant*</td>
+          <td>$0.023 + monitoring fee</td>
+        </tr>
+        <tr>
+          <td class="highlight">S3 Standard-IA</td>
+          <td>Infrequent but needs fast access</td>
+          <td>99.9%</td>
+          <td>30 days</td>
+          <td>Instant</td>
+          <td>$0.0125</td>
+        </tr>
+        <tr>
+          <td class="highlight">S3 One Zone-IA</td>
+          <td>Re-creatable infrequent data</td>
+          <td>99.5%</td>
+          <td>30 days</td>
+          <td>Instant</td>
+          <td>$0.01</td>
+        </tr>
+        <tr>
+          <td class="highlight">Glacier Instant</td>
+          <td>Archive with instant retrieval</td>
+          <td>99.9%</td>
+          <td>90 days</td>
+          <td>Milliseconds</td>
+          <td>$0.004</td>
+        </tr>
+        <tr>
+          <td class="highlight">Glacier Flexible</td>
+          <td>Archive: minutes to hours OK</td>
+          <td>99.99%</td>
+          <td>90 days</td>
+          <td>1-12 hours</td>
+          <td>$0.0036</td>
+        </tr>
+        <tr>
+          <td class="highlight">Glacier Deep Archive</td>
+          <td>Long-term compliance archive</td>
+          <td>99.99%</td>
+          <td>180 days</td>
+          <td>12-48 hours</td>
+          <td>$0.00099</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-danger">
+      <div class="callout-label">⚠️ Common Exam Trap</div>
+      <p><strong>One Zone-IA:</strong> Only 1 AZ = if that AZ is destroyed, data is LOST. Only use for data you can recreate (thumbnails, processed logs). The exam loves to test this: "most cost-effective for data that can be re-generated" → One Zone-IA.</p>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(59,130,246,0.15);">🔄</div>
+      <h3>S3 Lifecycle Policies</h3>
+    </div>
+    <div class="card">
+      <h4>Automating Cost Optimization</h4>
+      <p>Lifecycle rules automatically transition objects between storage classes or expire (delete) them based on age. This is the #1 way to reduce S3 costs in production.</p>
+      <div class="arch-diagram" style="padding: 20px;">
+        <svg viewBox="0 0 800 120" class="diagram-svg" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="35" width="120" height="50" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="70" y="55" text-anchor="middle" fill="#93c5fd" font-family="Space Grotesk" font-size="11" font-weight="600">S3 Standard</text>
+          <text x="70" y="72" text-anchor="middle" fill="#60a5fa" font-family="JetBrains Mono" font-size="9">Day 0</text>
+
+          <text x="155" y="65" text-anchor="middle" fill="#475569" font-family="DM Sans" font-size="16">→</text>
+          <text x="155" y="100" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="9">30 days</text>
+
+          <rect x="180" y="35" width="120" height="50" rx="8" fill="rgba(6,182,212,0.2)" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="240" y="55" text-anchor="middle" fill="#67e8f9" font-family="Space Grotesk" font-size="11" font-weight="600">Standard-IA</text>
+          <text x="240" y="72" text-anchor="middle" fill="#06b6d4" font-family="JetBrains Mono" font-size="9">Day 30</text>
+
+          <text x="325" y="65" text-anchor="middle" fill="#475569" font-family="DM Sans" font-size="16">→</text>
+          <text x="325" y="100" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="9">60 days</text>
+
+          <rect x="350" y="35" width="140" height="50" rx="8" fill="rgba(139,92,246,0.2)" stroke="#8b5cf6" stroke-width="1.5"/>
+          <text x="420" y="55" text-anchor="middle" fill="#c4b5fd" font-family="Space Grotesk" font-size="11" font-weight="600">Glacier Flexible</text>
+          <text x="420" y="72" text-anchor="middle" fill="#8b5cf6" font-family="JetBrains Mono" font-size="9">Day 90</text>
+
+          <text x="515" y="65" text-anchor="middle" fill="#475569" font-family="DM Sans" font-size="16">→</text>
+          <text x="515" y="100" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="9">275 days</text>
+
+          <rect x="540" y="35" width="140" height="50" rx="8" fill="rgba(168,85,247,0.2)" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="610" y="55" text-anchor="middle" fill="#d8b4fe" font-family="Space Grotesk" font-size="11" font-weight="600">Deep Archive</text>
+          <text x="610" y="72" text-anchor="middle" fill="#a855f7" font-family="JetBrains Mono" font-size="9">Day 365</text>
+
+          <text x="705" y="65" text-anchor="middle" fill="#475569" font-family="DM Sans" font-size="16">→</text>
+
+          <rect x="720" y="35" width="70" height="50" rx="8" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="755" y="55" text-anchor="middle" fill="#fca5a5" font-family="Space Grotesk" font-size="11" font-weight="600">Delete</text>
+          <text x="755" y="72" text-anchor="middle" fill="#ef4444" font-family="JetBrains Mono" font-size="9">Day 730</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(59,130,246,0.15);">🔒</div>
+      <h3>S3 Security Model</h3>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>Access Control (4 Layers)</h4>
+        <ol>
+          <li><strong>IAM Policies</strong> — Attached to users/roles/groups. Control what API calls the principal can make.</li>
+          <li><strong>Bucket Policies</strong> — JSON resource-based policy on the bucket itself. Best for cross-account access and public access.</li>
+          <li><strong>ACLs (Legacy)</strong> — Object/bucket level. AWS recommends disabling. Exam answer: "use bucket policies instead."</li>
+          <li><strong>Block Public Access</strong> — Account-level guardrail. Overrides bucket policies & ACLs. Enable at the account level for security.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h4>Encryption Options</h4>
+        <ul>
+          <li><strong>SSE-S3</strong> — AWS manages keys. Default encryption. No extra cost. Header: <code>AES256</code></li>
+          <li><strong>SSE-KMS</strong> — Uses AWS KMS. You control key rotation, audit via CloudTrail. Header: <code>aws:kms</code>. ⚠️ Has API call limits (throttling).</li>
+          <li><strong>SSE-C</strong> — You provide the key with each request. AWS does NOT store your key. Must use HTTPS.</li>
+          <li><strong>Client-Side</strong> — You encrypt before uploading. AWS sees only ciphertext.</li>
+        </ul>
+        <div class="callout callout-exam" style="margin-top:12px">
+          <div class="callout-label">🎯 Exam Tip</div>
+          <p>"Encrypt data and the company must manage their own keys, but don't want to manage the encryption process" → <strong>SSE-KMS</strong>. "Company provides and manages keys completely" → <strong>SSE-C</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(59,130,246,0.15);">🌐</div>
+      <h3>S3 Advanced Features</h3>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>Versioning</h4>
+        <ul>
+          <li>Enabled at the bucket level. Protects against accidental deletes and overwrites.</li>
+          <li>Delete = adds a "delete marker" (soft delete). Previous versions remain.</li>
+          <li>MFA Delete — requires MFA to permanently delete versions. Only root account can enable this.</li>
+          <li><strong>Exam tip:</strong> "Protect against accidental deletion" → Enable versioning + MFA Delete.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Replication</h4>
+        <ul>
+          <li><strong>CRR (Cross-Region)</strong> — Async copy to another region. Use for: compliance, DR, lower latency.</li>
+          <li><strong>SRR (Same-Region)</strong> — Async copy within same region. Use for: log aggregation, live replication between prod/test.</li>
+          <li>Requires: versioning enabled on source AND destination.</li>
+          <li>Only NEW objects are replicated after enabling. Use S3 Batch Replication for existing objects.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>S3 Transfer Acceleration</h4>
+        <p>Uses CloudFront edge locations as on-ramp to S3. Users upload to nearest edge → AWS backbone network → S3 bucket. <strong>Best for:</strong> global uploads, large files, cross-continent transfers. Can achieve 50-500% speed improvement.</p>
+      </div>
+      <div class="card">
+        <h4>S3 Select & Glacier Select</h4>
+        <p>Use SQL to retrieve only a subset of data from an object (e.g., CSV, JSON, Parquet). Up to <strong>400% faster</strong> and <strong>80% cheaper</strong> than downloading the entire object and filtering client-side. Replaced in many cases by Athena for more complex queries.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>S3 Object Lock & Glacier Vault Lock</h4>
+      <ul>
+        <li><strong>Object Lock</strong> — WORM (Write Once Read Many). Two modes:
+          <ul>
+            <li><strong>Governance Mode</strong> — Only users with special permissions can delete/overwrite.</li>
+            <li><strong>Compliance Mode</strong> — NO ONE can delete, not even root. Used for regulatory compliance.</li>
+          </ul>
+        </li>
+        <li><strong>Glacier Vault Lock</strong> — Similar WORM for Glacier. Once policy is locked, it can NEVER be changed.</li>
+        <li><strong>Exam tip:</strong> "Regulatory requirement — data cannot be deleted for 7 years" → S3 Object Lock in Compliance mode OR Glacier Vault Lock.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>S3 Event Notifications</h4>
+      <p>Trigger actions when objects are created, deleted, restored, or replicated. Destinations:</p>
+      <ul>
+        <li><strong>Lambda</strong> — Process uploads (thumbnails, transcode, validation)</li>
+        <li><strong>SQS</strong> — Queue events for downstream processing</li>
+        <li><strong>SNS</strong> — Fan-out to multiple subscribers</li>
+        <li><strong>EventBridge</strong> — Most flexible: supports filtering, multiple targets, replay. <em>Recommended for new designs.</em></li>
+      </ul>
+    </div>
+
+    <div class="callout callout-pro">
+      <div class="callout-label">🏭 Production Architect Pattern</div>
+      <p><strong>Data Lake on S3:</strong> Raw data lands in S3 Standard → Lifecycle to IA after 30d → Glacier after 90d. Athena queries data in-place. Glue Crawler auto-discovers schemas. Lake Formation manages permissions. This is the #1 architecture AWS pushes on the exam for analytics workloads.</p>
+    </div>
+  </div>
+
+  <!-- ====== EBS TAB ====== -->
+  <div class="tab-content" id="tab-ebs">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.15);">💾</div>
+      <h2>Amazon EBS — Elastic Block Store</h2>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">Why EBS Exists</div>
+      <p>EC2 instance store (local disk) is <strong>ephemeral</strong> — data is lost when the instance stops. EBS provides <strong>persistent, network-attached block storage</strong> that survives instance stops/starts. Think of it as a USB drive you can plug into any EC2 in the same AZ.</p>
+    </div>
+
+    <div class="card">
+      <h4>EBS Core Rules (Memorize These)</h4>
+      <ul>
+        <li>EBS volumes are <strong>AZ-locked</strong> — you can't attach a volume in us-east-1a to an EC2 in us-east-1b.</li>
+        <li>To move across AZs: <strong>Snapshot → Restore in new AZ</strong>.</li>
+        <li>To move across regions: <strong>Snapshot → Copy snapshot to new region → Restore</strong>.</li>
+        <li>Most volume types can attach to <strong>one EC2</strong> only (exception: io1/io2 Multi-Attach).</li>
+        <li>EBS volumes are <strong>provisioned capacity</strong> — you pay for allocated size, not used space.</li>
+        <li><strong>Delete on Termination</strong>: Root volume defaults to YES. Additional volumes default to NO. Exam tests this!</li>
+      </ul>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.15);">📊</div>
+      <h3>EBS Volume Types — The Critical Table</h3>
+    </div>
+
+    <div class="callout callout-exam">
+      <div class="callout-label">🎯 Exam Hot Spot</div>
+      <p>You MUST know these volume types cold. The exam will describe a workload and expect you to pick the right volume type. Key decision: <strong>SSD for IOPS → gp3/io2</strong>, <strong>HDD for throughput → st1</strong>, <strong>Cold HDD for lowest cost → sc1</strong>.</p>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Name</th>
+          <th>Use Case</th>
+          <th>Size</th>
+          <th>Max IOPS</th>
+          <th>Max Throughput</th>
+          <th>Boot?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="highlight">gp3</td>
+          <td>General Purpose SSD</td>
+          <td>Default choice. Dev/test, small DBs, boot volumes</td>
+          <td>1 GiB – 16 TiB</td>
+          <td>16,000</td>
+          <td>1,000 MB/s</td>
+          <td>✅</td>
+        </tr>
+        <tr>
+          <td class="highlight">gp2</td>
+          <td>General Purpose SSD (prev gen)</td>
+          <td>Legacy. IOPS scales with volume size (3 IOPS/GiB)</td>
+          <td>1 GiB – 16 TiB</td>
+          <td>16,000</td>
+          <td>250 MB/s</td>
+          <td>✅</td>
+        </tr>
+        <tr>
+          <td class="highlight">io2 Block Express</td>
+          <td>Provisioned IOPS SSD</td>
+          <td>Mission-critical DBs, SAP HANA, highest performance</td>
+          <td>4 GiB – 64 TiB</td>
+          <td>256,000</td>
+          <td>4,000 MB/s</td>
+          <td>✅</td>
+        </tr>
+        <tr>
+          <td class="highlight">io1</td>
+          <td>Provisioned IOPS SSD</td>
+          <td>High-perf DBs, latency-sensitive</td>
+          <td>4 GiB – 16 TiB</td>
+          <td>64,000</td>
+          <td>1,000 MB/s</td>
+          <td>✅</td>
+        </tr>
+        <tr>
+          <td class="highlight">st1</td>
+          <td>Throughput Optimized HDD</td>
+          <td>Big data, data warehouses, log processing</td>
+          <td>125 GiB – 16 TiB</td>
+          <td>500</td>
+          <td>500 MB/s</td>
+          <td>❌</td>
+        </tr>
+        <tr>
+          <td class="highlight">sc1</td>
+          <td>Cold HDD</td>
+          <td>Infrequent access, lowest cost</td>
+          <td>125 GiB – 16 TiB</td>
+          <td>250</td>
+          <td>250 MB/s</td>
+          <td>❌</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-danger">
+      <div class="callout-label">⚠️ Critical Distinctions</div>
+      <p><strong>gp3 vs gp2:</strong> gp3 lets you independently set IOPS and throughput (cost savings!). gp2 ties IOPS to size. Exam: "independent IOPS and throughput at lower cost" → gp3.<br><br>
+      <strong>io2 Multi-Attach:</strong> Only io1/io2 support attaching to up to 16 EC2 instances simultaneously in the same AZ. Use case: clustered databases. Exam will specifically test this.</p>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,158,11,0.15);">📸</div>
+      <h3>EBS Snapshots</h3>
+    </div>
+
+    <div class="card">
+      <h4>How Snapshots Work</h4>
+      <ul>
+        <li>Point-in-time backup stored in S3 (managed by AWS — you can't see the bucket).</li>
+        <li><strong>Incremental</strong> — only changed blocks since last snapshot are stored. Saves cost.</li>
+        <li>Can be used to create volumes in ANY AZ (same or different region).</li>
+        <li>Snapshots can be shared across accounts and copied across regions.</li>
+        <li><strong>Fast Snapshot Restore (FSR)</strong> — pre-warms snapshot so no latency on first read. Costs extra. Exam tests this for "eliminate latency on first access from snapshot."</li>
+      </ul>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>EBS Encryption</h4>
+        <ul>
+          <li>Uses AES-256 via KMS.</li>
+          <li>Encrypts: data at rest, in-flight between EC2 and EBS, snapshots, and volumes from snapshots.</li>
+          <li>Minimal latency impact.</li>
+          <li><strong>To encrypt an unencrypted volume:</strong> Create snapshot → Copy snapshot with encryption → Create new volume from encrypted snapshot.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Instance Store vs EBS</h4>
+        <table class="comparison-table">
+          <thead><tr><th>Feature</th><th>Instance Store</th><th>EBS</th></tr></thead>
+          <tbody>
+            <tr><td>Persistence</td><td>❌ Ephemeral</td><td>✅ Persistent</td></tr>
+            <tr><td>Performance</td><td>Very high (local NVMe)</td><td>Good (network)</td></tr>
+            <tr><td>Reboot survives?</td><td>✅ Yes</td><td>✅ Yes</td></tr>
+            <tr><td>Stop/Terminate?</td><td>❌ Data lost</td><td>✅ Persists</td></tr>
+            <tr><td>Best for</td><td>Caches, temp data, buffers</td><td>DBs, boot, persistent</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== EFS TAB ====== -->
+  <div class="tab-content" id="tab-efs">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.15);">📁</div>
+      <h2>Amazon EFS & FSx — Shared File Systems</h2>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">Why EFS Exists</div>
+      <p>EBS gives you a drive for ONE EC2. But what if 10 web servers need to read the same uploaded images? Or 50 containers need a shared config directory? <strong>EFS is a managed NFS that multiple instances mount simultaneously, across AZs.</strong> It auto-scales — no capacity planning needed.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>EFS Core Features</h4>
+        <ul>
+          <li><strong>Protocol:</strong> NFSv4.1 — works with Linux only (not Windows)</li>
+          <li><strong>Multi-AZ:</strong> Accessible from any AZ in the region via mount targets</li>
+          <li><strong>Auto-scaling:</strong> Grows/shrinks automatically. No provisioning.</li>
+          <li><strong>Pricing:</strong> Pay per GB stored (no pre-provisioning). ~3x EBS cost per GB but no waste.</li>
+          <li><strong>Performance modes:</strong> General Purpose (default, low latency) or Max I/O (high throughput, higher latency)</li>
+          <li><strong>Throughput modes:</strong> Bursting (scales with size), Provisioned (fixed), Elastic (auto-scales with workload — recommended)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>EFS Storage Classes</h4>
+        <ul>
+          <li><strong>Standard</strong> — Multi-AZ, frequently accessed</li>
+          <li><strong>Standard-IA</strong> — Multi-AZ, infrequent. Lower storage cost, retrieval fee.</li>
+          <li><strong>One Zone</strong> — Single AZ, frequently accessed. 47% cheaper.</li>
+          <li><strong>One Zone-IA</strong> — Single AZ, infrequent. Cheapest EFS option.</li>
+        </ul>
+        <div class="callout callout-exam" style="margin-top: 12px;">
+          <div class="callout-label">🎯 Exam Tip</div>
+          <p>"Linux shared storage across AZs" → EFS. "Windows shared storage" → FSx for Windows. "High-performance computing (HPC)" → FSx for Lustre.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(16,185,129,0.15);">🪟</div>
+      <h3>Amazon FSx — Specialized File Systems</h3>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-top: 3px solid #06b6d4;">
+        <h4 style="color: #06b6d4;">FSx for Windows File Server</h4>
+        <ul>
+          <li>Fully managed Windows-native file system (SMB protocol)</li>
+          <li>Supports Active Directory integration, ACLs, DFS namespaces</li>
+          <li>Multi-AZ deployment for HA</li>
+          <li><strong>Use when:</strong> Windows EC2 need shared storage, or migrating on-prem Windows file shares</li>
+          <li>Supports both SSD and HDD storage options</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top: 3px solid #a855f7;">
+        <h4 style="color: #a855f7;">FSx for Lustre</h4>
+        <ul>
+          <li>High-performance parallel file system for compute-intensive workloads</li>
+          <li>Sub-millisecond latencies, hundreds of GB/s throughput, millions of IOPS</li>
+          <li><strong>Integrates with S3:</strong> Can read from/write to S3 transparently</li>
+          <li><strong>Use when:</strong> Machine learning, HPC, video rendering, financial modeling</li>
+          <li>Deployment types: Scratch (temp, highest perf) or Persistent (long-term, replicated)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-top: 3px solid #f97316;">
+        <h4 style="color: #f97316;">FSx for NetApp ONTAP</h4>
+        <ul>
+          <li>Fully managed NetApp file system</li>
+          <li>Multi-protocol: NFS, SMB, iSCSI</li>
+          <li>Supports snapshots, replication, cloning, compression, deduplication</li>
+          <li><strong>Use when:</strong> Migrating workloads from on-prem NetApp, need multi-protocol access</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top: 3px solid #22c55e;">
+        <h4 style="color: #22c55e;">FSx for OpenZFS</h4>
+        <ul>
+          <li>Managed ZFS file system</li>
+          <li>NFS protocol, up to 1 million IOPS, point-in-time snapshots</li>
+          <li><strong>Use when:</strong> Migrating from on-prem ZFS, need ZFS features (snapshots, clones)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-exam">
+      <div class="callout-label">🎯 FSx Decision Matrix</div>
+      <p><strong>Need SMB + Active Directory?</strong> → FSx for Windows.<br>
+      <strong>Need HPC/ML performance + S3 integration?</strong> → FSx for Lustre.<br>
+      <strong>Need multi-protocol (NFS+SMB+iSCSI)?</strong> → FSx for NetApp ONTAP.<br>
+      <strong>Migrating from ZFS?</strong> → FSx for OpenZFS.</p>
+    </div>
+  </div>
+
+  <!-- ====== SNOW & GATEWAY TAB ====== -->
+  <div class="tab-content" id="tab-snow">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(139,92,246,0.15);">❄️</div>
+      <h2>Snow Family & Storage Gateway</h2>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">Why Snow Family Exists</div>
+      <p>Transferring 100TB over a 1 Gbps internet connection takes <strong>~12 days</strong>. 1 PB takes ~4 months. AWS said: "We'll ship you a physical device. Load your data. Ship it back." It's literally faster to FedEx your data than upload it. That's the Snow Family.</p>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr><th>Device</th><th>Storage</th><th>Compute</th><th>Use Case</th><th>Migration Size</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="highlight">Snowcone</td>
+          <td>8 TB HDD / 14 TB SSD</td>
+          <td>2 vCPUs, 4 GB RAM</td>
+          <td>Small edge + data collection</td>
+          <td>Up to TBs</td>
+        </tr>
+        <tr>
+          <td class="highlight">Snowball Edge Storage</td>
+          <td>80 TB usable</td>
+          <td>40 vCPUs, 80 GB RAM</td>
+          <td>Large data migrations, edge computing</td>
+          <td>TBs to PBs</td>
+        </tr>
+        <tr>
+          <td class="highlight">Snowball Edge Compute</td>
+          <td>42 TB usable</td>
+          <td>52 vCPUs, 208 GB RAM, optional GPU</td>
+          <td>Edge ML, processing in disconnected environments</td>
+          <td>TBs</td>
+        </tr>
+        <tr>
+          <td class="highlight">Snowmobile</td>
+          <td>100 PB</td>
+          <td>N/A</td>
+          <td>Exabyte-scale data center migration</td>
+          <td>10+ PB</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-exam">
+      <div class="callout-label">🎯 Snow Family Decision Rule</div>
+      <p><strong>"Large data migration, limited bandwidth"</strong> → If data < 10 TB, just use DataSync over the internet. If 10TB-10PB → Snowball Edge. If >10 PB → Snowmobile. If edge compute needed → Snowball Edge Compute. If tiny + rugged → Snowcone.</p>
+    </div>
+
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(139,92,246,0.15);">🌉</div>
+      <h3>AWS Storage Gateway</h3>
+    </div>
+
+    <div class="callout callout-why">
+      <div class="callout-label">Why Storage Gateway Exists</div>
+      <p>Many companies can't do a "big bang" cloud migration. They need a <strong>bridge</strong> between on-premises storage and AWS. Storage Gateway runs as a VM on-prem and presents familiar storage protocols (NFS, SMB, iSCSI) while backing data to S3, EBS, or Glacier behind the scenes.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="border-top: 3px solid var(--s3);">
+        <h4 style="color:var(--s3);">S3 File Gateway</h4>
+        <ul>
+          <li>Presents NFS/SMB interface to on-prem apps</li>
+          <li>Files stored as objects in S3</li>
+          <li>Local cache for low-latency access</li>
+          <li>Supports S3 Standard, IA, One Zone-IA</li>
+          <li><strong>Use case:</strong> File shares backed by S3, migrating file data to cloud</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--ebs);">
+        <h4 style="color:var(--ebs);">Volume Gateway</h4>
+        <ul>
+          <li>Presents iSCSI block storage to on-prem</li>
+          <li><strong>Cached mode:</strong> Primary data in S3, frequently accessed cached locally</li>
+          <li><strong>Stored mode:</strong> Full data on-prem, async backup to S3 as EBS snapshots</li>
+          <li><strong>Use case:</strong> Block storage with cloud backup</li>
+        </ul>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--snow);">
+        <h4 style="color:var(--snow);">Tape Gateway</h4>
+        <ul>
+          <li>Virtual tape library backed by S3 + Glacier</li>
+          <li>Compatible with existing backup software (Veeam, NetBackup, etc.)</li>
+          <li><strong>Use case:</strong> Replace physical tape libraries with cloud-backed virtual tapes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-exam">
+      <div class="callout-label">🎯 Storage Gateway Decision</div>
+      <p><strong>"On-prem apps need file access backed by S3"</strong> → S3 File Gateway.<br>
+      <strong>"On-prem backup software uses tapes"</strong> → Tape Gateway.<br>
+      <strong>"On-prem apps need block storage with cloud backup"</strong> → Volume Gateway.<br>
+      <strong>"Need to extend on-prem Windows file shares to AWS"</strong> → FSx File Gateway.</p>
+    </div>
+  </div>
+
+  <!-- ====== COMPARISON TAB ====== -->
+  <div class="tab-content" id="tab-compare">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(168,85,247,0.15);">⚖️</div>
+      <h2>Storage Services Comparison</h2>
+    </div>
+
+    <div class="card">
+      <h4>S3 vs EBS vs EFS — The Big Three</h4>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Feature</th><th>S3</th><th>EBS</th><th>EFS</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Type</strong></td><td>Object</td><td>Block</td><td>File (NFS)</td></tr>
+          <tr><td><strong>Access</strong></td><td>HTTP/HTTPS API</td><td>Single EC2 (same AZ)*</td><td>Multiple EC2 (multi-AZ)</td></tr>
+          <tr><td><strong>Max Size</strong></td><td>Unlimited (5TB/object)</td><td>64 TiB per volume</td><td>Unlimited (auto-scales)</td></tr>
+          <tr><td><strong>Durability</strong></td><td>99.999999999% (11 9's)</td><td>99.8-99.999%</td><td>Multi-AZ replicated</td></tr>
+          <tr><td><strong>Performance</strong></td><td>High throughput</td><td>Highest IOPS (io2)</td><td>Good (Elastic mode)</td></tr>
+          <tr><td><strong>Pricing</strong></td><td>Pay per GB stored + requests</td><td>Pay per GB provisioned</td><td>Pay per GB used (~3x EBS)</td></tr>
+          <tr><td><strong>OS Support</strong></td><td>Any (API)</td><td>Any (block device)</td><td>Linux only</td></tr>
+          <tr><td><strong>Backup</strong></td><td>Versioning + CRR</td><td>EBS Snapshots</td><td>AWS Backup</td></tr>
+          <tr><td><strong>Best For</strong></td><td>Static assets, backups, data lakes</td><td>Boot volumes, databases</td><td>Shared content, CMS, containers</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px; color:var(--text-dim); margin-top:8px;">* io1/io2 support Multi-Attach (up to 16 EC2 in same AZ)</p>
+    </div>
+
+    <div class="card">
+      <h4>Data Transfer Services Comparison</h4>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Service</th><th>Method</th><th>Data Volume</th><th>Speed</th><th>Use Case</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="highlight">S3 Transfer Acceleration</td><td>Network (CloudFront edges)</td><td>Any</td><td>Fast</td><td>Speed up uploads to S3 over internet</td></tr>
+          <tr><td class="highlight">DataSync</td><td>Network (agent-based)</td><td>Any</td><td>Up to 10 Gbps</td><td>On-prem ↔ AWS scheduled sync</td></tr>
+          <tr><td class="highlight">Snowball Edge</td><td>Physical device</td><td>TBs-PBs</td><td>Ship time</td><td>Large offline migration</td></tr>
+          <tr><td class="highlight">Storage Gateway</td><td>Network (on-prem VM)</td><td>Any</td><td>Real-time</td><td>Hybrid cloud bridge</td></tr>
+          <tr><td class="highlight">Direct Connect</td><td>Dedicated network</td><td>Any</td><td>1-100 Gbps</td><td>Consistent, private connectivity</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-pro">
+      <div class="callout-label">🏭 Architect's Rule of Thumb</div>
+      <p><strong>< 1 TB online:</strong> Direct upload or S3 Transfer Acceleration.<br>
+      <strong>Recurring sync:</strong> DataSync.<br>
+      <strong>Hybrid bridge:</strong> Storage Gateway.<br>
+      <strong>10 TB – 10 PB offline:</strong> Snowball Edge.<br>
+      <strong>> 10 PB:</strong> Snowmobile.<br>
+      <strong>Low-latency, consistent:</strong> Direct Connect + DataSync.</p>
+    </div>
+  </div>
+
+  <!-- ====== QUIZ TAB ====== -->
+  <div class="tab-content" id="tab-quiz">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(168,85,247,0.15);">🎯</div>
+      <h2>Exam Prep — Storage Questions</h2>
+    </div>
+
+    <div class="quiz-card" id="q1">
+      <h4>Question 1</h4>
+      <p style="margin-bottom:16px;">A company stores application logs in S3 Standard. Logs are frequently accessed for the first 30 days, rarely accessed for the next 60 days, and must be retained for 7 years for compliance. The company wants to minimize storage costs. What should a Solutions Architect recommend?</p>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q1', false)">A) Use S3 One Zone-IA for all logs with a 7-year retention policy</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q1', true)">B) Create a lifecycle policy: Standard → Standard-IA after 30 days → Glacier Deep Archive after 90 days</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q1', false)">C) Use S3 Intelligent-Tiering for all logs</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q1', false)">D) Move all logs to Glacier Flexible Retrieval immediately</button>
+      <div class="quiz-explanation" id="q1-exp">
+        <strong>✅ Answer: B</strong><br>
+        Lifecycle policies automate transitions to reduce cost as access frequency drops. Standard for first 30 days (frequent access), Standard-IA for days 30-90 (infrequent but still needs fast access), then Glacier Deep Archive for long-term compliance (cheapest, 12-48hr retrieval is acceptable for 7-year-old logs). One Zone-IA (A) risks data loss. Intelligent-Tiering (C) has monitoring fees and won't move to Glacier. Immediate Glacier (D) blocks access during the first 30 days when logs are needed.
+      </div>
+    </div>
+
+    <div class="quiz-card" id="q2">
+      <h4>Question 2</h4>
+      <p style="margin-bottom:16px;">A database running on EC2 requires 64,000 IOPS of consistent performance. The database must be highly available and the storage must persist if the instance is terminated. Which storage solution meets these requirements?</p>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q2', false)">A) Instance store with RAID 0</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q2', false)">B) EBS gp3 volume</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q2', true)">C) EBS io2 volume</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q2', false)">D) Amazon EFS with Provisioned Throughput</button>
+      <div class="quiz-explanation" id="q2-exp">
+        <strong>✅ Answer: C</strong><br>
+        io2 supports up to 64,000 IOPS (or 256,000 with Block Express) and is persistent. Instance store (A) is ephemeral — data lost on termination. gp3 (B) maxes out at 16,000 IOPS. EFS (D) is file storage, not block storage, and doesn't provide the same IOPS guarantee for database workloads.
+      </div>
+    </div>
+
+    <div class="quiz-card" id="q3">
+      <h4>Question 3</h4>
+      <p style="margin-bottom:16px;">A company needs to share files across multiple EC2 instances running Linux in three Availability Zones. The data includes frequently accessed application code and infrequently accessed log files. The solution must minimize costs. What should the architect recommend?</p>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q3', false)">A) Create an EBS volume and use Multi-Attach</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q3', false)">B) Store files in S3 and use S3 mounting on each instance</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q3', true)">C) Use Amazon EFS with lifecycle management to transition infrequent files to EFS-IA</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q3', false)">D) Use FSx for Windows File Server with Multi-AZ</button>
+      <div class="quiz-explanation" id="q3-exp">
+        <strong>✅ Answer: C</strong><br>
+        EFS provides shared NFS across multiple AZs for Linux. Lifecycle management automatically moves infrequently accessed files to EFS-IA for cost savings. EBS Multi-Attach (A) only works within a single AZ and only with io1/io2. S3 (B) is object storage, not a POSIX file system — can't be natively mounted. FSx for Windows (D) uses SMB, not NFS — wrong protocol for Linux instances.
+      </div>
+    </div>
+
+    <div class="quiz-card" id="q4">
+      <h4>Question 4</h4>
+      <p style="margin-bottom:16px;">A healthcare company must store medical records for 10 years. Regulations require that once stored, the data cannot be modified or deleted by anyone, including administrators. Which solution meets this requirement?</p>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q4', false)">A) S3 with versioning enabled and MFA Delete</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q4', true)">B) S3 Object Lock in Compliance mode with a 10-year retention period</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q4', false)">C) S3 Object Lock in Governance mode</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q4', false)">D) S3 with bucket policies denying delete actions</button>
+      <div class="quiz-explanation" id="q4-exp">
+        <strong>✅ Answer: B</strong><br>
+        Compliance mode Object Lock = NOBODY can delete the data, not even the root account, until the retention period expires. This is the WORM (Write Once Read Many) model required by healthcare/financial regulations. Governance mode (C) allows users with special permissions to override — doesn't meet the "no one can delete" requirement. MFA Delete (A) prevents accidental deletion but an admin with MFA can still delete. Bucket policies (D) can be changed by an admin.
+      </div>
+    </div>
+
+    <div class="quiz-card" id="q5">
+      <h4>Question 5</h4>
+      <p style="margin-bottom:16px;">A company needs to migrate 50 TB of data from an on-premises data center to S3. The company has a 100 Mbps internet connection. The migration must be completed within 1 week. Which is the most appropriate solution?</p>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q5', false)">A) Use S3 Transfer Acceleration</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q5', true)">B) Use AWS Snowball Edge Storage Optimized</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q5', false)">C) Use AWS DataSync over the internet connection</button>
+      <button class="quiz-option" onclick="checkAnswer(this, 'q5', false)">D) Set up AWS Direct Connect</button>
+      <div class="quiz-explanation" id="q5-exp">
+        <strong>✅ Answer: B</strong><br>
+        Math: 50 TB over 100 Mbps = ~46 days. That exceeds the 1-week requirement. Snowball Edge holds 80TB, can be shipped and loaded within a week. Transfer Acceleration (A) won't overcome the bandwidth limit. DataSync (C) still limited by the 100 Mbps pipe. Direct Connect (D) takes weeks/months to provision — won't help with the 1-week deadline.
+      </div>
+    </div>
+
+    <div class="callout callout-pro" style="margin-top: 32px;">
+      <div class="callout-label">📝 Key Exam Patterns for Storage</div>
+      <ul>
+        <li><strong>"Cost-effective long-term storage"</strong> → Glacier Deep Archive + lifecycle policy</li>
+        <li><strong>"Data must never be deleted by anyone"</strong> → S3 Object Lock (Compliance) or Glacier Vault Lock</li>
+        <li><strong>"Multiple EC2 need shared Linux storage"</strong> → EFS</li>
+        <li><strong>"Highest IOPS for database"</strong> → io2 Block Express</li>
+        <li><strong>"Migrate petabytes offline"</strong> → Snowball Edge or Snowmobile</li>
+        <li><strong>"On-prem apps need seamless access to S3"</strong> → Storage Gateway (S3 File Gateway)</li>
+        <li><strong>"HPC / ML file storage with S3 integration"</strong> → FSx for Lustre</li>
+        <li><strong>"Windows shared storage with AD"</strong> → FSx for Windows File Server</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: document.querySelector('.nav-tabs').offsetTop - 20, behavior: 'smooth' });
+}
+
+function checkAnswer(btn, qId, isCorrect) {
+  const card = document.getElementById(qId);
+  card.querySelectorAll('.quiz-option').forEach(o => {
+    o.disabled = true;
+    o.style.pointerEvents = 'none';
+    o.style.opacity = '0.6';
+  });
+  btn.style.opacity = '1';
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    card.querySelectorAll('.quiz-option').forEach(o => {
+      if (o.getAttribute('onclick')?.includes('true')) {
+        o.classList.add('correct');
+        o.style.opacity = '1';
+      }
+    });
+  }
+  document.getElementById(qId + '-exp').classList.add('show');
+}
+
+document.querySelectorAll('.expand-header').forEach(h => {
+  h.addEventListener('click', () => {
+    h.classList.toggle('open');
+    h.nextElementSibling.classList.toggle('open');
+  });
+});
+</script>
+</body>
+</html>

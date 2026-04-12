@@ -379,6 +379,37 @@ code {
 .accordion-panel p, .accordion-panel ul { font-size: 0.9rem; color: var(--text-muted); }
 .accordion-panel ul { padding-left: 18px; }
 
+/* Section header */
+.section-header {
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.section-header .subtitle {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+}
+
 /* Footer */
 .footer {
   text-align: center;
@@ -393,11 +424,13 @@ code {
 <body>
 
 <!-- HERO -->
+<div class="section-header" style="background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.03)); border: 1px solid rgba(245,158,11,0.2);"></div>
 <div class="hero">
   <div class="hero-content">
     <div class="badge">Week 1 · Days 1–2</div>
     <h1>AWS Fundamentals</h1>
     <p>Global Infrastructure, Well-Architected Framework, Shared Responsibility Model & Core AWS Concepts</p>
+  </div>
   </div>
 </div>
 

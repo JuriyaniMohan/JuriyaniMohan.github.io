@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS SAA-C03 Labs Guide — Part 2 (Weeks 5-8)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050608;--s1:#0a0e14;--s2:#10151e;--s3:#161d2a;--bdr:#1c2536;--acc:#a78bfa;--acc2:#38bdf8;--acc3:#34d399;--acc4:#fb7185;--acc5:#facc15;--acc6:#f97316;--txt:#d8dee9;--dim:#5e6b82}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter Tight',sans-serif;background:var(--bg);color:var(--txt);line-height:1.68;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.hero{position:relative;padding:70px 24px 48px;text-align:center;background:linear-gradient(160deg,#050608 0%,#0d0a1e 40%,#0a1220 70%,#050608 100%);overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 90%,rgba(167,139,250,.06),transparent 55%);pointer-events:none}
+.hero-i{position:relative;z-index:1;max-width:820px;margin:0 auto}
+.badge{display:inline-block;padding:5px 14px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.22);border-radius:20px;font-size:.7rem;font-weight:700;color:var(--acc);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.hero h1{font-size:clamp(1.8rem,4.5vw,3rem);font-weight:900;letter-spacing:-1px;margin-bottom:10px;background:linear-gradient(135deg,#fff 0%,#a78bfa 60%,#38bdf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1rem;color:var(--dim);max-width:620px;margin:0 auto}
+.nav{position:sticky;top:0;z-index:100;background:rgba(5,6,8,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);display:flex;overflow-x:auto;gap:2px;padding:0 10px}
+.nav button{flex-shrink:0;background:none;border:none;color:var(--dim);font-family:inherit;font-size:.76rem;font-weight:600;padding:12px 13px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.nav button:hover{color:var(--txt)}.nav button.active{color:var(--acc);border-bottom-color:var(--acc)}
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px 70px}
+.sec{display:none;animation:fu .3s ease}.sec.active{display:block}@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lab{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;margin-bottom:16px;overflow:hidden;transition:border-color .3s}.lab:hover{border-color:rgba(167,139,250,.2)}
+.lab-header{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none}.lab-header:hover{background:rgba(167,139,250,.02)}
+.lab-num{background:var(--acc);color:#000;font-size:.65rem;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.5px;flex-shrink:0}
+.lab-title{font-weight:700;font-size:.95rem;color:#fff;flex:1}
+.lab-tags{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap}
+.lab-tag{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.8px}
+.tag-free{background:rgba(52,211,153,.1);color:var(--acc3);border:1px solid rgba(52,211,153,.2)}
+.tag-cost{background:rgba(251,113,133,.08);color:var(--acc4);border:1px solid rgba(251,113,133,.18)}
+.tag-beginner{background:rgba(56,189,248,.08);color:var(--acc2);border:1px solid rgba(56,189,248,.18)}
+.tag-intermediate{background:rgba(250,204,21,.08);color:var(--acc5);border:1px solid rgba(250,204,21,.18)}
+.tag-advanced{background:rgba(249,115,22,.08);color:var(--acc6);border:1px solid rgba(249,115,22,.18)}
+.lab-arrow{color:var(--dim);font-size:.7rem;transition:transform .3s;flex-shrink:0}.lab.open .lab-arrow{transform:rotate(180deg)}
+.lab-body{max-height:0;overflow:hidden;transition:max-height .5s ease}.lab.open .lab-body{max-height:12000px}
+.lab-content{padding:0 20px 20px;border-top:1px solid var(--bdr)}
+.lab-content h4{font-size:.88rem;font-weight:700;color:var(--acc);margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.lab-content p{font-size:.86rem;margin-bottom:8px}.lab-content ul,.lab-content ol{padding-left:20px;margin-bottom:10px}.lab-content li{font-size:.84rem;margin-bottom:5px}.lab-content li::marker{color:var(--acc)}
+.step{background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:14px 16px;margin-bottom:8px;position:relative;padding-left:44px}
+.step::before{content:attr(data-step);position:absolute;left:14px;top:14px;background:var(--acc);color:#000;font-size:.62rem;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}.step p{margin:0;font-size:.84rem}
+.cmd{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:#0d1117;border:1px solid var(--bdr);border-radius:6px;padding:12px 16px;margin:8px 0;overflow-x:auto;line-height:1.55;color:#c9d1d9}
+.cmd .comment{color:#6e7681;font-style:italic}
+.co{border-radius:8px;padding:12px 16px;margin:10px 0;display:flex;gap:10px;align-items:flex-start;font-size:.84rem}
+.co.tip{background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.14)}
+.co.warn{background:rgba(250,204,21,.04);border:1px solid rgba(250,204,21,.14)}
+.co.danger{background:rgba(251,113,133,.04);border:1px solid rgba(251,113,133,.14)}
+.co.info{background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.14)}
+.co .icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}.co strong{color:#fff}
+code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--s2);padding:2px 7px;border-radius:4px;color:var(--acc5)}
+.expected{background:var(--s2);border-left:3px solid var(--acc2);border-radius:0 6px 6px 0;padding:10px 14px;margin:8px 0;font-size:.82rem;color:var(--dim)}
+.expected strong{color:var(--acc2);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+.cleanup{background:rgba(251,113,133,.04);border:1px solid rgba(251,113,133,.14);border-radius:8px;padding:14px 18px;margin:12px 0}.cleanup h4{color:var(--acc4);margin-bottom:6px;font-size:.85rem}
+.sec-intro{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:22px;margin-bottom:20px}
+.sec-intro h2{font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.sec-intro p{font-size:.88rem;color:var(--dim)}
+.sec-intro .stats{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.sec-intro .stat{background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:10px 16px;text-align:center}
+.sec-intro .stat .n{font-size:1.3rem;font-weight:800;color:var(--acc)}.sec-intro .stat .l{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.footer{text-align:center;padding:32px 24px;border-top:1px solid var(--bdr);color:var(--dim);font-size:.74rem}
+</style>
+</head>
+<body>
+
+<div class="hero"><div class="hero-i">
+  <div class="badge">Complete Hands-On Labs · Part 2</div>
+  <h1>AWS SAA-C03 Labs Guide</h1>
+  <p>Weeks 5-8 — Route 53, CloudFront, App Integration, Migration, Analytics, Cost & Architecture</p>
+</div></div>
+
+<div class="nav">
+  <button class="active" onclick="go('home')">Home</button>
+  <button onclick="go('r53')">Route 53</button>
+  <button onclick="go('cf')">CloudFront</button>
+  <button onclick="go('integ')">App Integration</button>
+  <button onclick="go('migrate')">Migration</button>
+  <button onclick="go('analytics')">Analytics</button>
+  <button onclick="go('cost')">Cost Optimization</button>
+  <button onclick="go('arch')">Architecture Patterns</button>
+  <button onclick="go('cleanup')">Master Cleanup</button>
+</div>
+
+<div class="wrap">
+
+<!-- HOME -->
+<div class="sec active" id="sec-home">
+  <div class="sec-intro">
+    <h2>🧪 Part 2 — Advanced Labs (Weeks 5-8)</h2>
+    <p>This file covers Route 53, CloudFront, Application Integration (SQS/SNS), Migration services, Analytics, Cost Optimization, and Architecture Pattern labs.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">25+</div><div class="l">Labs</div></div>
+      <div class="stat"><div class="n">8</div><div class="l">Topics</div></div>
+      <div class="stat"><div class="n">Weeks 5-8</div><div class="l">Timeline</div></div>
+    </div>
+  </div>
+  <div class="sec-intro">
+    <h2>🗂️ Lab Index — Part 2</h2>
+    <ul>
+      <li><strong>Route 53 (3)</strong> — Hosted Zones, Routing Policies, Health Checks</li>
+      <li><strong>CloudFront (3)</strong> — S3 Distribution, OAC, Cache Policies</li>
+      <li><strong>App Integration (4)</strong> — SQS, SNS, EventBridge, Step Functions</li>
+      <li><strong>Migration (3)</strong> — DataSync, DMS, Snow Family Concepts</li>
+      <li><strong>Analytics (4)</strong> — Athena, Kinesis, Glue, QuickSight</li>
+      <li><strong>Cost Optimization (3)</strong> — Cost Explorer, Budgets, Trusted Advisor</li>
+      <li><strong>Architecture Patterns (5)</strong> — Multi-tier, Serverless, DR, Event-driven, HA</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ROUTE 53 -->
+<div class="sec" id="sec-r53">
+  <div class="sec-intro"><h2>🌐 Route 53 Labs</h2><p>DNS management and routing policies.</p><div class="stats"><div class="stat"><div class="n">3</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 10.1</span><span class="lab-title">Create Hosted Zone & Record Sets</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a hosted zone and various DNS record types.</p>
+    <div class="cmd">
+<span class="comment"># Create hosted zone (you need a domain — or use a private hosted zone for practice)</span>
+ZONE_ID=$(aws route53 create-hosted-zone --name lab.internal \
+  --vpc VPCRegion=ap-southeast-1,VPCId=$LAB_VPC \
+  --caller-reference $(date +%s) \
+  --hosted-zone-config PrivateZone=true \
+  --query 'HostedZone.Id' --output text)
+
+<span class="comment"># Create A record pointing to EC2</span>
+aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --change-batch '{
+  "Changes": [{
+    "Action": "CREATE",
+    "ResourceRecordSet": {
+      "Name": "web.lab.internal",
+      "Type": "A",
+      "TTL": 300,
+      "ResourceRecords": [{"Value": "'$PUBLIC_IP'"}]
+    }
+  }]
+}'
+
+<span class="comment"># Create CNAME record</span>
+aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --change-batch '{
+  "Changes": [{
+    "Action": "CREATE",
+    "ResourceRecordSet": {
+      "Name": "app.lab.internal",
+      "Type": "CNAME",
+      "TTL": 300,
+      "ResourceRecords": [{"Value": "web.lab.internal"}]
+    }
+  }]
+}'
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> A record = domain → IPv4. AAAA = domain → IPv6. CNAME = domain → domain (can't use at zone apex). Alias = AWS-specific, works at zone apex, free for AWS resources.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 10.2</span><span class="lab-title">Route 53 Routing Policies</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Configure different routing policies and understand their behavior.</p>
+    <p><strong>Routing Policy Comparison (for reference while building):</strong></p>
+    <ul>
+      <li><strong>Simple</strong> — One record, one or more IPs (random selection). No health checks.</li>
+      <li><strong>Weighted</strong> — Split traffic by percentage (e.g., 70/30 blue-green). Each record has a weight.</li>
+      <li><strong>Latency</strong> — Route to the Region with lowest latency for the user.</li>
+      <li><strong>Failover</strong> — Active-Passive. Primary + Secondary with health check.</li>
+      <li><strong>Geolocation</strong> — Route based on user's geographic location (country/continent).</li>
+      <li><strong>Geoproximity</strong> — Route based on proximity with bias (shift traffic). Requires Traffic Flow.</li>
+      <li><strong>Multi-value</strong> — Return multiple IPs with health checks (like simple + health checks).</li>
+    </ul>
+    <div class="step" data-step="1"><p><strong>Weighted Routing (Console)</strong></p></div>
+    <p>Route 53 → Hosted Zone → Create Record → Routing: Weighted → Record 1: IP-A, Weight: 70 → Record 2: IP-B, Weight: 30 → Same record name → Use different Set IDs.</p>
+    <div class="step" data-step="2"><p><strong>Failover Routing</strong></p></div>
+    <p>Create health check for primary endpoint → Create Failover record (Primary) with health check → Create Failover record (Secondary) as standby.</p>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam Patterns:</strong> "Blue-green deployment" → Weighted. "Active-passive DR" → Failover. "Serve users from nearest Region" → Latency. "Comply with local regulations" → Geolocation. "Gradually shift traffic" → Weighted or Geoproximity.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 10.3</span><span class="lab-title">Route 53 Health Checks & DNS Failover</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create health check for your web server</span>
+HC_ID=$(aws route53 create-health-check --caller-reference $(date +%s) \
+  --health-check-config '{
+    "IPAddress": "'$PUBLIC_IP'",
+    "Port": 80,
+    "Type": "HTTP",
+    "ResourcePath": "/",
+    "RequestInterval": 30,
+    "FailureThreshold": 3
+  }' --query 'HealthCheck.Id' --output text)
+
+<span class="comment"># View health check status</span>
+aws route53 get-health-check-status --health-check-id $HC_ID
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Health checks monitor endpoints every 10s (fast) or 30s (standard). Must receive 200/300 status codes. Can check: endpoint, other health checks (calculated), CloudWatch alarm. Health checks are from outside your VPC — SG must allow Route 53 health checker IPs.</div></div>
+  </div></div></div>
+</div>
+
+<!-- CLOUDFRONT -->
+<div class="sec" id="sec-cf">
+  <div class="sec-intro"><h2>⚡ CloudFront Labs</h2><p>CDN distribution, caching, and origin protection.</p><div class="stats"><div class="stat"><div class="n">3</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 11.1</span><span class="lab-title">CloudFront Distribution with S3 Origin + OAC</span><div class="lab-tags"><span class="lab-tag tag-free">Free Tier</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Serve S3 content through CloudFront with Origin Access Control (block direct S3 access).</p>
+    <ol>
+      <li>Create S3 bucket with <strong>Block All Public Access ON</strong></li>
+      <li>Upload index.html to the bucket</li>
+      <li>CloudFront → Create Distribution → Origin: S3 bucket → Origin Access: <strong>OAC (Origin Access Control)</strong></li>
+      <li>CloudFront will generate a bucket policy — copy and apply to S3</li>
+      <li>Default root object: <code>index.html</code></li>
+      <li>Wait ~5 min for deployment → access via CloudFront URL <code>dxxxxxx.cloudfront.net</code></li>
+      <li>Direct S3 URL should return <strong>Access Denied</strong> — only CloudFront can access it!</li>
+    </ol>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam:</strong> OAC is the modern replacement for OAI (Origin Access Identity). "Restrict S3 access to only CloudFront" → OAC + bucket policy. OAC supports KMS encryption; OAI doesn't.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><p>Disable distribution → Wait → Delete distribution → Delete S3 bucket</p></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 11.2</span><span class="lab-title">CloudFront with ALB Origin (Dynamic Content)</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Use CloudFront to serve dynamic content from ALB + cache static assets from S3.</p>
+    <ol>
+      <li>Create CloudFront distribution with <strong>two origins</strong>: S3 (static) + ALB (dynamic)</li>
+      <li>Create behaviors: <code>/api/*</code> → ALB origin, <code>Default (*)</code> → S3 origin</li>
+      <li>Configure cache policies: S3 gets long TTL (1 day), ALB gets short TTL or no cache</li>
+    </ol>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam Pattern:</strong> "Serve static + dynamic content with low latency globally" → CloudFront with multiple origins and path-based behaviors. S3 for assets, ALB for API.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 11.3</span><span class="lab-title">CloudFront — Cache Invalidation & Geo Restriction</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Invalidate cached objects</span>
+aws cloudfront create-invalidation \
+  --distribution-id E1XXXXXXXXX \
+  --paths "/*"
+
+<span class="comment"># Add Geo Restriction (block countries)</span>
+<span class="comment"># Console: Distribution → Geographic Restrictions → Edit</span>
+<span class="comment"># Choose: Allowlist or Blocklist → Select countries</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Invalidation costs money per path ($0.005). Better: use versioned filenames (app-v2.js). "Restrict content to specific countries" → CloudFront Geo Restriction.</div></div>
+  </div></div></div>
+</div>
+
+<!-- APP INTEGRATION -->
+<div class="sec" id="sec-integ">
+  <div class="sec-intro"><h2>🔗 Application Integration Labs</h2><p>SQS, SNS, EventBridge, Step Functions.</p><div class="stats"><div class="stat"><div class="n">4</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 12.1</span><span class="lab-title">SQS — Standard & FIFO Queues</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create Standard Queue</span>
+STD_URL=$(aws sqs create-queue --queue-name lab-standard-queue \
+  --attributes '{"VisibilityTimeout":"30","MessageRetentionPeriod":"86400"}' \
+  --query 'QueueUrl' --output text)
+
+<span class="comment"># Create FIFO Queue</span>
+FIFO_URL=$(aws sqs create-queue --queue-name lab-fifo-queue.fifo \
+  --attributes '{"FifoQueue":"true","ContentBasedDeduplication":"true"}' \
+  --query 'QueueUrl' --output text)
+
+<span class="comment"># Send messages</span>
+aws sqs send-message --queue-url $STD_URL --message-body "Hello from standard queue!"
+aws sqs send-message --queue-url $FIFO_URL --message-body "Hello from FIFO queue!" --message-group-id "group1"
+
+<span class="comment"># Receive messages</span>
+aws sqs receive-message --queue-url $STD_URL --max-number-of-messages 5
+aws sqs receive-message --queue-url $FIFO_URL --max-number-of-messages 5
+
+<span class="comment"># Create Dead Letter Queue</span>
+DLQ_URL=$(aws sqs create-queue --queue-name lab-dlq --query 'QueueUrl' --output text)
+DLQ_ARN=$(aws sqs get-queue-attributes --queue-url $DLQ_URL --attribute-names QueueArn --query 'Attributes.QueueArn' --output text)
+
+<span class="comment"># Set DLQ on standard queue (after 3 failed receives)</span>
+aws sqs set-queue-attributes --queue-url $STD_URL \
+  --attributes '{"RedrivePolicy":"{\"deadLetterTargetArn\":\"'$DLQ_ARN'\",\"maxReceiveCount\":\"3\"}"}'
+    </div>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam:</strong> Standard = unlimited throughput, at-least-once, best-effort order. FIFO = 300 msg/s (3000 with batching), exactly-once, guaranteed order. "Process orders in sequence" → FIFO. "Maximum throughput" → Standard. DLQ = capture failed messages.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws sqs delete-queue --queue-url $STD_URL
+aws sqs delete-queue --queue-url $FIFO_URL
+aws sqs delete-queue --queue-url $DLQ_URL
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 12.2</span><span class="lab-title">SNS — Topics, Subscriptions, Fan-out</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create SNS topic</span>
+TOPIC_ARN=$(aws sns create-topic --name lab-notifications --query 'TopicArn' --output text)
+
+<span class="comment"># Subscribe email</span>
+aws sns subscribe --topic-arn $TOPIC_ARN --protocol email --notification-endpoint your@email.com
+<span class="comment"># CHECK YOUR EMAIL and confirm subscription!</span>
+
+<span class="comment"># Subscribe SQS queue (fan-out pattern)</span>
+aws sns subscribe --topic-arn $TOPIC_ARN --protocol sqs --notification-endpoint $DLQ_ARN
+
+<span class="comment"># Publish message (goes to ALL subscribers)</span>
+aws sns publish --topic-arn $TOPIC_ARN --subject "Lab Alert" --message "This is a test notification from SNS lab!"
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Fan-out Pattern:</strong> SNS topic → multiple SQS queues. Each queue processes the same message independently. "Send one event to multiple consumers" → SNS + SQS fan-out.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">aws sns delete-topic --topic-arn $TOPIC_ARN</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 12.3</span><span class="lab-title">EventBridge — Rule-based Event Routing</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create EventBridge rule (trigger Lambda every 5 minutes)</span>
+aws events put-rule --name lab-scheduled-rule \
+  --schedule-expression "rate(5 minutes)" \
+  --state ENABLED
+
+<span class="comment"># Add Lambda as target</span>
+aws events put-targets --rule lab-scheduled-rule \
+  --targets "Id"="1","Arn"="arn:aws:lambda:ap-southeast-1:$ACCOUNT_ID:function:lab-hello"
+
+<span class="comment"># Create event pattern rule (trigger on EC2 state changes)</span>
+aws events put-rule --name lab-ec2-state-rule \
+  --event-pattern '{
+    "source": ["aws.ec2"],
+    "detail-type": ["EC2 Instance State-change Notification"],
+    "detail": { "state": ["stopped", "terminated"] }
+  }'
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> EventBridge = the evolution of CloudWatch Events. Central event bus for AWS services, SaaS, custom apps. "React to EC2 termination" or "schedule a Lambda cron" → EventBridge.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws events remove-targets --rule lab-scheduled-rule --ids 1
+aws events delete-rule --name lab-scheduled-rule
+aws events delete-rule --name lab-ec2-state-rule
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 12.4</span><span class="lab-title">Step Functions — Orchestrate Lambda Workflow</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a state machine that orchestrates multiple Lambda functions in sequence.</p>
+    <p>Best via Console: Step Functions → Create state machine → Use Workflow Studio (visual drag-and-drop) → Add Lambda invoke steps → Add Choice state for branching.</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Step Functions orchestrate multi-step workflows. Standard = long-running (up to 1 year), exactly-once. Express = high-volume, short-duration (up to 5 min), at-least-once. "Orchestrate microservices" or "human approval workflow" → Step Functions.</div></div>
+  </div></div></div>
+</div>
+
+<!-- MIGRATION -->
+<div class="sec" id="sec-migrate">
+  <div class="sec-intro"><h2>🚚 Migration Labs</h2><p>Practice data transfer and migration strategies.</p><div class="stats"><div class="stat"><div class="n">3</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 13.1</span><span class="lab-title">AWS DataSync — S3 to S3 Cross-Region Transfer</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <p>Console: DataSync → Create task → Source: S3 in Region A → Destination: S3 in Region B → Configure schedule → Run task. Observe transfer speeds and validation.</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> DataSync = automated, accelerated data transfer (on-prem ↔ AWS, or AWS ↔ AWS). Supports S3, EFS, FSx. "Migrate NFS server to EFS" → DataSync. Transfer Family = SFTP/FTP to S3.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 13.2</span><span class="lab-title">DMS — Database Migration Service</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-advanced">Advanced</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <p>Console: DMS → Create replication instance → Create source endpoint (your MySQL) → Create target endpoint (RDS or Aurora) → Create migration task (full load + CDC for ongoing replication).</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> DMS supports homogeneous (MySQL→MySQL) and heterogeneous (Oracle→Aurora) migration. For heterogeneous, use <strong>Schema Conversion Tool (SCT)</strong> first. CDC (Change Data Capture) enables continuous replication with minimal downtime.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 13.3</span><span class="lab-title">Migration Strategies — 6 R's Decision Exercise</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Exercise (No AWS resources needed)</h4>
+    <p>For each scenario below, decide which R strategy applies:</p>
+    <ul>
+      <li><strong>Rehost</strong> (Lift & Shift) — Move as-is to EC2</li>
+      <li><strong>Replatform</strong> (Lift, Tinker, Shift) — Minor optimization (e.g., move to RDS)</li>
+      <li><strong>Repurchase</strong> — Switch to SaaS (e.g., CRM → Salesforce)</li>
+      <li><strong>Refactor</strong> — Re-architect for cloud-native (e.g., microservices + Lambda)</li>
+      <li><strong>Retire</strong> — Turn off (not needed)</li>
+      <li><strong>Retain</strong> — Keep on-premises (not ready to migrate)</li>
+    </ul>
+    <p><strong>Scenarios:</strong></p>
+    <ol>
+      <li>"Move legacy Java app to AWS quickly for data center exit" → <strong>Rehost</strong></li>
+      <li>"Move self-managed MySQL to managed DB" → <strong>Replatform</strong> (to RDS)</li>
+      <li>"Replace on-prem email server" → <strong>Repurchase</strong> (to WorkMail/O365)</li>
+      <li>"Break monolith into microservices" → <strong>Refactor</strong></li>
+      <li>"Old test server nobody uses" → <strong>Retire</strong></li>
+      <li>"Mainframe with complex dependencies" → <strong>Retain</strong> (for now)</li>
+    </ol>
+  </div></div></div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="sec" id="sec-analytics">
+  <div class="sec-intro"><h2>📊 Analytics Labs</h2><p>Query, stream, and visualize data.</p><div class="stats"><div class="stat"><div class="n">4</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 14.1</span><span class="lab-title">Athena — Query S3 Data with SQL</span><div class="lab-tags"><span class="lab-tag tag-free">Near Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Upload sample CSV to S3</span>
+cat &lt;&lt; 'EOF' > employees.csv
+id,name,department,salary
+1,Alice,Engineering,120000
+2,Bob,Marketing,95000
+3,Carol,Engineering,130000
+4,Dave,Sales,88000
+5,Eve,Engineering,115000
+EOF
+aws s3 cp employees.csv s3://$BUCKET/data/employees.csv
+
+<span class="comment"># In Athena Console:</span>
+<span class="comment"># 1. Set query results location: s3://$BUCKET/athena-results/</span>
+<span class="comment"># 2. Create database and table:</span>
+    </div>
+    <div class="cmd">
+<span class="comment">-- Run in Athena Query Editor:</span>
+CREATE DATABASE lab_db;
+
+CREATE EXTERNAL TABLE lab_db.employees (
+  id INT, name STRING, department STRING, salary INT
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION 's3://YOUR-BUCKET/data/'
+TBLPROPERTIES ('skip.header.line.count'='1');
+
+<span class="comment">-- Query!</span>
+SELECT department, COUNT(*) as headcount, AVG(salary) as avg_salary
+FROM lab_db.employees
+GROUP BY department
+ORDER BY avg_salary DESC;
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Athena = serverless SQL queries on S3 data. Pay $5/TB scanned. Use columnar formats (Parquet, ORC) to reduce scan cost by 90%+. "Ad-hoc query S3 logs" → Athena.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 14.2</span><span class="lab-title">Kinesis Data Streams — Real-time Ingestion</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create stream (On-Demand mode)</span>
+aws kinesis create-stream --stream-name lab-stream --stream-mode-details StreamMode=ON_DEMAND
+
+<span class="comment"># Put records</span>
+aws kinesis put-record --stream-name lab-stream \
+  --partition-key user123 \
+  --data $(echo '{"event":"page_view","page":"/home","timestamp":"2026-04-04T10:00:00Z"}' | base64)
+
+<span class="comment"># Get shard iterator and read records</span>
+SHARD_ID=$(aws kinesis list-shards --stream-name lab-stream --query 'Shards[0].ShardId' --output text)
+ITERATOR=$(aws kinesis get-shard-iterator --stream-name lab-stream \
+  --shard-id $SHARD_ID --shard-iterator-type TRIM_HORIZON --query 'ShardIterator' --output text)
+aws kinesis get-records --shard-iterator $ITERATOR
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Kinesis Data Streams = real-time (sub-second). Data Firehose = near-real-time (60s buffer, auto-delivers to S3/Redshift). "Real-time clickstream processing" → Streams + Lambda. "Load data into S3 with transformation" → Firehose.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">aws kinesis delete-stream --stream-name lab-stream</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 14.3</span><span class="lab-title">AWS Glue — ETL & Data Catalog</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <p>Console: Glue → Crawlers → Create crawler → Point to S3 data → Run → Crawler auto-discovers schema → Creates table in Glue Data Catalog → Query with Athena!</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Glue = serverless ETL + Data Catalog. Crawlers auto-discover schemas. Data Catalog is central metadata repo (works with Athena, EMR, Redshift Spectrum). "Transform CSV to Parquet before querying" → Glue ETL job.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 14.4</span><span class="lab-title">QuickSight — Build a Dashboard</span><div class="lab-tags"><span class="lab-tag tag-free">Free Trial</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <p>QuickSight → Sign up for Standard edition (free trial) → New Dataset → Athena → Select lab_db.employees → Create visualization → Add bar chart: department vs avg salary.</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> QuickSight = serverless BI dashboards. Sources: Athena, S3, RDS, Redshift, etc. SPICE = in-memory engine for fast dashboards. "Business users need visual reports" → QuickSight.</div></div>
+  </div></div></div>
+</div>
+
+<!-- COST OPTIMIZATION -->
+<div class="sec" id="sec-cost">
+  <div class="sec-intro"><h2>💰 Cost Optimization Labs</h2><p>Monitor and reduce AWS spending.</p><div class="stats"><div class="stat"><div class="n">3</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 15.1</span><span class="lab-title">Set Up Billing Alarm & Budget</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create SNS topic for billing alerts</span>
+BILLING_TOPIC=$(aws sns create-topic --name billing-alerts --query 'TopicArn' --output text --region us-east-1)
+aws sns subscribe --topic-arn $BILLING_TOPIC --protocol email --notification-endpoint your@email.com --region us-east-1
+
+<span class="comment"># Create CloudWatch billing alarm ($5 threshold)</span>
+aws cloudwatch put-metric-alarm --region us-east-1 \
+  --alarm-name "billing-alarm-5-dollars" \
+  --metric-name EstimatedCharges \
+  --namespace AWS/Billing \
+  --statistic Maximum \
+  --period 21600 \
+  --threshold 5 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods 1 \
+  --alarm-actions $BILLING_TOPIC \
+  --dimensions Name=Currency,Value=USD
+    </div>
+    <div class="step" data-step="2"><p><strong>Create AWS Budget (Console)</strong></p></div>
+    <p>Billing → Budgets → Create budget → Cost budget → $10 monthly → Alert at 80% threshold → Email notification.</p>
+    <div class="co danger"><span class="icon">⚠️</span><div><strong>Do This FIRST!</strong> Before any labs. A $5 billing alarm prevents surprises. Budget alerts at 80% give you time to react.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 15.2</span><span class="lab-title">Cost Explorer & Cost Allocation Tags</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <p>Console: Billing → Cost Explorer → Enable → Explore cost breakdowns by service, Region, usage type.</p>
+    <p><strong>Tagging Strategy:</strong></p>
+    <div class="cmd">
+<span class="comment"># Tag all lab resources consistently</span>
+aws ec2 create-tags --resources $INSTANCE_ID \
+  --tags Key=Environment,Value=Lab Key=Project,Value=SAA-C03 Key=Owner,Value=Mohan
+
+<span class="comment"># Activate cost allocation tags:</span>
+<span class="comment"># Billing → Cost allocation tags → Activate "Environment", "Project", "Owner"</span>
+<span class="comment"># After 24 hours, Cost Explorer shows costs grouped by these tags</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Cost allocation tags take 24 hours to appear in billing. AWS-generated tags (aws:createdBy) + user-defined tags. "Track costs by department" → Use cost allocation tags + Cost Explorer.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 15.3</span><span class="lab-title">Trusted Advisor — Review Recommendations</span><div class="lab-tags"><span class="lab-tag tag-free">Free (7 checks)</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <p>Console: Trusted Advisor → Review all 5 categories: Cost Optimization, Performance, Security, Fault Tolerance, Service Limits.</p>
+    <div class="cmd">
+<span class="comment"># Check Trusted Advisor via CLI</span>
+aws support describe-trusted-advisor-checks --language en --region us-east-1
+
+<span class="comment"># Free tier = 7 core checks (MFA on root, SG open ports, etc.)</span>
+<span class="comment"># Business/Enterprise = all checks + API access</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Free: 7 core checks (S3 bucket permissions, SG unrestricted, MFA on root, etc.). Business/Enterprise: all checks including cost optimization (idle EC2, underutilized EBS). "Find idle resources to reduce cost" → Trusted Advisor (Business plan).</div></div>
+  </div></div></div>
+</div>
+
+<!-- ARCHITECTURE PATTERNS -->
+<div class="sec" id="sec-arch">
+  <div class="sec-intro"><h2>🏗️ Architecture Pattern Labs</h2><p>Design and build real-world patterns.</p><div class="stats"><div class="stat"><div class="n">5</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 16.1</span><span class="lab-title">Multi-Tier Architecture (Web → App → DB)</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-advanced">Advanced</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Build This Architecture:</h4>
+    <ol>
+      <li>VPC with 6 subnets (2 public, 2 private-app, 2 private-db across 2 AZs)</li>
+      <li>ALB in public subnets → routes to EC2 web servers in private-app subnets</li>
+      <li>Web servers connect to RDS MySQL Multi-AZ in private-db subnets</li>
+      <li>NAT Gateway in public subnet for web server updates</li>
+      <li>Security Groups: ALB (80/443) → Web (8080 from ALB SG) → DB (3306 from Web SG)</li>
+    </ol>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam Pattern:</strong> This is THE classic 3-tier architecture. Know it cold. Web tier (public) → App tier (private) → DB tier (private). Each tier has its own SG referencing the tier above.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 16.2</span><span class="lab-title">Serverless API (API GW + Lambda + DynamoDB)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Build This:</h4>
+    <ol>
+      <li>DynamoDB table "Notes" (partition key: NoteId)</li>
+      <li>Lambda function for CRUD operations (from Lab 7.4)</li>
+      <li>API Gateway REST API with resources: <code>GET /notes</code>, <code>POST /notes</code>, <code>DELETE /notes/{id}</code></li>
+      <li>Each method integrated with Lambda</li>
+      <li>Test with curl or Postman</li>
+      <li>Optional: Add Cognito User Pool for authentication</li>
+    </ol>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Cost:</strong> This entire stack runs for free under Free Tier — 1M Lambda requests + 25GB DynamoDB + 1M API Gateway calls/month.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 16.3</span><span class="lab-title">Event-Driven Architecture (S3 → SNS → SQS → Lambda)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Build This:</h4>
+    <ol>
+      <li>S3 bucket configured to send events to SNS topic on object creation</li>
+      <li>SNS topic fans out to 2 SQS queues: "thumbnail-queue" and "metadata-queue"</li>
+      <li>Lambda function polls thumbnail-queue (image processing)</li>
+      <li>Lambda function polls metadata-queue (index to DynamoDB)</li>
+    </ol>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Pattern:</strong> This is the SNS + SQS fan-out pattern. S3 can only send to ONE SNS topic per event type — but SNS can fan out to unlimited SQS queues. Each queue processes independently.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 16.4</span><span class="lab-title">Disaster Recovery — Pilot Light</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-advanced">Advanced</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Concept Build:</h4>
+    <ol>
+      <li><strong>Primary Region</strong> (ap-southeast-1): Full stack — ALB, ASG, RDS Multi-AZ</li>
+      <li><strong>DR Region</strong> (ap-northeast-1): Pilot Light — RDS Read Replica only (core data running)</li>
+      <li>During failover: Promote Read Replica → Launch EC2/ASG → Update Route 53 to DR Region</li>
+    </ol>
+    <p><strong>DR Strategy Comparison:</strong></p>
+    <ul>
+      <li><strong>Backup & Restore</strong> — Cheapest, slowest (hours). Just backups in S3.</li>
+      <li><strong>Pilot Light</strong> — Core DB running in DR, scale up on failover (minutes).</li>
+      <li><strong>Warm Standby</strong> — Scaled-down version running in DR (minutes, faster).</li>
+      <li><strong>Multi-Site Active-Active</strong> — Full stack in both Regions. Instant failover. Most expensive.</li>
+    </ul>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 16.5</span><span class="lab-title">High Availability Architecture Checklist</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Verify Your Architecture Has:</h4>
+    <ul>
+      <li>☐ Resources deployed across <strong>at least 2 AZs</strong></li>
+      <li>☐ <strong>Auto Scaling Group</strong> with min ≥ 2 instances</li>
+      <li>☐ <strong>Load Balancer</strong> distributing traffic across AZs</li>
+      <li>☐ <strong>RDS Multi-AZ</strong> for database high availability</li>
+      <li>☐ <strong>S3</strong> for static assets (11 nines durability)</li>
+      <li>☐ <strong>CloudFront</strong> for global content delivery</li>
+      <li>☐ <strong>Route 53</strong> health checks with failover routing</li>
+      <li>☐ <strong>EBS snapshots</strong> on schedule for backup</li>
+      <li>☐ <strong>Cross-Region replication</strong> for DR (S3 CRR, RDS cross-Region read replica)</li>
+      <li>☐ <strong>CloudWatch alarms</strong> for monitoring and auto-recovery</li>
+      <li>☐ <strong>SNS notifications</strong> for alerting</li>
+      <li>☐ <strong>No single points of failure</strong> — everything redundant</li>
+    </ul>
+  </div></div></div>
+</div>
+
+<!-- MASTER CLEANUP -->
+<div class="sec" id="sec-cleanup">
+  <div class="sec-intro" style="border-color:rgba(251,113,133,.3)">
+    <h2>🧹 Master Cleanup Checklist</h2>
+    <p>Run through this after completing all labs to ensure no resources are left running and costing money.</p>
+  </div>
+
+  <div class="lab open"><div class="lab-header"><span class="lab-num" style="background:var(--acc4)">!!!</span><span class="lab-title">Complete Cleanup — Run This Weekly</span><div class="lab-tags"><span class="lab-tag tag-cost">SAVE $$$</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># ═══ EC2 ═══</span>
+echo "=== Running EC2 Instances ==="
+aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" \
+  --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],InstanceType]' --output table
+
+<span class="comment"># ═══ EBS Volumes (unattached = wasting money) ═══</span>
+echo "=== Unattached EBS Volumes ==="
+aws ec2 describe-volumes --filters "Name=status,Values=available" \
+  --query 'Volumes[*].[VolumeId,Size,VolumeType]' --output table
+
+<span class="comment"># ═══ Elastic IPs (unattached = $3.65/month) ═══</span>
+echo "=== Unassociated Elastic IPs ==="
+aws ec2 describe-addresses --query 'Addresses[?AssociationId==null].[PublicIp,AllocationId]' --output table
+
+<span class="comment"># ═══ NAT Gateways ($32/month each!) ═══</span>
+echo "=== NAT Gateways ==="
+aws ec2 describe-nat-gateways --filter "Name=state,Values=available" \
+  --query 'NatGateways[*].[NatGatewayId,State]' --output table
+
+<span class="comment"># ═══ Load Balancers ═══</span>
+echo "=== Load Balancers ==="
+aws elbv2 describe-load-balancers --query 'LoadBalancers[*].[LoadBalancerName,Type,State.Code]' --output table
+
+<span class="comment"># ═══ RDS Instances ═══</span>
+echo "=== RDS Instances ==="
+aws rds describe-db-instances --query 'DBInstances[*].[DBInstanceIdentifier,DBInstanceClass,DBInstanceStatus]' --output table
+
+<span class="comment"># ═══ ElastiCache Clusters ═══</span>
+echo "=== ElastiCache Clusters ==="
+aws elasticache describe-cache-clusters --query 'CacheClusters[*].[CacheClusterId,CacheNodeType,CacheClusterStatus]' --output table
+
+<span class="comment"># ═══ Lambda Functions ═══</span>
+echo "=== Lambda Functions ==="
+aws lambda list-functions --query 'Functions[*].[FunctionName,Runtime,MemorySize]' --output table
+
+<span class="comment"># ═══ CloudFront Distributions ═══</span>
+echo "=== CloudFront Distributions ==="
+aws cloudfront list-distributions --query 'DistributionList.Items[*].[Id,Status,DomainName]' --output table
+
+<span class="comment"># ═══ S3 Buckets ═══</span>
+echo "=== S3 Buckets ==="
+aws s3api list-buckets --query 'Buckets[*].Name' --output table
+
+echo ""
+echo "Review above and DELETE anything you don't need!"
+echo "Priority: NAT Gateways > RDS > ELB > Elastic IPs > EBS volumes"
+    </div>
+
+    <div class="co danger"><span class="icon">💸</span><div><strong>Top Cost Traps:</strong> NAT Gateway (~$32/mo), RDS Multi-AZ (even t3.micro adds up), Elastic IPs not attached ($3.65/mo), EBS volumes sitting unused, ElastiCache clusters, Secrets Manager ($0.40/secret/mo). Run this script after EVERY lab session!</div></div>
+  </div></div></div>
+</div>
+
+</div>
+
+<div class="footer">AWS SAA-C03 Labs Guide · Part 2 (Weeks 5-8) · Built for Mohan's Certification Journey<br>Combined with Part 1: 40+ labs covering all 14 SAA-C03 modules</div>
+
+<script>
+function go(id){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));document.getElementById(`sec-${id}`).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');window.scrollTo({top:180,behavior:'smooth'})}
+function toggleLab(el){if(event.target.closest('.cmd'))return;el.classList.toggle('open')}
+</script>
+</body>
+</html>

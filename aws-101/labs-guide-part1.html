@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS SAA-C03 Labs Guide — Part 1 (Weeks 1-4)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050608;--s1:#0a0e14;--s2:#10151e;--s3:#161d2a;
+  --bdr:#1c2536;--acc:#00e5a0;--acc2:#818cf8;--acc3:#38bdf8;
+  --acc4:#fb7185;--acc5:#facc15;--acc6:#f97316;--acc7:#c084fc;
+  --txt:#d8dee9;--dim:#5e6b82;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter Tight',sans-serif;background:var(--bg);color:var(--txt);line-height:1.68;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+
+/* Hero */
+.hero{position:relative;padding:70px 24px 48px;text-align:center;background:linear-gradient(160deg,#050608 0%,#0a1220 40%,#0d0a1a 70%,#050608 100%);overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 90%,rgba(0,229,160,.06),transparent 55%);pointer-events:none}
+.hero-i{position:relative;z-index:1;max-width:820px;margin:0 auto}
+.badge{display:inline-block;padding:5px 14px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.22);border-radius:20px;font-size:.7rem;font-weight:700;color:var(--acc);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.hero h1{font-size:clamp(1.8rem,4.5vw,3rem);font-weight:900;letter-spacing:-1px;margin-bottom:10px;background:linear-gradient(135deg,#fff 0%,#00e5a0 60%,#38bdf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1rem;color:var(--dim);max-width:620px;margin:0 auto}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(5,6,8,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);display:flex;overflow-x:auto;gap:2px;padding:0 10px}
+.nav button{flex-shrink:0;background:none;border:none;color:var(--dim);font-family:inherit;font-size:.76rem;font-weight:600;padding:12px 13px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.nav button:hover{color:var(--txt)}.nav button.active{color:var(--acc);border-bottom-color:var(--acc)}
+
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px 70px}
+.sec{display:none;animation:fu .3s ease}.sec.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Lab Card */
+.lab{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;margin-bottom:16px;overflow:hidden;transition:border-color .3s}
+.lab:hover{border-color:rgba(0,229,160,.2)}
+.lab-header{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none}
+.lab-header:hover{background:rgba(0,229,160,.02)}
+.lab-num{background:var(--acc);color:#000;font-size:.65rem;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.5px;flex-shrink:0}
+.lab-title{font-weight:700;font-size:.95rem;color:#fff;flex:1}
+.lab-tags{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap}
+.lab-tag{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.8px}
+.tag-free{background:rgba(0,229,160,.1);color:var(--acc);border:1px solid rgba(0,229,160,.2)}
+.tag-cost{background:rgba(251,113,133,.08);color:var(--acc4);border:1px solid rgba(251,113,133,.18)}
+.tag-beginner{background:rgba(56,189,248,.08);color:var(--acc3);border:1px solid rgba(56,189,248,.18)}
+.tag-intermediate{background:rgba(250,204,21,.08);color:var(--acc5);border:1px solid rgba(250,204,21,.18)}
+.tag-advanced{background:rgba(249,115,22,.08);color:var(--acc6);border:1px solid rgba(249,115,22,.18)}
+.lab-arrow{color:var(--dim);font-size:.7rem;transition:transform .3s;flex-shrink:0}
+.lab.open .lab-arrow{transform:rotate(180deg)}
+
+.lab-body{max-height:0;overflow:hidden;transition:max-height .5s ease}
+.lab.open .lab-body{max-height:12000px}
+.lab-content{padding:0 20px 20px;border-top:1px solid var(--bdr)}
+
+/* Inside lab content */
+.lab-content h4{font-size:.88rem;font-weight:700;color:var(--acc);margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.lab-content p{font-size:.86rem;margin-bottom:8px;color:var(--txt)}
+.lab-content ul,.lab-content ol{padding-left:20px;margin-bottom:10px}
+.lab-content li{font-size:.84rem;margin-bottom:5px;color:var(--txt)}
+.lab-content li::marker{color:var(--acc)}
+
+/* Steps */
+.step{background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:14px 16px;margin-bottom:8px;position:relative;padding-left:44px}
+.step::before{content:attr(data-step);position:absolute;left:14px;top:14px;background:var(--acc);color:#000;font-size:.62rem;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.step p{margin:0;font-size:.84rem}
+
+/* Command blocks */
+.cmd{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  background:#0d1117;border:1px solid var(--bdr);
+  border-radius:6px;padding:12px 16px;margin:8px 0;
+  overflow-x:auto;line-height:1.55;color:#c9d1d9;
+  position:relative;
+}
+.cmd .comment{color:#6e7681;font-style:italic}
+.cmd .highlight{color:var(--acc)}
+.cmd .warn{color:var(--acc5)}
+.cmd-copy{position:absolute;top:6px;right:6px;background:var(--s3);border:1px solid var(--bdr);border-radius:4px;color:var(--dim);font-size:.65rem;padding:3px 8px;cursor:pointer;font-family:inherit;transition:.2s}
+.cmd-copy:hover{color:var(--acc);border-color:var(--acc)}
+
+/* Callouts */
+.co{border-radius:8px;padding:12px 16px;margin:10px 0;display:flex;gap:10px;align-items:flex-start;font-size:.84rem}
+.co.tip{background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.14)}
+.co.warn{background:rgba(250,204,21,.04);border:1px solid rgba(250,204,21,.14)}
+.co.danger{background:rgba(251,113,133,.04);border:1px solid rgba(251,113,133,.14)}
+.co.info{background:rgba(129,140,248,.04);border:1px solid rgba(129,140,248,.14)}
+.co .icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.co strong{color:#fff}
+
+/* Expected output */
+.expected{background:var(--s2);border-left:3px solid var(--acc3);border-radius:0 6px 6px 0;padding:10px 14px;margin:8px 0;font-size:.82rem;color:var(--dim)}
+.expected strong{color:var(--acc3);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+
+/* Checklist */
+.checklist{list-style:none;padding:0;margin:10px 0}
+.checklist li{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:.84rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.checklist li::before{content:'☐';color:var(--acc);font-size:1rem;flex-shrink:0;margin-top:-1px}
+
+/* Section intro */
+.sec-intro{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:22px;margin-bottom:20px}
+.sec-intro h2{font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.sec-intro p{font-size:.88rem;color:var(--dim)}
+.sec-intro .stats{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.sec-intro .stat{background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:10px 16px;text-align:center}
+.sec-intro .stat .n{font-size:1.3rem;font-weight:800;color:var(--acc)}
+.sec-intro .stat .l{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+
+/* Cleanup box */
+.cleanup{background:rgba(251,113,133,.04);border:1px solid rgba(251,113,133,.14);border-radius:8px;padding:14px 18px;margin:12px 0}
+.cleanup h4{color:var(--acc4);margin-bottom:6px;font-size:.85rem}
+
+/* Footer */
+.footer{text-align:center;padding:32px 24px;border-top:1px solid var(--bdr);color:var(--dim);font-size:.74rem}
+</style>
+</head>
+<body>
+
+<div class="hero"><div class="hero-i">
+  <div class="badge">Complete Hands-On Labs · Part 1</div>
+  <h1>AWS SAA-C03 Labs Guide</h1>
+  <p>Weeks 1-4 — Fundamentals, IAM, Compute, Storage, Databases, Networking & Security</p>
+</div></div>
+
+<div class="nav">
+  <button class="active" onclick="go('home')">Home</button>
+  <button onclick="go('iam')">IAM Labs</button>
+  <button onclick="go('ec2')">EC2 Labs</button>
+  <button onclick="go('storage')">Storage Labs</button>
+  <button onclick="go('db')">Database Labs</button>
+  <button onclick="go('vpc')">VPC / Networking</button>
+  <button onclick="go('elb')">ELB & ASG</button>
+  <button onclick="go('lambda')">Lambda / Serverless</button>
+  <button onclick="go('security')">Security Labs</button>
+  <button onclick="go('monitor')">Monitoring Labs</button>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════ HOME ══════════ -->
+<div class="sec active" id="sec-home">
+  <div class="sec-intro">
+    <h2>🧪 Lab Guide Overview</h2>
+    <p>This guide contains <strong>40+ hands-on labs</strong> organized by topic, following the SAA-C03 study roadmap. Each lab includes step-by-step instructions, CLI commands, expected outcomes, and cleanup steps to avoid charges.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">40+</div><div class="l">Total Labs</div></div>
+      <div class="stat"><div class="n">10</div><div class="l">Topics</div></div>
+      <div class="stat"><div class="n">90%</div><div class="l">Free Tier Eligible</div></div>
+      <div class="stat"><div class="n">2 Files</div><div class="l">Part 1 + Part 2</div></div>
+    </div>
+  </div>
+
+  <div class="sec-intro">
+    <h2>⚙️ Prerequisites</h2>
+    <ul>
+      <li>AWS Free Tier account — <a href="https://aws.amazon.com/free" style="color:var(--acc)">https://aws.amazon.com/free</a></li>
+      <li>AWS CLI v2 installed and configured — <code>aws configure</code></li>
+      <li>A terminal (Linux/macOS) or PowerShell (Windows)</li>
+      <li>Region: <code>ap-southeast-1</code> (Singapore) — or your preferred Region</li>
+      <li>Set billing alerts: <strong>Billing → Budgets → Create $5 monthly budget</strong></li>
+    </ul>
+  </div>
+
+  <div class="co danger">
+    <span class="icon">💸</span>
+    <div><strong>COST WARNING:</strong> Always clean up resources after each lab! Some services (NAT Gateway, RDS, EIP, etc.) cost money even when idle. Labs tagged <span class="lab-tag tag-cost">$$</span> may incur charges — terminate everything after completing the lab. Set up a <strong>Billing Alarm</strong> before starting.</div>
+  </div>
+
+  <div class="sec-intro">
+    <h2>🗂️ Lab Index — Part 1 (This File)</h2>
+    <ul>
+      <li><strong>IAM Labs (4)</strong> — Users, Groups, Roles, Policies, MFA</li>
+      <li><strong>EC2 Labs (6)</strong> — Launch, SGs, User Data, Placement, AMI, Metadata</li>
+      <li><strong>Storage Labs (5)</strong> — S3 Buckets, Lifecycle, EBS, EFS, Snapshots</li>
+      <li><strong>Database Labs (4)</strong> — RDS Multi-AZ, Aurora, DynamoDB, ElastiCache</li>
+      <li><strong>VPC / Networking (5)</strong> — VPC, Subnets, NAT, Peering, Endpoints</li>
+      <li><strong>ELB & ASG (3)</strong> — ALB, NLB, Auto Scaling Group</li>
+      <li><strong>Lambda / Serverless (4)</strong> — Functions, API Gateway, S3 Trigger, DynamoDB</li>
+      <li><strong>Security Labs (4)</strong> — KMS, Secrets Manager, WAF, GuardDuty</li>
+      <li><strong>Monitoring Labs (3)</strong> — CloudWatch, CloudTrail, Config</li>
+    </ul>
+    <p style="margin-top:10px;font-size:.84rem;color:var(--dim)"><strong>Part 2</strong> covers: Route 53, CloudFront, Migration, Analytics, Cost Optimization, Architecture Patterns & Practice scenarios.</p>
+  </div>
+</div>
+
+<!-- ══════════ IAM LABS ══════════ -->
+<div class="sec" id="sec-iam">
+  <div class="sec-intro">
+    <h2>🔐 IAM Labs</h2>
+    <p>Master identity and access management with hands-on practice. All IAM labs are free.</p>
+    <div class="stats">
+      <div class="stat"><div class="n">4</div><div class="l">Labs</div></div>
+      <div class="stat"><div class="n">Free</div><div class="l">Cost</div></div>
+      <div class="stat"><div class="n">~90 min</div><div class="l">Total Time</div></div>
+    </div>
+  </div>
+
+  <!-- LAB 1.1 -->
+  <div class="lab" onclick="toggleLab(this)">
+    <div class="lab-header">
+      <span class="lab-num">LAB 1.1</span>
+      <span class="lab-title">Create IAM Users, Groups & Assign Policies</span>
+      <div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div>
+      <span class="lab-arrow">▼</span>
+    </div>
+    <div class="lab-body"><div class="lab-content">
+      <h4>🎯 Objective</h4>
+      <p>Create IAM users, groups, assign managed policies, and test access with different permission levels.</p>
+
+      <h4>📝 Steps</h4>
+      <div class="step" data-step="1">
+        <p><strong>Create a Group for Developers</strong></p>
+      </div>
+      <div class="cmd">
+<span class="comment"># Create a group called "Developers"</span>
+aws iam create-group --group-name Developers
+
+<span class="comment"># Attach AmazonEC2ReadOnlyAccess policy</span>
+aws iam attach-group-policy \
+  --group-name Developers \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+
+<span class="comment"># Attach AmazonS3ReadOnlyAccess policy</span>
+aws iam attach-group-policy \
+  --group-name Developers \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      </div>
+
+      <div class="step" data-step="2">
+        <p><strong>Create a Group for Admins</strong></p>
+      </div>
+      <div class="cmd">
+aws iam create-group --group-name Admins
+aws iam attach-group-policy \
+  --group-name Admins \
+  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+      </div>
+
+      <div class="step" data-step="3">
+        <p><strong>Create IAM Users and Add to Groups</strong></p>
+      </div>
+      <div class="cmd">
+<span class="comment"># Create users</span>
+aws iam create-user --user-name dev-alice
+aws iam create-user --user-name dev-bob
+aws iam create-user --user-name admin-carol
+
+<span class="comment"># Add users to groups</span>
+aws iam add-user-to-group --user-name dev-alice --group-name Developers
+aws iam add-user-to-group --user-name dev-bob --group-name Developers
+aws iam add-user-to-group --user-name admin-carol --group-name Admins
+
+<span class="comment"># Create console login for dev-alice</span>
+aws iam create-login-profile \
+  --user-name dev-alice \
+  --password 'TempPass123!' \
+  --password-reset-required
+      </div>
+
+      <div class="step" data-step="4">
+        <p><strong>Verify Permissions</strong></p>
+      </div>
+      <div class="cmd">
+<span class="comment"># List groups for a user</span>
+aws iam list-groups-for-user --user-name dev-alice
+
+<span class="comment"># List policies attached to group</span>
+aws iam list-attached-group-policies --group-name Developers
+
+<span class="comment"># Simulate: Can dev-alice launch EC2?</span>
+aws iam simulate-principal-policy \
+  --policy-source-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):user/dev-alice \
+  --action-names ec2:RunInstances
+      </div>
+
+      <div class="expected">
+        <strong>Expected Result:</strong> dev-alice should have EC2 and S3 read-only access. The simulate call for ec2:RunInstances should return "implicitDeny" since she only has read-only.
+      </div>
+
+      <div class="cleanup">
+        <h4>🧹 Cleanup</h4>
+        <div class="cmd">
+aws iam remove-user-from-group --user-name dev-alice --group-name Developers
+aws iam remove-user-from-group --user-name dev-bob --group-name Developers
+aws iam remove-user-from-group --user-name admin-carol --group-name Admins
+aws iam delete-login-profile --user-name dev-alice
+aws iam delete-user --user-name dev-alice
+aws iam delete-user --user-name dev-bob
+aws iam delete-user --user-name admin-carol
+aws iam detach-group-policy --group-name Developers --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+aws iam detach-group-policy --group-name Developers --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+aws iam detach-group-policy --group-name Admins --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+aws iam delete-group --group-name Developers
+aws iam delete-group --group-name Admins
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- LAB 1.2 -->
+  <div class="lab" onclick="toggleLab(this)">
+    <div class="lab-header">
+      <span class="lab-num">LAB 1.2</span>
+      <span class="lab-title">Create Custom IAM Policy (JSON) & Test</span>
+      <div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div>
+      <span class="lab-arrow">▼</span>
+    </div>
+    <div class="lab-body"><div class="lab-content">
+      <h4>🎯 Objective</h4>
+      <p>Write a custom IAM policy that allows S3 access to a specific bucket only, attach it to a user, and verify.</p>
+
+      <div class="step" data-step="1"><p><strong>Create the Custom Policy JSON</strong></p></div>
+      <div class="cmd">
+cat &lt;&lt; 'EOF' > s3-specific-bucket-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::my-lab-bucket-12345"
+    },
+    {
+      "Sid": "AllowGetPutObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::my-lab-bucket-12345/*"
+    }
+  ]
+}
+EOF
+      </div>
+
+      <div class="step" data-step="2"><p><strong>Create Policy in IAM</strong></p></div>
+      <div class="cmd">
+aws iam create-policy \
+  --policy-name S3SpecificBucketAccess \
+  --policy-document file://s3-specific-bucket-policy.json
+      </div>
+
+      <div class="step" data-step="3"><p><strong>Attach to a User and Test</strong></p></div>
+      <div class="cmd">
+<span class="comment"># Get your account ID</span>
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+<span class="comment"># Attach policy to user</span>
+aws iam attach-user-policy \
+  --user-name dev-alice \
+  --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/S3SpecificBucketAccess
+
+<span class="comment"># Simulate: Can user access the specific bucket?</span>
+aws iam simulate-principal-policy \
+  --policy-source-arn arn:aws:iam::${ACCOUNT_ID}:user/dev-alice \
+  --action-names s3:GetObject \
+  --resource-arns arn:aws:s3:::my-lab-bucket-12345/test.txt
+      </div>
+
+      <div class="co tip"><span class="icon">💡</span><div><strong>Key Learning:</strong> Notice how the policy needs BOTH the bucket ARN (for ListBucket) AND the bucket/* ARN (for object-level actions). This is a common exam question.</div></div>
+
+      <div class="cleanup"><h4>🧹 Cleanup</h4>
+        <div class="cmd">
+aws iam detach-user-policy --user-name dev-alice --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/S3SpecificBucketAccess
+aws iam delete-policy --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/S3SpecificBucketAccess
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- LAB 1.3 -->
+  <div class="lab" onclick="toggleLab(this)">
+    <div class="lab-header">
+      <span class="lab-num">LAB 1.3</span>
+      <span class="lab-title">Create IAM Role for EC2 & Assume It</span>
+      <div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div>
+      <span class="lab-arrow">▼</span>
+    </div>
+    <div class="lab-body"><div class="lab-content">
+      <h4>🎯 Objective</h4>
+      <p>Create an IAM Role that allows EC2 instances to read S3, and attach it to an EC2 instance (Instance Profile).</p>
+
+      <div class="step" data-step="1"><p><strong>Create Trust Policy (who can assume the role)</strong></p></div>
+      <div class="cmd">
+cat &lt;&lt; 'EOF' > ec2-trust-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "Service": "ec2.amazonaws.com" },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+      </div>
+
+      <div class="step" data-step="2"><p><strong>Create Role and Attach S3 Read Policy</strong></p></div>
+      <div class="cmd">
+<span class="comment"># Create the role</span>
+aws iam create-role \
+  --role-name EC2-S3-ReadOnly \
+  --assume-role-policy-document file://ec2-trust-policy.json
+
+<span class="comment"># Attach S3 read-only policy</span>
+aws iam attach-role-policy \
+  --role-name EC2-S3-ReadOnly \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+<span class="comment"># Create Instance Profile (wrapper for EC2)</span>
+aws iam create-instance-profile --instance-profile-name EC2-S3-ReadOnly-Profile
+aws iam add-role-to-instance-profile \
+  --instance-profile-name EC2-S3-ReadOnly-Profile \
+  --role-name EC2-S3-ReadOnly
+      </div>
+
+      <div class="step" data-step="3"><p><strong>Attach to an EC2 Instance (after launching)</strong></p></div>
+      <div class="cmd">
+<span class="comment"># Associate with a running instance</span>
+aws ec2 associate-iam-instance-profile \
+  --instance-id i-xxxxxxxxxxxx \
+  --iam-instance-profile Name=EC2-S3-ReadOnly-Profile
+
+<span class="comment"># Verify from INSIDE the EC2 instance:</span>
+<span class="comment"># SSH into EC2, then run:</span>
+aws s3 ls   <span class="comment"># Should work — no access keys needed!</span>
+      </div>
+
+      <div class="co tip"><span class="icon">🎯</span><div><strong>Exam Connection:</strong> This is THE correct way to give EC2 instances access to AWS services. Never use access keys on EC2.</div></div>
+
+      <div class="cleanup"><h4>🧹 Cleanup</h4>
+        <div class="cmd">
+aws iam remove-role-from-instance-profile --instance-profile-name EC2-S3-ReadOnly-Profile --role-name EC2-S3-ReadOnly
+aws iam delete-instance-profile --instance-profile-name EC2-S3-ReadOnly-Profile
+aws iam detach-role-policy --role-name EC2-S3-ReadOnly --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+aws iam delete-role --role-name EC2-S3-ReadOnly
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- LAB 1.4 -->
+  <div class="lab" onclick="toggleLab(this)">
+    <div class="lab-header">
+      <span class="lab-num">LAB 1.4</span>
+      <span class="lab-title">Enable MFA & Configure Password Policy</span>
+      <div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div>
+      <span class="lab-arrow">▼</span>
+    </div>
+    <div class="lab-body"><div class="lab-content">
+      <h4>🎯 Objective</h4>
+      <p>Set up a password policy and enable virtual MFA for an IAM user.</p>
+
+      <div class="step" data-step="1"><p><strong>Set Account Password Policy</strong></p></div>
+      <div class="cmd">
+aws iam update-account-password-policy \
+  --minimum-password-length 12 \
+  --require-uppercase-characters \
+  --require-lowercase-characters \
+  --require-numbers \
+  --require-symbols \
+  --max-password-age 90 \
+  --password-reuse-prevention 5 \
+  --allow-users-to-change-password
+      </div>
+
+      <div class="step" data-step="2"><p><strong>Enable Virtual MFA (Console method — recommended)</strong></p></div>
+      <p>Go to <strong>IAM → Users → Select user → Security credentials tab → Assign MFA device</strong>. Use Google Authenticator or Authy to scan the QR code.</p>
+
+      <div class="step" data-step="3"><p><strong>Generate Credentials Report</strong></p></div>
+      <div class="cmd">
+<span class="comment"># Generate the report</span>
+aws iam generate-credential-report
+
+<span class="comment"># Download (base64 encoded CSV)</span>
+aws iam get-credential-report --query Content --output text | base64 --decode > credential-report.csv
+
+<span class="comment"># View — check MFA status, password age, access key age</span>
+cat credential-report.csv | column -t -s ','
+      </div>
+
+      <div class="expected">
+        <strong>Expected:</strong> The CSV shows all users with columns for password_enabled, mfa_active, access_key_1_active, access_key_1_last_rotated, etc.
+      </div>
+
+      <div class="co tip"><span class="icon">💡</span><div><strong>Exam Link:</strong> "Audit all users' credentials" → Credentials Report. "Find unused permissions for one user" → Access Advisor (in console: IAM → User → Access Advisor tab).</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════ EC2 LABS ══════════ -->
+<div class="sec" id="sec-ec2">
+  <div class="sec-intro">
+    <h2>🖥️ EC2 Labs</h2>
+    <p>Build, configure, and manage virtual servers.</p>
+    <div class="stats"><div class="stat"><div class="n">6</div><div class="l">Labs</div></div><div class="stat"><div class="n">Mostly Free</div><div class="l">Cost</div></div><div class="stat"><div class="n">~3 hrs</div><div class="l">Total Time</div></div></div>
+  </div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 2.1</span><span class="lab-title">Launch EC2 with User Data (Web Server Bootstrap)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Launch an EC2 instance that auto-installs Apache web server on boot using User Data.</p>
+    <div class="step" data-step="1"><p><strong>Create a Security Group allowing HTTP & SSH</strong></p></div>
+    <div class="cmd">
+<span class="comment"># Get default VPC ID</span>
+VPC_ID=$(aws ec2 describe-vpcs --filters "Name=isDefault,Values=true" --query "Vpcs[0].VpcId" --output text)
+
+<span class="comment"># Create SG</span>
+SG_ID=$(aws ec2 create-security-group \
+  --group-name web-server-sg \
+  --description "Allow HTTP and SSH" \
+  --vpc-id $VPC_ID \
+  --query 'GroupId' --output text)
+
+<span class="comment"># Allow SSH (port 22) from your IP</span>
+aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 22 --cidr $(curl -s ifconfig.me)/32
+
+<span class="comment"># Allow HTTP (port 80) from anywhere</span>
+aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 80 --cidr 0.0.0.0/0
+    </div>
+
+    <div class="step" data-step="2"><p><strong>Create User Data Script</strong></p></div>
+    <div class="cmd">
+cat &lt;&lt; 'EOF' > userdata.sh
+#!/bin/bash
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+echo "&lt;h1>Hello from EC2!&lt;/h1>&lt;p>Instance: $INSTANCE_ID&lt;/p>&lt;p>AZ: $AZ&lt;/p>" > /var/www/html/index.html
+EOF
+    </div>
+
+    <div class="step" data-step="3"><p><strong>Launch EC2 Instance</strong></p></div>
+    <div class="cmd">
+<span class="comment"># Find latest Amazon Linux 2023 AMI</span>
+AMI_ID=$(aws ec2 describe-images \
+  --owners amazon \
+  --filters "Name=name,Values=al2023-ami-2023*-x86_64" "Name=state,Values=available" \
+  --query "sort_by(Images, &CreationDate)[-1].ImageId" --output text)
+
+<span class="comment"># Launch instance</span>
+INSTANCE_ID=$(aws ec2 run-instances \
+  --image-id $AMI_ID \
+  --instance-type t2.micro \
+  --security-group-ids $SG_ID \
+  --user-data file://userdata.sh \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=WebServer-Lab}]' \
+  --query 'Instances[0].InstanceId' --output text)
+
+echo "Instance ID: $INSTANCE_ID"
+    </div>
+
+    <div class="step" data-step="4"><p><strong>Get Public IP & Test</strong></p></div>
+    <div class="cmd">
+<span class="comment"># Wait for instance to be running</span>
+aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+
+<span class="comment"># Get public IP</span>
+PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
+  --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+
+echo "Visit: http://$PUBLIC_IP"
+<span class="comment"># Open in browser — you should see "Hello from EC2!"</span>
+    </div>
+
+    <div class="expected"><strong>Expected:</strong> Browser shows "Hello from EC2!" with instance ID and AZ displayed.</div>
+
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws ec2 terminate-instances --instance-ids $INSTANCE_ID
+aws ec2 wait instance-terminated --instance-ids $INSTANCE_ID
+aws ec2 delete-security-group --group-id $SG_ID
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 2.2</span><span class="lab-title">EBS Volumes — Create, Attach, Snapshot, Restore</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create an EBS volume, attach to EC2, write data, create snapshot, restore to a new volume.</p>
+    <div class="step" data-step="1"><p><strong>Create gp3 EBS Volume</strong></p></div>
+    <div class="cmd">
+<span class="comment"># Get the AZ of your running instance</span>
+AZ=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
+  --query 'Reservations[0].Instances[0].Placement.AvailabilityZone' --output text)
+
+<span class="comment"># Create 10 GB gp3 volume in same AZ</span>
+VOL_ID=$(aws ec2 create-volume \
+  --volume-type gp3 \
+  --size 10 \
+  --availability-zone $AZ \
+  --tag-specifications 'ResourceType=volume,Tags=[{Key=Name,Value=Lab-Data}]' \
+  --query 'VolumeId' --output text)
+
+<span class="comment"># Wait and attach</span>
+aws ec2 wait volume-available --volume-ids $VOL_ID
+aws ec2 attach-volume --volume-id $VOL_ID --instance-id $INSTANCE_ID --device /dev/xvdf
+    </div>
+
+    <div class="step" data-step="2"><p><strong>SSH into EC2 — Format & Mount</strong></p></div>
+    <div class="cmd">
+<span class="comment"># On the EC2 instance:</span>
+sudo mkfs -t xfs /dev/xvdf
+sudo mkdir /data
+sudo mount /dev/xvdf /data
+echo "Hello from EBS!" | sudo tee /data/test.txt
+cat /data/test.txt
+    </div>
+
+    <div class="step" data-step="3"><p><strong>Create Snapshot</strong></p></div>
+    <div class="cmd">
+SNAP_ID=$(aws ec2 create-snapshot \
+  --volume-id $VOL_ID \
+  --description "Lab snapshot" \
+  --query 'SnapshotId' --output text)
+
+aws ec2 wait snapshot-completed --snapshot-ids $SNAP_ID
+echo "Snapshot: $SNAP_ID"
+    </div>
+
+    <div class="step" data-step="4"><p><strong>Restore — Create New Volume from Snapshot</strong></p></div>
+    <div class="cmd">
+NEW_VOL=$(aws ec2 create-volume \
+  --snapshot-id $SNAP_ID \
+  --volume-type gp3 \
+  --availability-zone $AZ \
+  --query 'VolumeId' --output text)
+echo "New volume from snapshot: $NEW_VOL"
+    </div>
+
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam Link:</strong> Snapshots let you migrate EBS across AZs and Regions. Create snapshot → copy to another Region → create volume from it there.</div></div>
+
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws ec2 detach-volume --volume-id $VOL_ID
+aws ec2 wait volume-available --volume-ids $VOL_ID
+aws ec2 delete-volume --volume-id $VOL_ID
+aws ec2 delete-volume --volume-id $NEW_VOL
+aws ec2 delete-snapshot --snapshot-id $SNAP_ID
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 2.3</span><span class="lab-title">Create Custom AMI (Golden Image)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Install software on an EC2 instance, create a custom AMI, then launch a new instance from it.</p>
+    <div class="step" data-step="1"><p><strong>SSH into your running EC2 and install software</strong></p></div>
+    <div class="cmd">
+sudo yum install -y nginx git
+sudo systemctl enable nginx
+sudo systemctl start nginx
+echo "Golden AMI works!" | sudo tee /usr/share/nginx/html/index.html
+    </div>
+    <div class="step" data-step="2"><p><strong>Create AMI from the instance</strong></p></div>
+    <div class="cmd">
+AMI_ID=$(aws ec2 create-image \
+  --instance-id $INSTANCE_ID \
+  --name "golden-ami-lab-$(date +%Y%m%d)" \
+  --description "Lab golden AMI with nginx" \
+  --no-reboot \
+  --query 'ImageId' --output text)
+
+echo "AMI: $AMI_ID"
+<span class="comment"># Wait for AMI to be available (may take 2-5 minutes)</span>
+aws ec2 wait image-available --image-ids $AMI_ID
+    </div>
+    <div class="step" data-step="3"><p><strong>Launch new instance from custom AMI</strong></p></div>
+    <div class="cmd">
+NEW_INST=$(aws ec2 run-instances \
+  --image-id $AMI_ID \
+  --instance-type t2.micro \
+  --security-group-ids $SG_ID \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=From-Golden-AMI}]' \
+  --query 'Instances[0].InstanceId' --output text)
+
+echo "New instance: $NEW_INST"
+<span class="comment"># This instance boots with nginx already installed — no User Data needed!</span>
+    </div>
+    <div class="expected"><strong>Expected:</strong> New instance has nginx running immediately on boot — faster launch than User Data approach.</div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws ec2 terminate-instances --instance-ids $NEW_INST
+aws ec2 deregister-image --image-id $AMI_ID
+<span class="comment"># Also delete the snapshot created by the AMI</span>
+aws ec2 describe-snapshots --filters "Name=description,Values=*$AMI_ID*" --query 'Snapshots[*].SnapshotId' --output text | xargs -I{} aws ec2 delete-snapshot --snapshot-id {}
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 2.4</span><span class="lab-title">EC2 Instance Metadata & User Data Exploration</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Query EC2 instance metadata service (IMDS) to retrieve instance information.</p>
+    <div class="step" data-step="1"><p><strong>SSH into EC2 and query IMDSv2</strong></p></div>
+    <div class="cmd">
+<span class="comment"># Get token (IMDSv2 requires token-based access)</span>
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+
+<span class="comment"># Query metadata</span>
+echo "Instance ID:"
+curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id
+
+echo -e "\nInstance Type:"
+curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-type
+
+echo -e "\nAvailability Zone:"
+curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/availability-zone
+
+echo -e "\nPublic IP:"
+curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4
+
+echo -e "\nIAM Role (if attached):"
+curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/
+
+echo -e "\nUser Data:"
+curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/user-data
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam Note:</strong> IMDSv2 (token-based) is more secure than IMDSv1. AWS recommends enforcing IMDSv2 via <code>--metadata-options HttpTokens=required</code>. Metadata endpoint is always <code>169.254.169.254</code>.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 2.5</span><span class="lab-title">Placement Groups — Cluster, Spread, Partition</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create different placement group types and understand their behavior.</p>
+    <div class="cmd">
+<span class="comment"># Create Cluster placement group</span>
+aws ec2 create-placement-group --group-name lab-cluster --strategy cluster
+
+<span class="comment"># Create Spread placement group</span>
+aws ec2 create-placement-group --group-name lab-spread --strategy spread
+
+<span class="comment"># Create Partition placement group (7 partitions)</span>
+aws ec2 create-placement-group --group-name lab-partition --strategy partition --partition-count 7
+
+<span class="comment"># Launch instance in cluster group</span>
+aws ec2 run-instances --image-id $AMI_ID --instance-type t2.micro --placement "GroupName=lab-cluster" --count 2
+
+<span class="comment"># List placement groups</span>
+aws ec2 describe-placement-groups
+    </div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+<span class="comment"># Terminate instances first, then:</span>
+aws ec2 delete-placement-group --group-name lab-cluster
+aws ec2 delete-placement-group --group-name lab-spread
+aws ec2 delete-placement-group --group-name lab-partition
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 2.6</span><span class="lab-title">Elastic IP & ENI (Elastic Network Interface)</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Allocate an Elastic IP, associate with EC2, understand ENIs.</p>
+    <div class="co warn"><span class="icon">💰</span><div><strong>Cost Note:</strong> Elastic IPs are FREE when associated with a running instance. Charged when NOT associated or when instance is stopped. Clean up immediately!</div></div>
+    <div class="cmd">
+<span class="comment"># Allocate Elastic IP</span>
+EIP_ALLOC=$(aws ec2 allocate-address --domain vpc --query 'AllocationId' --output text)
+EIP=$(aws ec2 describe-addresses --allocation-ids $EIP_ALLOC --query 'Addresses[0].PublicIp' --output text)
+echo "Elastic IP: $EIP"
+
+<span class="comment"># Associate with instance</span>
+aws ec2 associate-address --instance-id $INSTANCE_ID --allocation-id $EIP_ALLOC
+
+<span class="comment"># Now the instance has a STATIC public IP that persists across stop/start</span>
+
+<span class="comment"># View ENIs</span>
+aws ec2 describe-network-interfaces --filters "Name=attachment.instance-id,Values=$INSTANCE_ID"
+    </div>
+    <div class="cleanup"><h4>🧹 Cleanup — DO THIS IMMEDIATELY</h4><div class="cmd">
+aws ec2 disassociate-address --association-id $(aws ec2 describe-addresses --allocation-ids $EIP_ALLOC --query 'Addresses[0].AssociationId' --output text)
+aws ec2 release-address --allocation-id $EIP_ALLOC
+    </div></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ STORAGE LABS ══════════ -->
+<div class="sec" id="sec-storage">
+  <div class="sec-intro"><h2>📦 Storage Labs (S3, EBS, EFS)</h2><p>Master AWS storage services with hands-on practice.</p><div class="stats"><div class="stat"><div class="n">5</div><div class="l">Labs</div></div><div class="stat"><div class="n">Mostly Free</div><div class="l">Cost</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 3.1</span><span class="lab-title">S3 Bucket — Create, Upload, Versioning, Lifecycle</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create S3 bucket, enable versioning, upload objects, configure lifecycle rules.</p>
+    <div class="cmd">
+BUCKET="saa-lab-$(date +%s)-$(echo $RANDOM)"
+
+<span class="comment"># Create bucket</span>
+aws s3api create-bucket --bucket $BUCKET \
+  --region ap-southeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-southeast-1
+
+<span class="comment"># Enable versioning</span>
+aws s3api put-bucket-versioning --bucket $BUCKET \
+  --versioning-configuration Status=Enabled
+
+<span class="comment"># Block public access (security best practice)</span>
+aws s3api put-public-access-block --bucket $BUCKET \
+  --public-access-block-configuration \
+  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+
+<span class="comment"># Upload a file</span>
+echo "Version 1" > test.txt
+aws s3 cp test.txt s3://$BUCKET/test.txt
+
+<span class="comment"># Upload a second version</span>
+echo "Version 2 - updated" > test.txt
+aws s3 cp test.txt s3://$BUCKET/test.txt
+
+<span class="comment"># List versions</span>
+aws s3api list-object-versions --bucket $BUCKET --prefix test.txt
+    </div>
+
+    <div class="step" data-step="2"><p><strong>Configure Lifecycle Rule</strong></p></div>
+    <div class="cmd">
+cat &lt;&lt; EOF > lifecycle.json
+{
+  "Rules": [
+    {
+      "ID": "MoveToIA",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "" },
+      "Transitions": [
+        { "Days": 30, "StorageClass": "STANDARD_IA" },
+        { "Days": 90, "StorageClass": "GLACIER" },
+        { "Days": 365, "StorageClass": "DEEP_ARCHIVE" }
+      ],
+      "NoncurrentVersionTransitions": [
+        { "NoncurrentDays": 30, "StorageClass": "GLACIER" }
+      ],
+      "NoncurrentVersionExpiration": { "NoncurrentDays": 90 }
+    }
+  ]
+}
+EOF
+
+aws s3api put-bucket-lifecycle-configuration --bucket $BUCKET --lifecycle-configuration file://lifecycle.json
+aws s3api get-bucket-lifecycle-configuration --bucket $BUCKET
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam Link:</strong> Lifecycle rules are exam favorites. Know the transitions: Standard → Standard-IA (30 days min) → Glacier (90 days) → Deep Archive. Minimum 128KB and 30 days for IA transition.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+<span class="comment"># Must delete all versions first</span>
+aws s3api list-object-versions --bucket $BUCKET --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}, Quiet: `true`}' > del.json
+aws s3api delete-objects --bucket $BUCKET --delete file://del.json 2>/dev/null
+aws s3api list-object-versions --bucket $BUCKET --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}, Quiet: `true`}' > del2.json
+aws s3api delete-objects --bucket $BUCKET --delete file://del2.json 2>/dev/null
+aws s3api delete-bucket --bucket $BUCKET
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 3.2</span><span class="lab-title">S3 Bucket Policy & Static Website Hosting</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Host a static website on S3 with a bucket policy for public read access.</p>
+    <div class="cmd">
+BUCKET="saa-website-lab-$(date +%s)"
+
+aws s3api create-bucket --bucket $BUCKET --region ap-southeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-southeast-1
+
+<span class="comment"># Disable block public access (required for public website)</span>
+aws s3api put-public-access-block --bucket $BUCKET \
+  --public-access-block-configuration \
+  BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false
+
+<span class="comment"># Enable static website hosting</span>
+aws s3 website s3://$BUCKET --index-document index.html --error-document error.html
+
+<span class="comment"># Create and upload index.html</span>
+echo '&lt;html>&lt;body>&lt;h1>Hello from S3 Static Website!&lt;/h1>&lt;/body>&lt;/html>' > index.html
+aws s3 cp index.html s3://$BUCKET/
+
+<span class="comment"># Add bucket policy for public read</span>
+cat &lt;&lt; EOF > bucket-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Sid": "PublicReadGetObject",
+    "Effect": "Allow",
+    "Principal": "*",
+    "Action": "s3:GetObject",
+    "Resource": "arn:aws:s3:::$BUCKET/*"
+  }]
+}
+EOF
+
+aws s3api put-bucket-policy --bucket $BUCKET --policy file://bucket-policy.json
+
+echo "Website URL: http://$BUCKET.s3-website-ap-southeast-1.amazonaws.com"
+    </div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws s3 rm s3://$BUCKET --recursive
+aws s3api delete-bucket-policy --bucket $BUCKET
+aws s3api delete-bucket --bucket $BUCKET
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 3.3</span><span class="lab-title">S3 Encryption — SSE-S3, SSE-KMS, Client-side</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Upload objects with different encryption methods and set default encryption.</p>
+    <div class="cmd">
+<span class="comment"># Upload with SSE-S3 (AES-256)</span>
+aws s3 cp test.txt s3://$BUCKET/encrypted-s3.txt --sse AES256
+
+<span class="comment"># Upload with SSE-KMS (AWS managed key)</span>
+aws s3 cp test.txt s3://$BUCKET/encrypted-kms.txt --sse aws:kms
+
+<span class="comment"># Set default encryption to SSE-S3</span>
+aws s3api put-bucket-encryption --bucket $BUCKET \
+  --server-side-encryption-configuration '{
+    "Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]
+  }'
+
+<span class="comment"># Verify encryption on an object</span>
+aws s3api head-object --bucket $BUCKET --key encrypted-kms.txt \
+  --query 'ServerSideEncryption'
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> SSE-S3 = AWS manages everything. SSE-KMS = You control the key (audit via CloudTrail, key rotation). SSE-C = You provide the key with every request. Default: all new buckets have SSE-S3 enabled.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 3.4</span><span class="lab-title">S3 Cross-Region Replication (CRR)</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Set up cross-region replication between two S3 buckets for disaster recovery.</p>
+    <div class="cmd">
+SOURCE="saa-crr-source-$(date +%s)"
+DEST="saa-crr-dest-$(date +%s)"
+
+<span class="comment"># Create source bucket (Singapore)</span>
+aws s3api create-bucket --bucket $SOURCE --region ap-southeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-southeast-1
+aws s3api put-bucket-versioning --bucket $SOURCE --versioning-configuration Status=Enabled
+
+<span class="comment"># Create destination bucket (different region — e.g., Tokyo)</span>
+aws s3api create-bucket --bucket $DEST --region ap-northeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-northeast-1
+aws s3api put-bucket-versioning --bucket $DEST --versioning-configuration Status=Enabled
+
+<span class="comment"># Create IAM role for replication (see AWS docs for full trust policy)</span>
+<span class="comment"># Then configure replication in the console:</span>
+<span class="comment"># S3 → Source bucket → Management → Replication rules → Create rule</span>
+    </div>
+    <div class="co warn"><span class="icon">⚠️</span><div><strong>Note:</strong> CRR is easiest to configure via the console. Both buckets MUST have versioning enabled. Existing objects are NOT replicated — only new objects after rule creation (unless you use S3 Batch Replication).</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 3.5</span><span class="lab-title">EFS — Create Shared File System Across AZs</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create EFS file system, mount on two EC2 instances in different AZs, verify shared access.</p>
+    <div class="cmd">
+<span class="comment"># Create EFS file system</span>
+EFS_ID=$(aws efs create-file-system \
+  --performance-mode generalPurpose \
+  --throughput-mode bursting \
+  --encrypted \
+  --tags Key=Name,Value=Lab-EFS \
+  --query 'FileSystemId' --output text)
+
+<span class="comment"># Create mount targets in each subnet (need SG allowing NFS port 2049)</span>
+<span class="comment"># Create SG for EFS</span>
+EFS_SG=$(aws ec2 create-security-group --group-name efs-sg --description "EFS access" --vpc-id $VPC_ID --query 'GroupId' --output text)
+aws ec2 authorize-security-group-ingress --group-id $EFS_SG --protocol tcp --port 2049 --source-group $SG_ID
+
+<span class="comment"># Create mount target (repeat per subnet/AZ)</span>
+SUBNET_ID=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[0].SubnetId' --output text)
+aws efs create-mount-target --file-system-id $EFS_ID --subnet-id $SUBNET_ID --security-groups $EFS_SG
+
+<span class="comment"># On EC2 instance: install helper and mount</span>
+<span class="comment"># sudo yum install -y amazon-efs-utils</span>
+<span class="comment"># sudo mkdir /efs</span>
+<span class="comment"># sudo mount -t efs $EFS_ID:/ /efs</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> EBS = one instance, one AZ. EFS = multiple instances, multiple AZs (Linux only). FSx for Windows = Windows file system. FSx for Lustre = HPC.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup — Important!</h4><div class="cmd">
+<span class="comment"># Delete mount targets first</span>
+aws efs describe-mount-targets --file-system-id $EFS_ID --query 'MountTargets[*].MountTargetId' --output text | tr '\t' '\n' | xargs -I{} aws efs delete-mount-target --mount-target-id {}
+<span class="comment"># Wait ~1 minute, then delete file system</span>
+sleep 60
+aws efs delete-file-system --file-system-id $EFS_ID
+aws ec2 delete-security-group --group-id $EFS_SG
+    </div></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ DATABASE LABS ══════════ -->
+<div class="sec" id="sec-db">
+  <div class="sec-intro"><h2>🗄️ Database Labs</h2><p>Practice with RDS, DynamoDB, and ElastiCache.</p><div class="stats"><div class="stat"><div class="n">4</div><div class="l">Labs</div></div><div class="stat"><div class="n">Mix</div><div class="l">Free + Paid</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 4.1</span><span class="lab-title">RDS MySQL — Launch, Multi-AZ, Read Replica</span><div class="lab-tags"><span class="lab-tag tag-free">Free Tier</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create RDS MySQL instance, enable Multi-AZ, create a Read Replica.</p>
+    <div class="cmd">
+<span class="comment"># Create DB Subnet Group</span>
+SUBNETS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text | tr '\t' ',')
+aws rds create-db-subnet-group \
+  --db-subnet-group-name lab-db-subnet \
+  --db-subnet-group-description "Lab subnets" \
+  --subnet-ids $(echo $SUBNETS | tr ',' ' ')
+
+<span class="comment"># Create Security Group for RDS (MySQL port 3306)</span>
+RDS_SG=$(aws ec2 create-security-group --group-name rds-sg --description "RDS MySQL" --vpc-id $VPC_ID --query 'GroupId' --output text)
+aws ec2 authorize-security-group-ingress --group-id $RDS_SG --protocol tcp --port 3306 --source-group $SG_ID
+
+<span class="comment"># Launch RDS MySQL (Free Tier eligible: db.t3.micro, 20GB)</span>
+aws rds create-db-instance \
+  --db-instance-identifier lab-mysql \
+  --db-instance-class db.t3.micro \
+  --engine mysql \
+  --master-username admin \
+  --master-user-password LabPassword123! \
+  --allocated-storage 20 \
+  --db-subnet-group-name lab-db-subnet \
+  --vpc-security-group-ids $RDS_SG \
+  --no-publicly-accessible \
+  --backup-retention-period 7
+    </div>
+    <div class="step" data-step="2"><p><strong>Create Read Replica (after RDS is available)</strong></p></div>
+    <div class="cmd">
+aws rds create-db-instance-read-replica \
+  --db-instance-identifier lab-mysql-replica \
+  --source-db-instance-identifier lab-mysql
+    </div>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam Key:</strong> Multi-AZ = automatic failover (HA). Read Replica = read scaling (performance). Multi-AZ is synchronous. Read Replicas are asynchronous. You can have up to 15 Read Replicas in Aurora, 5 in standard RDS.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup — IMPORTANT (RDS costs money!)</h4><div class="cmd">
+aws rds delete-db-instance --db-instance-identifier lab-mysql-replica --skip-final-snapshot
+aws rds wait db-instance-deleted --db-instance-identifier lab-mysql-replica
+aws rds delete-db-instance --db-instance-identifier lab-mysql --skip-final-snapshot
+aws rds wait db-instance-deleted --db-instance-identifier lab-mysql
+aws rds delete-db-subnet-group --db-subnet-group-name lab-db-subnet
+aws ec2 delete-security-group --group-id $RDS_SG
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 4.2</span><span class="lab-title">DynamoDB — Table, Items, Queries, GSI</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create DynamoDB table, put/get items, query with GSI.</p>
+    <div class="cmd">
+<span class="comment"># Create table (On-Demand billing = free tier eligible)</span>
+aws dynamodb create-table \
+  --table-name Lab-Users \
+  --attribute-definitions \
+    AttributeName=UserId,AttributeType=S \
+    AttributeName=Email,AttributeType=S \
+  --key-schema AttributeName=UserId,KeyType=HASH \
+  --global-secondary-indexes '[{
+    "IndexName":"EmailIndex",
+    "KeySchema":[{"AttributeName":"Email","KeyType":"HASH"}],
+    "Projection":{"ProjectionType":"ALL"}
+  }]' \
+  --billing-mode PAY_PER_REQUEST
+
+<span class="comment"># Put items</span>
+aws dynamodb put-item --table-name Lab-Users --item '{
+  "UserId":{"S":"u001"},"Name":{"S":"Alice"},"Email":{"S":"alice@example.com"},"Role":{"S":"Developer"}
+}'
+aws dynamodb put-item --table-name Lab-Users --item '{
+  "UserId":{"S":"u002"},"Name":{"S":"Bob"},"Email":{"S":"bob@example.com"},"Role":{"S":"Admin"}
+}'
+
+<span class="comment"># Get item by primary key</span>
+aws dynamodb get-item --table-name Lab-Users --key '{"UserId":{"S":"u001"}}'
+
+<span class="comment"># Query using GSI (find by email)</span>
+aws dynamodb query --table-name Lab-Users --index-name EmailIndex \
+  --key-condition-expression "Email = :email" \
+  --expression-attribute-values '{":email":{"S":"bob@example.com"}}'
+
+<span class="comment"># Scan all items</span>
+aws dynamodb scan --table-name Lab-Users
+    </div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">aws dynamodb delete-table --table-name Lab-Users</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 4.3</span><span class="lab-title">DynamoDB — DAX, Streams & TTL</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-advanced">Advanced</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Enable DynamoDB Streams and TTL. DAX setup is best done via console.</p>
+    <div class="cmd">
+<span class="comment"># Enable DynamoDB Streams</span>
+aws dynamodb update-table --table-name Lab-Users \
+  --stream-specification StreamEnabled=true,StreamViewType=NEW_AND_OLD_IMAGES
+
+<span class="comment"># Enable TTL (auto-delete items after expiry)</span>
+aws dynamodb update-time-to-live --table-name Lab-Users \
+  --time-to-live-specification Enabled=true,AttributeName=ExpiresAt
+
+<span class="comment"># Put item with TTL (expires in 1 hour)</span>
+EXPIRES=$(($(date +%s) + 3600))
+aws dynamodb put-item --table-name Lab-Users --item "{
+  \"UserId\":{\"S\":\"temp001\"},\"Name\":{\"S\":\"Temp User\"},
+  \"Email\":{\"S\":\"temp@example.com\"},\"ExpiresAt\":{\"N\":\"$EXPIRES\"}
+}"
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> DynamoDB Streams + Lambda = event-driven processing (like CDC). DAX = in-memory cache for DynamoDB (microsecond reads). TTL = auto-delete expired items (free, no WCU cost).</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 4.4</span><span class="lab-title">ElastiCache Redis — Create & Connect</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create ElastiCache Redis cluster and connect from EC2. Best done via Console.</p>
+    <p><strong>Console Steps:</strong></p>
+    <ol>
+      <li>ElastiCache → Create cluster → Redis OSS</li>
+      <li>Node type: <code>cache.t3.micro</code> (Free Tier)</li>
+      <li>Select your VPC, create a subnet group</li>
+      <li>Security Group: allow port 6379 from EC2 SG</li>
+      <li>SSH to EC2 → <code>redis-cli -h &lt;endpoint&gt; -p 6379</code></li>
+      <li>Test: <code>SET hello "world"</code> then <code>GET hello</code></li>
+    </ol>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Redis = complex data structures, persistence, replication, pub/sub. Memcached = simple key-value, multi-threaded, no persistence. "Caching with leaderboards/sorted sets" → Redis.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><p>Console → ElastiCache → Clusters → Delete. Wait for deletion to complete.</p></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ VPC LABS ══════════ -->
+<div class="sec" id="sec-vpc">
+  <div class="sec-intro"><h2>🌐 VPC & Networking Labs</h2><p>Build production-grade network architectures.</p><div class="stats"><div class="stat"><div class="n">5</div><div class="l">Labs</div></div><div class="stat"><div class="n">Mix</div><div class="l">Cost</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 5.1</span><span class="lab-title">Build a Custom VPC with Public & Private Subnets</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a VPC from scratch with public and private subnets, IGW, route tables. This is the #1 most important lab.</p>
+    <div class="cmd">
+<span class="comment"># 1. Create VPC</span>
+LAB_VPC=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --query 'Vpc.VpcId' --output text)
+aws ec2 create-tags --resources $LAB_VPC --tags Key=Name,Value=Lab-VPC
+aws ec2 modify-vpc-attribute --vpc-id $LAB_VPC --enable-dns-hostnames '{"Value":true}'
+
+<span class="comment"># 2. Create Internet Gateway & attach to VPC</span>
+IGW=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text)
+aws ec2 attach-internet-gateway --internet-gateway-id $IGW --vpc-id $LAB_VPC
+
+<span class="comment"># 3. Create Public Subnet (AZ-a)</span>
+PUB_SUB=$(aws ec2 create-subnet --vpc-id $LAB_VPC --cidr-block 10.0.1.0/24 \
+  --availability-zone ap-southeast-1a --query 'Subnet.SubnetId' --output text)
+aws ec2 create-tags --resources $PUB_SUB --tags Key=Name,Value=Public-Subnet
+aws ec2 modify-subnet-attribute --subnet-id $PUB_SUB --map-public-ip-on-launch
+
+<span class="comment"># 4. Create Private Subnet (AZ-b)</span>
+PRIV_SUB=$(aws ec2 create-subnet --vpc-id $LAB_VPC --cidr-block 10.0.2.0/24 \
+  --availability-zone ap-southeast-1b --query 'Subnet.SubnetId' --output text)
+aws ec2 create-tags --resources $PRIV_SUB --tags Key=Name,Value=Private-Subnet
+
+<span class="comment"># 5. Create Public Route Table → route 0.0.0.0/0 to IGW</span>
+PUB_RT=$(aws ec2 create-route-table --vpc-id $LAB_VPC --query 'RouteTable.RouteTableId' --output text)
+aws ec2 create-route --route-table-id $PUB_RT --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW
+aws ec2 associate-route-table --route-table-id $PUB_RT --subnet-id $PUB_SUB
+
+<span class="comment"># 6. Private subnet uses the main route table (no internet route)</span>
+echo "VPC: $LAB_VPC | Public: $PUB_SUB | Private: $PRIV_SUB | IGW: $IGW"
+    </div>
+    <div class="expected"><strong>Expected:</strong> Instances in Public Subnet get public IPs and internet access. Instances in Private Subnet have no internet access (until you add NAT Gateway).</div>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Exam Pattern:</strong> Public subnet = has route to IGW. Private subnet = no route to IGW. This distinction is purely about the route table — nothing else makes a subnet "public".</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 5.2</span><span class="lab-title">NAT Gateway for Private Subnet Internet Access</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Allow private subnet instances to reach the internet (for updates) via NAT Gateway.</p>
+    <div class="co danger"><span class="icon">💸</span><div><strong>Cost Warning:</strong> NAT Gateway costs ~$0.045/hr (~$32/month). Create it, test, then DELETE immediately.</div></div>
+    <div class="cmd">
+<span class="comment"># Allocate Elastic IP for NAT Gateway</span>
+NAT_EIP=$(aws ec2 allocate-address --domain vpc --query 'AllocationId' --output text)
+
+<span class="comment"># Create NAT Gateway in PUBLIC subnet</span>
+NAT_GW=$(aws ec2 create-nat-gateway --subnet-id $PUB_SUB \
+  --allocation-id $NAT_EIP --query 'NatGateway.NatGatewayId' --output text)
+
+echo "Waiting for NAT Gateway..."
+aws ec2 wait nat-gateway-available --nat-gateway-ids $NAT_GW
+
+<span class="comment"># Create Private Route Table → route 0.0.0.0/0 to NAT Gateway</span>
+PRIV_RT=$(aws ec2 create-route-table --vpc-id $LAB_VPC --query 'RouteTable.RouteTableId' --output text)
+aws ec2 create-route --route-table-id $PRIV_RT --destination-cidr-block 0.0.0.0/0 --nat-gateway-id $NAT_GW
+aws ec2 associate-route-table --route-table-id $PRIV_RT --subnet-id $PRIV_SUB
+    </div>
+    <div class="cleanup"><h4>🧹 Cleanup — DO THIS NOW</h4><div class="cmd">
+aws ec2 delete-nat-gateway --nat-gateway-id $NAT_GW
+<span class="comment"># Wait 5 min for NAT GW to delete</span>
+sleep 300
+aws ec2 release-address --allocation-id $NAT_EIP
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 5.3</span><span class="lab-title">Security Groups vs NACLs — Side by Side</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a NACL with explicit deny rules and test against Security Group behavior.</p>
+    <div class="cmd">
+<span class="comment"># Create a NACL for the public subnet</span>
+NACL=$(aws ec2 create-network-acl --vpc-id $LAB_VPC --query 'NetworkAcl.NetworkAclId' --output text)
+
+<span class="comment"># Allow inbound HTTP (rule 100)</span>
+aws ec2 create-network-acl-entry --network-acl-id $NACL --rule-number 100 \
+  --protocol tcp --port-range From=80,To=80 --cidr-block 0.0.0.0/0 --rule-action allow --ingress
+
+<span class="comment"># Allow inbound SSH (rule 110)</span>
+aws ec2 create-network-acl-entry --network-acl-id $NACL --rule-number 110 \
+  --protocol tcp --port-range From=22,To=22 --cidr-block 0.0.0.0/0 --rule-action allow --ingress
+
+<span class="comment"># Allow outbound ephemeral ports (required — NACLs are STATELESS!)</span>
+aws ec2 create-network-acl-entry --network-acl-id $NACL --rule-number 100 \
+  --protocol tcp --port-range From=1024,To=65535 --cidr-block 0.0.0.0/0 --rule-action allow --egress
+
+<span class="comment"># DENY a specific IP (block an attacker)</span>
+aws ec2 create-network-acl-entry --network-acl-id $NACL --rule-number 50 \
+  --protocol -1 --cidr-block 203.0.113.0/24 --rule-action deny --ingress
+    </div>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Key Difference:</strong> SG = stateful (return traffic auto-allowed). NACL = stateless (must explicitly allow return traffic on ephemeral ports). NACL rules evaluated in order — lowest number first. First match wins.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 5.4</span><span class="lab-title">VPC Endpoints (Gateway & Interface)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a Gateway Endpoint for S3 so private subnet instances access S3 without internet.</p>
+    <div class="cmd">
+<span class="comment"># Create Gateway Endpoint for S3 (FREE!)</span>
+aws ec2 create-vpc-endpoint \
+  --vpc-id $LAB_VPC \
+  --service-name com.amazonaws.ap-southeast-1.s3 \
+  --route-table-ids $PRIV_RT \
+  --vpc-endpoint-type Gateway
+
+<span class="comment"># Now instances in private subnet can access S3 without NAT Gateway!</span>
+<span class="comment"># This saves NAT Gateway costs for S3 traffic</span>
+
+<span class="comment"># Interface Endpoint example (for other services like SSM, KMS):</span>
+<span class="comment"># aws ec2 create-vpc-endpoint \</span>
+<span class="comment">#   --vpc-id $LAB_VPC \</span>
+<span class="comment">#   --service-name com.amazonaws.ap-southeast-1.ssm \</span>
+<span class="comment">#   --subnet-ids $PRIV_SUB \</span>
+<span class="comment">#   --vpc-endpoint-type Interface</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Gateway Endpoints = S3 and DynamoDB only (free, modifies route table). Interface Endpoints = everything else (uses ENI, costs $/hr). "Access S3 from private subnet without internet" → Gateway Endpoint.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 5.5</span><span class="lab-title">VPC Flow Logs — Enable & Analyze</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Enable VPC Flow Logs to capture network traffic for troubleshooting.</p>
+    <div class="cmd">
+<span class="comment"># Enable Flow Logs to CloudWatch (requires IAM role)</span>
+<span class="comment"># Easiest via Console: VPC → Your VPC → Flow Logs tab → Create</span>
+<span class="comment"># Select: All traffic, Destination: CloudWatch Logs, Create new log group</span>
+
+<span class="comment"># OR to S3 (cheaper for long-term storage):</span>
+aws ec2 create-flow-logs \
+  --resource-type VPC \
+  --resource-ids $LAB_VPC \
+  --traffic-type ALL \
+  --log-destination-type s3 \
+  --log-destination arn:aws:s3:::$BUCKET/flow-logs/
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Flow Logs capture ACCEPT/REJECT traffic metadata (not packet contents). Use to troubleshoot: "Why can't my instance connect?" → Check Flow Logs for REJECT entries. Can be at VPC, Subnet, or ENI level.</div></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ ELB & ASG LABS ══════════ -->
+<div class="sec" id="sec-elb">
+  <div class="sec-intro"><h2>⚖️ ELB & Auto Scaling Labs</h2><p>Build elastic, self-healing architectures.</p><div class="stats"><div class="stat"><div class="n">3</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 6.1</span><span class="lab-title">ALB with Target Groups — Multi-AZ Web Servers</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create ALB with two EC2 targets across AZs. Observe load distribution.</p>
+    <p>Best done via Console for visual understanding:</p>
+    <ol>
+      <li>Launch 2 EC2 instances (t2.micro) in different AZs with the Apache User Data from Lab 2.1</li>
+      <li>EC2 → Load Balancers → Create → Application Load Balancer</li>
+      <li>Select both AZ subnets, create/select SG allowing port 80</li>
+      <li>Create Target Group → Register both instances</li>
+      <li>Access ALB DNS name in browser — refresh repeatedly to see different instance IDs</li>
+    </ol>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Observe:</strong> Each refresh may show a different Instance ID/AZ — the ALB is distributing traffic. Enable sticky sessions to always route to the same target.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><p>Delete ALB → Delete Target Group → Terminate EC2 instances → Delete SG</p></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 6.2</span><span class="lab-title">Auto Scaling Group with Target Tracking</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create ASG with Launch Template, attach to ALB, configure target tracking scaling.</p>
+    <div class="cmd">
+<span class="comment"># 1. Create Launch Template</span>
+LT_ID=$(aws ec2 create-launch-template \
+  --launch-template-name lab-web-lt \
+  --launch-template-data '{
+    "ImageId": "'$AMI_ID'",
+    "InstanceType": "t2.micro",
+    "SecurityGroupIds": ["'$SG_ID'"],
+    "UserData": "'$(base64 -w 0 userdata.sh)'"
+  }' --query 'LaunchTemplate.LaunchTemplateId' --output text)
+
+<span class="comment"># 2. Create Auto Scaling Group</span>
+aws autoscaling create-auto-scaling-group \
+  --auto-scaling-group-name lab-asg \
+  --launch-template LaunchTemplateId=$LT_ID,Version='$Latest' \
+  --min-size 2 --max-size 6 --desired-capacity 2 \
+  --availability-zones ap-southeast-1a ap-southeast-1b \
+  --target-group-arns &lt;your-target-group-arn&gt;
+
+<span class="comment"># 3. Add Target Tracking Policy (keep CPU at 50%)</span>
+aws autoscaling put-scaling-policy \
+  --auto-scaling-group-name lab-asg \
+  --policy-name cpu-target-tracking \
+  --policy-type TargetTrackingScaling \
+  --target-tracking-configuration '{
+    "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ASGAverageCPUUtilization"
+    },
+    "TargetValue": 50.0
+  }'
+
+<span class="comment"># 4. Stress test to trigger scaling (on EC2 instance):</span>
+<span class="comment"># sudo amazon-linux-extras install epel -y && sudo yum install stress -y</span>
+<span class="comment"># stress --cpu 4 --timeout 300</span>
+    </div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws autoscaling delete-auto-scaling-group --auto-scaling-group-name lab-asg --force-delete
+aws ec2 delete-launch-template --launch-template-id $LT_ID
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 6.3</span><span class="lab-title">NLB — Static IP Load Balancer</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create NLB with Elastic IPs for static IP addresses. Compare behavior with ALB.</p>
+    <p>Console: EC2 → Load Balancers → Create → Network Load Balancer → Assign Elastic IP per AZ → Create TCP target group on port 80.</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Key Observation:</strong> NLB gives you a static IP per AZ. ALB only gives a DNS name. If a client requires whitelisting a specific IP → use NLB (or ALB + Global Accelerator).</div></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ LAMBDA LABS ══════════ -->
+<div class="sec" id="sec-lambda">
+  <div class="sec-intro"><h2>⚡ Lambda & Serverless Labs</h2><p>Build event-driven architectures without servers.</p><div class="stats"><div class="stat"><div class="n">4</div><div class="l">Labs</div></div><div class="stat"><div class="n">Free</div><div class="l">Cost</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 7.1</span><span class="lab-title">Create Lambda Function & Test</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create function code</span>
+cat &lt;&lt; 'EOF' > lambda_function.py
+import json
+def lambda_handler(event, context):
+    name = event.get('name', 'World')
+    return {
+        'statusCode': 200,
+        'body': json.dumps(f'Hello, {name}! From Lambda!')
+    }
+EOF
+zip function.zip lambda_function.py
+
+<span class="comment"># Create execution role</span>
+ROLE_ARN=$(aws iam create-role --role-name lambda-lab-role \
+  --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}' \
+  --query 'Role.Arn' --output text)
+aws iam attach-role-policy --role-name lambda-lab-role \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+sleep 10 <span class="comment"># Wait for role propagation</span>
+
+<span class="comment"># Create Lambda function</span>
+aws lambda create-function --function-name lab-hello \
+  --runtime python3.12 --handler lambda_function.lambda_handler \
+  --zip-file fileb://function.zip --role $ROLE_ARN --timeout 30 --memory-size 128
+
+<span class="comment"># Invoke!</span>
+aws lambda invoke --function-name lab-hello \
+  --payload '{"name":"Mohan"}' response.json
+cat response.json
+    </div>
+    <div class="expected"><strong>Expected:</strong> <code>{"statusCode": 200, "body": "\"Hello, Mohan! From Lambda!\""}</code></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws lambda delete-function --function-name lab-hello
+aws iam detach-role-policy --role-name lambda-lab-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+aws iam delete-role --role-name lambda-lab-role
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 7.2</span><span class="lab-title">API Gateway + Lambda (REST API)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a serverless REST API with API Gateway fronting Lambda. Best done via Console.</p>
+    <ol>
+      <li>Lambda → Create function "api-handler" (Python 3.12)</li>
+      <li>API Gateway → Create REST API → Create resource <code>/hello</code> → Create GET method → Integration: Lambda → Select your function</li>
+      <li>Deploy API → Create stage "prod"</li>
+      <li>Test the invoke URL: <code>https://xxxxxx.execute-api.region.amazonaws.com/prod/hello</code></li>
+    </ol>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam Architecture:</strong> API Gateway + Lambda + DynamoDB = the classic serverless stack. No servers to manage, auto-scales to zero, pay-per-request.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 7.3</span><span class="lab-title">S3 Event → Lambda Trigger (Image Processing)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Configure S3 to trigger Lambda when objects are uploaded.</p>
+    <div class="cmd">
+<span class="comment"># Lambda function that logs S3 events</span>
+cat &lt;&lt; 'EOF' > s3_trigger.py
+import json
+def lambda_handler(event, context):
+    for record in event['Records']:
+        bucket = record['s3']['bucket']['name']
+        key = record['s3']['object']['key']
+        size = record['s3']['object']['size']
+        print(f"New object: s3://{bucket}/{key} ({size} bytes)")
+    return {'statusCode': 200}
+EOF
+zip s3trigger.zip s3_trigger.py
+
+aws lambda create-function --function-name s3-trigger-lab \
+  --runtime python3.12 --handler s3_trigger.lambda_handler \
+  --zip-file fileb://s3trigger.zip --role $ROLE_ARN
+
+<span class="comment"># Add S3 permission to invoke Lambda</span>
+aws lambda add-permission --function-name s3-trigger-lab \
+  --statement-id s3-invoke --action lambda:InvokeFunction \
+  --principal s3.amazonaws.com --source-arn arn:aws:s3:::$BUCKET
+
+<span class="comment"># Configure S3 event notification (Console is easier)</span>
+<span class="comment"># S3 → Bucket → Properties → Event notifications → Create</span>
+<span class="comment"># Event type: PUT, Destination: Lambda, Select s3-trigger-lab</span>
+    </div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 7.4</span><span class="lab-title">Lambda + DynamoDB (Serverless CRUD)</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create Lambda functions that read/write to DynamoDB — the classic serverless data layer.</p>
+    <div class="cmd">
+cat &lt;&lt; 'EOF' > dynamo_crud.py
+import json, boto3
+from datetime import datetime
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('Lab-Notes')
+
+def lambda_handler(event, context):
+    method = event.get('httpMethod', 'GET')
+    
+    if method == 'POST':
+        body = json.loads(event.get('body', '{}'))
+        table.put_item(Item={
+            'NoteId': body['id'],
+            'Content': body['content'],
+            'CreatedAt': datetime.utcnow().isoformat()
+        })
+        return {'statusCode': 201, 'body': json.dumps('Created!')}
+    
+    elif method == 'GET':
+        result = table.scan()
+        return {'statusCode': 200, 'body': json.dumps(result['Items'], default=str)}
+EOF
+    </div>
+    <div class="co tip"><span class="icon">🎯</span><div><strong>Full Stack:</strong> API Gateway → Lambda → DynamoDB. Add Cognito for auth. This pattern handles millions of requests with zero server management.</div></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ SECURITY LABS ══════════ -->
+<div class="sec" id="sec-security">
+  <div class="sec-intro"><h2>🔒 Security Labs</h2><p>Implement encryption, secrets management, and threat detection.</p><div class="stats"><div class="stat"><div class="n">4</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 8.1</span><span class="lab-title">KMS — Create Key, Encrypt/Decrypt Data</span><div class="lab-tags"><span class="lab-tag tag-free">Free*</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create a KMS key</span>
+KEY_ID=$(aws kms create-key --description "Lab encryption key" --query 'KeyMetadata.KeyId' --output text)
+aws kms create-alias --alias-name alias/lab-key --target-key-id $KEY_ID
+
+<span class="comment"># Encrypt data</span>
+aws kms encrypt --key-id alias/lab-key \
+  --plaintext "Secret message from Mohan" \
+  --query 'CiphertextBlob' --output text > encrypted.txt
+
+<span class="comment"># Decrypt data</span>
+aws kms decrypt --ciphertext-blob fileb://<(base64 --decode encrypted.txt) \
+  --query 'Plaintext' --output text | base64 --decode
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> KMS CMK = you control rotation, access. AWS managed key = AWS manages. Envelope encryption: KMS encrypts a data key, data key encrypts your data. Max direct encrypt = 4KB → use envelope for larger.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws kms delete-alias --alias-name alias/lab-key
+aws kms schedule-key-deletion --key-id $KEY_ID --pending-window-in-days 7
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 8.2</span><span class="lab-title">Secrets Manager — Store & Retrieve DB Credentials</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Store a secret</span>
+aws secretsmanager create-secret --name lab/db-credentials \
+  --secret-string '{"username":"admin","password":"SuperSecret123!","host":"mydb.cluster.ap-southeast-1.rds.amazonaws.com"}'
+
+<span class="comment"># Retrieve the secret</span>
+aws secretsmanager get-secret-value --secret-id lab/db-credentials \
+  --query 'SecretString' --output text | python3 -m json.tool
+
+<span class="comment"># Enable auto-rotation (30 days)</span>
+<span class="comment"># Best configured via Console with a Lambda rotation function</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Secrets Manager = auto-rotation of secrets (RDS, Redshift, DocumentDB integrated). Parameter Store = simpler, cheaper, no auto-rotation. "Rotate DB password automatically" → Secrets Manager.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">aws secretsmanager delete-secret --secret-id lab/db-credentials --force-delete-without-recovery</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 8.3</span><span class="lab-title">GuardDuty — Enable Threat Detection</span><div class="lab-tags"><span class="lab-tag tag-free">Free 30-day trial</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Enable GuardDuty</span>
+aws guardduty create-detector --enable
+
+<span class="comment"># Generate sample findings for testing</span>
+DETECTOR_ID=$(aws guardduty list-detectors --query 'DetectorIds[0]' --output text)
+aws guardduty create-sample-findings --detector-id $DETECTOR_ID \
+  --finding-types "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom"
+
+<span class="comment"># List findings</span>
+FINDING_IDS=$(aws guardduty list-findings --detector-id $DETECTOR_ID --query 'FindingIds' --output json)
+aws guardduty get-findings --detector-id $DETECTOR_ID --finding-ids $FINDING_IDS
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> GuardDuty analyzes CloudTrail, VPC Flow Logs, and DNS logs for threats. It's a one-click enable. "Detect compromised EC2 instances" or "detect cryptocurrency mining" → GuardDuty.</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 8.4</span><span class="lab-title">AWS WAF — Protect ALB with Web ACL</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Create a WAF Web ACL with rules to block SQL injection and rate limiting.</p>
+    <p>Best via Console: WAF & Shield → Create Web ACL → Add AWS Managed Rules (SQL injection, XSS) → Associate with ALB.</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> WAF protects ALB, API Gateway, CloudFront (NOT NLB). Shield Standard = free DDoS protection. Shield Advanced = dedicated DDoS response team ($3K/month).</div></div>
+  </div></div></div>
+</div>
+
+<!-- ══════════ MONITORING LABS ══════════ -->
+<div class="sec" id="sec-monitor">
+  <div class="sec-intro"><h2>📊 Monitoring Labs</h2><p>CloudWatch, CloudTrail, and AWS Config.</p><div class="stats"><div class="stat"><div class="n">3</div><div class="l">Labs</div></div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 9.1</span><span class="lab-title">CloudWatch — Alarms, Dashboards, Custom Metrics</span><div class="lab-tags"><span class="lab-tag tag-free">Free</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create CPU alarm for EC2</span>
+aws cloudwatch put-metric-alarm \
+  --alarm-name high-cpu-lab \
+  --metric-name CPUUtilization \
+  --namespace AWS/EC2 \
+  --statistic Average \
+  --period 300 \
+  --threshold 80 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods 2 \
+  --dimensions Name=InstanceId,Value=$INSTANCE_ID \
+  --alarm-actions arn:aws:sns:ap-southeast-1:$ACCOUNT_ID:lab-alerts
+
+<span class="comment"># Publish custom metric</span>
+aws cloudwatch put-metric-data \
+  --namespace "Lab/CustomApp" \
+  --metric-name ActiveUsers \
+  --value 42 \
+  --unit Count
+
+<span class="comment"># Create dashboard (Console: CloudWatch → Dashboards → Create)</span>
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Default EC2 metrics: CPU, Network, Disk I/O, Status checks (every 5 min). Memory and disk space are NOT default — need CloudWatch Agent. Detailed monitoring = 1-minute intervals ($).</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">aws cloudwatch delete-alarms --alarm-names high-cpu-lab</div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 9.2</span><span class="lab-title">CloudTrail — Enable Audit Logging</span><div class="lab-tags"><span class="lab-tag tag-free">Free (1 trail)</span><span class="lab-tag tag-beginner">Beginner</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <div class="cmd">
+<span class="comment"># Create trail (logs all management events to S3)</span>
+aws cloudtrail create-trail \
+  --name lab-trail \
+  --s3-bucket-name $BUCKET \
+  --s3-key-prefix cloudtrail \
+  --is-multi-region-trail \
+  --enable-log-file-validation
+
+aws cloudtrail start-logging --name lab-trail
+
+<span class="comment"># Look up recent events</span>
+aws cloudtrail lookup-events --max-results 5
+    </div>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> CloudTrail = WHO did WHAT (API audit log). CloudWatch = HOW things are performing (metrics). Config = WHAT changed and is it compliant. "Detect who deleted an S3 bucket" → CloudTrail.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><div class="cmd">
+aws cloudtrail stop-logging --name lab-trail
+aws cloudtrail delete-trail --name lab-trail
+    </div></div>
+  </div></div></div>
+
+  <div class="lab" onclick="toggleLab(this)"><div class="lab-header"><span class="lab-num">LAB 9.3</span><span class="lab-title">AWS Config — Compliance Rules</span><div class="lab-tags"><span class="lab-tag tag-cost">$$</span><span class="lab-tag tag-intermediate">Intermediate</span></div><span class="lab-arrow">▼</span></div><div class="lab-body"><div class="lab-content">
+    <h4>🎯 Objective</h4><p>Enable AWS Config and add rules to check compliance (e.g., all EBS volumes encrypted).</p>
+    <p>Best via Console: Config → Get started → Record all resources → Add rule → Select "encrypted-volumes" managed rule.</p>
+    <div class="co tip"><span class="icon">💡</span><div><strong>Exam:</strong> Config tracks resource configuration changes over time. Config Rules evaluate compliance. "Ensure all S3 buckets have versioning enabled" → AWS Config rule. Remediation can auto-fix non-compliant resources.</div></div>
+    <div class="cleanup"><h4>🧹 Cleanup</h4><p>Config → Settings → Turn off recording. Delete rules. Delete Config recorder and delivery channel.</p></div>
+  </div></div></div>
+</div>
+
+</div>
+
+<div class="footer">AWS SAA-C03 Labs Guide · Part 1 (Weeks 1-4) · Built for Mohan's Certification Journey<br>Part 2: Route 53, CloudFront, Migration, Analytics, Cost Optimization & Architecture</div>
+
+<script>
+function go(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`sec-${id}`).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  window.scrollTo({top:180,behavior:'smooth'});
+}
+function toggleLab(el){
+  if(event.target.closest('.cmd')||event.target.closest('.cmd-copy'))return;
+  el.classList.toggle('open');
+}
+</script>
+</body>
+</html>

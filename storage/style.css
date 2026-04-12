@@ -382,7 +382,7 @@ svg text { font-family: 'DM Sans', sans-serif; }
   body { background: #fff; color: #1a1a1a; }
   .chapter { break-inside: avoid; border-color: #ddd; background: #fff; }
   .subtopic { background: #f8f8f8; border-color: #666; }
-  .hero { background: #fff; min-height: auto; padding: 30px; }
+  .hero { background: #fff; min-height: auto; padding: 20px; }
   .hero h1 { -webkit-text-fill-color: #1a1a1a; }
 }
 

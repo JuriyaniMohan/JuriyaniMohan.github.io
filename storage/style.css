@@ -37,7 +37,7 @@ body::before {
 
 .sidebar input {
   width:100%;
-  padding:10px;
+  padding:4px;
   margin:15px 0;
   border:none;
   border-radius:8px;
@@ -62,7 +62,7 @@ body::before {
 
 /* MAIN */
 .main {
-  margin-left:260px;
+  margin-left:290px;
   width:100%;
 }
 

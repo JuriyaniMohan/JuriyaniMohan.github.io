@@ -412,7 +412,7 @@ svg text { font-family: 'DM Sans', sans-serif; }
   .main {
     margin-left: 0;
   }
-  .hero { padding: 60px 20px; }
+  .hero { padding: 30px 20px; }
   .hero h1 { font-size: 2rem; }
   footer { margin-left: 0 !important; }
 }

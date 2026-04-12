@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 Part 2 — Route 53, CloudFront & Edge | AWS SAA-C03</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e17;--surface:#111827;--surface2:#1a2235;--surface3:#243049;--border:#2a3a55;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--accent:#f59e0b;--accent2:#d97706;--green:#10b981;--green-bg:rgba(16,185,129,0.08);--green-border:rgba(16,185,129,0.25);--orange:#f59e0b;--orange-bg:rgba(245,158,11,0.08);--orange-border:rgba(245,158,11,0.25);--red:#ef4444;--red-bg:rgba(239,68,68,0.08);--red-border:rgba(239,68,68,0.25);--purple:#a78bfa;--purple-bg:rgba(167,139,250,0.08);--purple-border:rgba(167,139,250,0.25);--blue:#3b82f6;--blue-bg:rgba(59,130,246,0.08);--blue-border:rgba(59,130,246,0.25);--cyan:#06b6d4;--pink:#ec4899}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:60px 20px 40px;position:relative}
+.header::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(245,158,11,0.06) 0%,transparent 70%);pointer-events:none}
+.week-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;margin-bottom:16px}
+.header h1{font-family:'Source Serif 4',serif;font-size:clamp(32px,5vw,52px);font-weight:700;line-height:1.15;margin-bottom:12px;background:linear-gradient(135deg,#e2e8f0 30%,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:18px;color:var(--text2);max-width:650px;margin:0 auto}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:32px;overflow-x:auto;padding-bottom:0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 22px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text3);border-bottom:3px solid transparent;white-space:nowrap;transition:all .25s;border-radius:8px 8px 0 0}
+.tab:hover{color:var(--text);background:var(--surface)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface)}
+.tab-content{display:none;animation:fadeUp .4s ease}.tab-content.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:24px}
+.card h2{font-family:'Source Serif 4',serif;font-size:26px;font-weight:700;margin-bottom:8px;color:#fff}
+.card h3{font-size:20px;font-weight:600;margin:24px 0 12px;color:var(--accent)}
+.card h4{font-size:16px;font-weight:600;margin:18px 0 8px;color:var(--purple)}
+.card p,.card li{font-size:15px;color:var(--text2);margin-bottom:8px}
+.card ul,.card ol{padding-left:20px}
+.card li{margin-bottom:6px}
+.callout{border-radius:10px;padding:18px 22px;margin:18px 0;font-size:14px}
+.callout-title{font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.exam-tip{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.exam-tip .callout-body{color:var(--text2)}
+.danger{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.danger .callout-body{color:var(--text2)}
+.why-box{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+.why-box .callout-body{color:var(--text2)}
+.production{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+.production .callout-body{color:var(--text2)}
+.info{background:var(--orange-bg);border:1px solid var(--orange-border);color:var(--orange)}
+.info .callout-body{color:var(--text2)}
+.table-wrap{overflow-x:auto;margin:18px 0;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--surface2);color:var(--accent);padding:12px 16px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid var(--border);color:var(--text2)}
+tr:hover td{background:rgba(245,158,11,0.03)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surface2);padding:2px 7px;border-radius:5px;color:var(--accent)}
+pre{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:13px;color:var(--text)}
+.diagram-wrap{margin:24px 0;text-align:center;overflow-x:auto}
+.diagram-wrap svg{max-width:100%;height:auto}
+.quiz-q{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:22px;margin:16px 0}
+.quiz-q p{font-weight:600;color:#fff;margin-bottom:12px;font-size:15px}
+.quiz-opts label{display:block;padding:8px 14px;margin:4px 0;border-radius:8px;cursor:pointer;color:var(--text2);font-size:14px;transition:background .2s}
+.quiz-opts label:hover{background:var(--surface3)}
+.quiz-opts input{margin-right:10px}
+.reveal-btn{margin-top:12px;padding:8px 20px;background:var(--accent);color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px}
+.reveal-btn:hover{background:var(--accent2)}
+.quiz-answer{display:none;margin-top:14px;padding:14px;border-radius:8px;background:var(--green-bg);border:1px solid var(--green-border);font-size:14px;color:var(--text2)}
+.quiz-answer strong{color:var(--green)}
+@media(max-width:768px){.card{padding:20px}.header{padding:40px 16px 24px}.tab{padding:10px 14px;font-size:13px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<div class="week-badge">Week 3 · Part 2 of 3</div>
+<h1>Route 53, CloudFront & Edge</h1>
+<p>DNS routing strategies, CDN architecture, edge caching, and global acceleration — the services that make your app fast worldwide</p>
+</div>
+
+<div class="container">
+<div class="tabs" id="mainTabs">
+<div class="tab active" onclick="switchTab(0)">Route 53</div>
+<div class="tab" onclick="switchTab(1)">Routing Policies</div>
+<div class="tab" onclick="switchTab(2)">CloudFront</div>
+<div class="tab" onclick="switchTab(3)">Global Accelerator</div>
+<div class="tab" onclick="switchTab(4)">Exam Prep</div>
+</div>
+
+<!-- ============ TAB 0: ROUTE 53 ============ -->
+<div class="tab-content active" id="tab0">
+<div class="card">
+<h2>Amazon Route 53 — Intelligent DNS</h2>
+<p>Route 53 is AWS's managed DNS service. Named after port 53 (DNS). It provides three functions: domain registration, DNS routing, and health checking.</p>
+
+<div class="callout why-box">
+<div class="callout-title">Why Route 53 Matters for the Exam</div>
+<div class="callout-body">Route 53 is the only AWS service with a <strong>100% SLA</strong>. Understanding its routing policies is critical — at least 3-5 exam questions will test your ability to choose the right routing policy for a scenario.</div>
+</div>
+
+<h3>DNS Fundamentals</h3>
+<p>DNS translates human-readable domain names (alienops.online) into IP addresses (54.123.45.67). The process involves a hierarchy:</p>
+
+<div class="diagram-wrap">
+<svg viewBox="0 0 740 280" xmlns="http://www.w3.org/2000/svg">
+<rect width="740" height="280" rx="14" fill="#111827"/>
+<text x="370" y="28" text-anchor="middle" font-family="Outfit" font-size="14" font-weight="700" fill="#e2e8f0">DNS Resolution Flow</text>
+
+<!-- User -->
+<rect x="30" y="100" width="100" height="50" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="80" y="130" text-anchor="middle" font-family="Outfit" font-size="11" font-weight="500" fill="#e2e8f0">User Browser</text>
+
+<!-- Recursive resolver -->
+<rect x="170" y="90" width="120" height="70" rx="8" fill="rgba(59,130,246,0.1)" stroke="#3b82f6"/>
+<text x="230" y="115" text-anchor="middle" font-family="Outfit" font-size="10" font-weight="600" fill="#3b82f6">Recursive</text>
+<text x="230" y="130" text-anchor="middle" font-family="Outfit" font-size="10" font-weight="600" fill="#3b82f6">Resolver</text>
+<text x="230" y="148" text-anchor="middle" font-family="Outfit" font-size="9" fill="#94a3b8">(ISP / 8.8.8.8)</text>
+
+<line x1="130" y1="125" x2="168" y2="125" stroke="#3b82f6" stroke-width="1.5"/>
+
+<!-- Root -->
+<rect x="330" y="50" width="100" height="40" rx="8" fill="rgba(239,68,68,0.1)" stroke="#ef4444"/>
+<text x="380" y="75" text-anchor="middle" font-family="Outfit" font-size="10" font-weight="600" fill="#ef4444">Root (.)</text>
+<line x1="290" y1="110" x2="330" y2="70" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- TLD -->
+<rect x="470" y="50" width="100" height="40" rx="8" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"/>
+<text x="520" y="75" text-anchor="middle" font-family="Outfit" font-size="10" font-weight="600" fill="#f59e0b">TLD (.online)</text>
+<line x1="430" y1="70" x2="468" y2="70" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- Authoritative (Route 53) -->
+<rect x="610" y="50" width="110" height="40" rx="8" fill="rgba(16,185,129,0.1)" stroke="#10b981"/>
+<text x="665" y="75" text-anchor="middle" font-family="Outfit" font-size="10" font-weight="600" fill="#10b981">Route 53 (NS)</text>
+<line x1="570" y1="70" x2="608" y2="70" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- Return -->
+<line x1="665" y1="90" x2="290" y2="145" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="490" y="135" text-anchor="middle" font-family="Outfit" font-size="9" fill="#10b981">IP: 54.123.45.67</text>
+
+<!-- Steps -->
+<text x="370" y="200" text-anchor="middle" font-family="Outfit" font-size="11" fill="#94a3b8">1. Browser asks resolver → 2. Resolver asks Root → 3. Root says "ask .online TLD"</text>
+<text x="370" y="220" text-anchor="middle" font-family="Outfit" font-size="11" fill="#94a3b8">4. TLD says "ask Route 53 nameservers" → 5. Route 53 returns the IP</text>
+<text x="370" y="245" text-anchor="middle" font-family="Outfit" font-size="11" fill="#94a3b8">6. Resolver caches result (TTL) → Returns IP to browser</text>
+</svg>
+</div>
+
+<h3>Record Types You Must Know</h3>
+<div class="table-wrap">
+<table>
+<tr><th>Type</th><th>Purpose</th><th>Example</th><th>Exam Notes</th></tr>
+<tr><td><code>A</code></td><td>Maps domain to IPv4</td><td>alienops.online → 54.1.2.3</td><td>Most common record</td></tr>
+<tr><td><code>AAAA</code></td><td>Maps domain to IPv6</td><td>alienops.online → 2001:db8::1</td><td>Four A's = IPv6</td></tr>
+<tr><td><code>CNAME</code></td><td>Alias to another domain</td><td>www → alienops.online</td><td>Cannot be used at zone apex!</td></tr>
+<tr><td><code>ALIAS</code></td><td>AWS-specific alias to AWS resource</td><td>alienops.online → ALB DNS</td><td>CAN be used at zone apex. Free.</td></tr>
+<tr><td><code>MX</code></td><td>Mail server routing</td><td>Priority + mail server</td><td>Lower number = higher priority</td></tr>
+<tr><td><code>NS</code></td><td>Nameserver delegation</td><td>ns-xxx.awsdns-xx.com</td><td>Your Namecheap → Route 53 NS setup</td></tr>
+<tr><td><code>TXT</code></td><td>Text verification</td><td>SPF, DKIM, domain verification</td><td>Used for email auth + ACM validation</td></tr>
+<tr><td><code>SRV</code></td><td>Service location</td><td>Protocol + port + server</td><td>Rare on exam</td></tr>
+</table>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">Critical — CNAME vs ALIAS</div>
+<div class="callout-body">
+<strong>CNAME</strong> cannot be used at the zone apex (naked domain like <code>alienops.online</code>). It only works on subdomains (<code>www.alienops.online</code>).<br><br>
+<strong>ALIAS</strong> is Route 53's special record — works at zone apex, resolves to an AWS resource (ALB, CloudFront, S3 website, etc.), and queries are <strong>free</strong>. This is the answer whenever an exam question asks about pointing a naked domain to an AWS resource.
+</div>
+</div>
+
+<h3>Hosted Zones</h3>
+<ul>
+<li><strong>Public Hosted Zone</strong> — Routes traffic on the internet. Contains records for your public domain.</li>
+<li><strong>Private Hosted Zone</strong> — Routes traffic within VPCs. Associates with specific VPCs for internal DNS (e.g., <code>db.internal.alienops</code>).</li>
+<li>Cost: $0.50/month per hosted zone + $0.40 per million queries (standard)</li>
+</ul>
+
+<h3>Health Checks</h3>
+<ul>
+<li>Monitor endpoint health (HTTP, HTTPS, TCP)</li>
+<li>Health checkers from multiple regions worldwide</li>
+<li>Threshold: configurable (default 3 consecutive failures = unhealthy)</li>
+<li>Can monitor: endpoints, other health checks (calculated), CloudWatch alarms</li>
+<li>Integrates with routing policies for automatic failover</li>
+</ul>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — Health Check + Private Resources</div>
+<div class="callout-body">Route 53 health checkers are on the public internet — they <strong>cannot access private endpoints</strong> directly. To health-check a private resource, create a <strong>CloudWatch Alarm</strong> monitoring the resource, then create a Route 53 health check that monitors that CloudWatch Alarm.</div>
+</div>
+</div>
+</div>
+
+<!-- ============ TAB 1: ROUTING POLICIES ============ -->
+<div class="tab-content" id="tab1">
+<div class="card">
+<h2>Route 53 Routing Policies — Deep Dive</h2>
+<p>This is the <strong>most-tested Route 53 topic</strong>. Each policy serves a different purpose. You must know when to use each.</p>
+
+<div class="table-wrap">
+<table>
+<tr><th>Policy</th><th>What It Does</th><th>Use Case</th><th>Health Checks?</th></tr>
+<tr><td style="color:var(--green)"><strong>Simple</strong></td><td>Return one or multiple values randomly</td><td>Single resource, no special routing needs</td><td>No (but multiple values = client picks one)</td></tr>
+<tr><td style="color:var(--accent)"><strong>Weighted</strong></td><td>Distribute traffic by assigned weights (%)</td><td>A/B testing, blue-green deployment, gradual migration</td><td>Yes</td></tr>
+<tr><td style="color:var(--blue)"><strong>Latency-based</strong></td><td>Route to region with lowest latency for user</td><td>Global apps needing best performance</td><td>Yes</td></tr>
+<tr><td style="color:var(--red)"><strong>Failover</strong></td><td>Active-passive failover</td><td>DR — primary in us-east-1, secondary in eu-west-1</td><td>Yes (mandatory for primary)</td></tr>
+<tr><td style="color:var(--purple)"><strong>Geolocation</strong></td><td>Route based on user's geographic location</td><td>Content localization, compliance (data sovereignty)</td><td>Yes</td></tr>
+<tr><td style="color:var(--pink)"><strong>Geoproximity</strong></td><td>Route based on geographic distance + bias</td><td>Shift traffic between regions with bias values</td><td>Yes</td></tr>
+<tr><td style="color:var(--cyan)"><strong>Multi-value</strong></td><td>Return up to 8 healthy records</td><td>Client-side load balancing (not ELB replacement)</td><td>Yes</td></tr>
+<tr><td style="color:#94a3b8"><strong>IP-based</strong></td><td>Route based on client IP/CIDR</td><td>ISP-specific routing, known client ranges</td><td>Yes</td></tr>
+</table>
+</div>
+
+<h3>Weighted Routing — Traffic Splitting</h3>
+<p>Assign a weight (0-255) to each record. Traffic percentage = record weight ÷ sum of all weights.</p>
+<pre><code># Example: Gradual migration from old to new
+app.alienops.online → old-server   Weight: 70  (70%)
+app.alienops.online → new-server   Weight: 30  (30%)
+
+# To send NO traffic to a record, set weight = 0
+# If ALL weights are 0, traffic splits equally</code></pre>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — Weighted</div>
+<div class="callout-body">Questions mentioning "send 10% of traffic to a new version" or "gradually shift traffic" = <strong>Weighted routing</strong>. It's NOT the same as ALB weighted target groups — Route 53 weighted is at the DNS level.</div>
+</div>
+
+<h3>Latency-Based vs Geolocation vs Geoproximity</h3>
+<p>These three are the most confused. Here's the difference:</p>
+
+<div class="table-wrap">
+<table>
+<tr><th>Policy</th><th>Decision Factor</th><th>Example</th></tr>
+<tr><td><strong>Latency-based</strong></td><td>Network latency measurement</td><td>User in Singapore gets routed to ap-southeast-1 because it has lowest latency (even though India is geographically closer)</td></tr>
+<tr><td><strong>Geolocation</strong></td><td>User's physical continent/country/state</td><td>All users in EU get routed to eu-west-1 for GDPR compliance, regardless of latency</td></tr>
+<tr><td><strong>Geoproximity</strong></td><td>Geographic distance + adjustable bias</td><td>Normally users in Texas route to us-east-1, but with +50 bias on us-west-2, some Texas traffic shifts west</td></tr>
+</table>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">Exam Trap — Geolocation Default Record</div>
+<div class="callout-body">With Geolocation routing, if a user's location doesn't match any configured records, they get <strong>no answer</strong> (NXDOMAIN). You <strong>must</strong> create a "Default" record as a catch-all. Without it, users from unmapped locations cannot access your site.</div>
+</div>
+
+<h3>Failover Routing — DR Pattern</h3>
+<div class="diagram-wrap">
+<svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="220" rx="14" fill="#111827"/>
+<text x="350" y="28" text-anchor="middle" font-family="Outfit" font-size="14" font-weight="700" fill="#e2e8f0">Failover Routing — Active/Passive</text>
+
+<!-- Route 53 -->
+<rect x="270" y="48" width="160" height="40" rx="8" fill="rgba(245,158,11,0.12)" stroke="#f59e0b"/>
+<text x="350" y="73" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="600" fill="#f59e0b">Route 53 + Health Check</text>
+
+<!-- Primary -->
+<rect x="80" y="130" width="200" height="60" rx="8" fill="rgba(16,185,129,0.1)" stroke="#10b981"/>
+<text x="180" y="155" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="600" fill="#10b981">Primary (Active)</text>
+<text x="180" y="175" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">us-east-1 — EC2/ALB</text>
+<line x1="300" y1="88" x2="200" y2="128" stroke="#10b981" stroke-width="1.5"/>
+<text x="235" y="105" font-family="Outfit" font-size="9" fill="#10b981">healthy ✓</text>
+
+<!-- Secondary -->
+<rect x="420" y="130" width="200" height="60" rx="8" fill="rgba(59,130,246,0.1)" stroke="#3b82f6"/>
+<text x="520" y="155" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="600" fill="#3b82f6">Secondary (Passive)</text>
+<text x="520" y="175" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">eu-west-1 — S3 static site</text>
+<line x1="400" y1="88" x2="500" y2="128" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="465" y="105" font-family="Outfit" font-size="9" fill="#64748b">standby</text>
+</svg>
+</div>
+
+<div class="callout production">
+<div class="callout-title">Common Exam Pattern — S3 Static Failover</div>
+<div class="callout-body">Route 53 Failover + S3 static website hosting is a classic DR pattern. Primary = dynamic app on ALB/EC2. Secondary = static "sorry" page on S3. When primary fails health check, DNS automatically resolves to S3. Cost-effective passive DR.</div>
+</div>
+
+<h3>Routing Policy Combos</h3>
+<p>You can <strong>nest</strong> routing policies using ALIAS records:</p>
+<ul>
+<li><strong>Latency + Failover</strong>: Use latency to pick the closest region, then failover within each region to a secondary</li>
+<li><strong>Geolocation + Weighted</strong>: Route EU users to EU, then within EU split 80/20 for A/B testing</li>
+<li><strong>Failover + Multi-value</strong>: Primary record fails over to a multi-value set for client-side balancing</li>
+</ul>
+</div>
+</div>
+
+<!-- ============ TAB 2: CLOUDFRONT ============ -->
+<div class="tab-content" id="tab2">
+<div class="card">
+<h2>Amazon CloudFront — Global CDN</h2>
+<p>CloudFront is AWS's Content Delivery Network with 450+ edge locations worldwide. It caches content close to users, reducing latency and offloading origin servers.</p>
+
+<div class="callout why-box">
+<div class="callout-title">Why CloudFront Exists</div>
+<div class="callout-body">Without a CDN, every request travels from the user to your origin (say, us-east-1). A user in Singapore has 200-300ms round-trip. CloudFront caches content at an edge location in Singapore — subsequent requests return in 5-20ms. This isn't optional for production apps — it's expected.</div>
+</div>
+
+<div class="diagram-wrap">
+<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<rect width="760" height="300" rx="14" fill="#111827"/>
+<text x="380" y="28" text-anchor="middle" font-family="Outfit" font-size="14" font-weight="700" fill="#e2e8f0">CloudFront Architecture</text>
+
+<!-- Users -->
+<rect x="30" y="60" width="100" height="80" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="80" y="85" text-anchor="middle" font-family="Outfit" font-size="11" font-weight="600" fill="#e2e8f0">Global Users</text>
+<text x="80" y="103" text-anchor="middle" font-family="Outfit" font-size="9" fill="#94a3b8">Singapore</text>
+<text x="80" y="117" text-anchor="middle" font-family="Outfit" font-size="9" fill="#94a3b8">London</text>
+<text x="80" y="131" text-anchor="middle" font-family="Outfit" font-size="9" fill="#94a3b8">São Paulo</text>
+
+<!-- Edge Locations -->
+<rect x="190" y="50" width="160" height="100" rx="10" fill="rgba(245,158,11,0.08)" stroke="#f59e0b"/>
+<text x="270" y="75" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="700" fill="#f59e0b">Edge Locations</text>
+<text x="270" y="95" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">450+ worldwide</text>
+<text x="270" y="112" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">Cache + TLS termination</text>
+<text x="270" y="129" text-anchor="middle" font-family="Outfit" font-size="10" fill="#f59e0b">5-20ms response</text>
+
+<line x1="130" y1="100" x2="188" y2="100" stroke="#f59e0b" stroke-width="1.5"/>
+
+<!-- Regional Edge Cache -->
+<rect x="400" y="50" width="160" height="100" rx="10" fill="rgba(167,139,250,0.08)" stroke="#a78bfa"/>
+<text x="480" y="75" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="700" fill="#a78bfa">Regional Edge</text>
+<text x="480" y="95" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">13 locations</text>
+<text x="480" y="112" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">Larger cache</text>
+<text x="480" y="129" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">Reduces origin load</text>
+
+<line x1="350" y1="100" x2="398" y2="100" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="375" y="90" text-anchor="middle" font-family="Outfit" font-size="8" fill="#64748b">cache miss</text>
+
+<!-- Origin -->
+<rect x="610" y="40" width="130" height="120" rx="10" fill="rgba(6,182,212,0.08)" stroke="#06b6d4"/>
+<text x="675" y="65" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="700" fill="#06b6d4">Origin</text>
+<text x="675" y="85" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">S3 Bucket</text>
+<text x="675" y="100" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">— or —</text>
+<text x="675" y="115" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">ALB / EC2</text>
+<text x="675" y="130" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">Custom HTTP</text>
+<text x="675" y="148" text-anchor="middle" font-family="Outfit" font-size="10" fill="#06b6d4">us-east-1</text>
+
+<line x1="560" y1="100" x2="608" y2="100" stroke="#06b6d4" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="585" y="90" text-anchor="middle" font-family="Outfit" font-size="8" fill="#64748b">cache miss</text>
+
+<!-- Bottom info -->
+<text x="380" y="200" text-anchor="middle" font-family="Outfit" font-size="12" fill="#e2e8f0">Cache Hierarchy: Edge Location → Regional Edge Cache → Origin</text>
+<text x="380" y="220" text-anchor="middle" font-family="Outfit" font-size="11" fill="#94a3b8">Content cached at each layer based on TTL. Cache HIT = instant response.</text>
+<text x="380" y="240" text-anchor="middle" font-family="Outfit" font-size="11" fill="#94a3b8">Cache MISS = request forwarded up the chain to origin.</text>
+</svg>
+</div>
+
+<h3>Key CloudFront Concepts</h3>
+
+<h4>Origins</h4>
+<ul>
+<li><strong>S3 bucket</strong> — Static content (images, CSS, JS). Uses Origin Access Control (OAC) for private buckets</li>
+<li><strong>Custom origin</strong> — ALB, EC2, API Gateway, any HTTP server</li>
+<li><strong>Origin Groups</strong> — Primary + secondary origin for automatic failover (if primary returns 5xx)</li>
+<li>S3 bucket as website endpoint is treated as a custom origin (different from regular S3 origin)</li>
+</ul>
+
+<h4>Origin Access Control (OAC) — Securing S3 Origin</h4>
+<p>Restricts S3 bucket access so users <strong>must</strong> go through CloudFront — they cannot bypass it by hitting the S3 URL directly.</p>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — OAC vs OAI</div>
+<div class="callout-body"><strong>Origin Access Control (OAC)</strong> is the modern replacement for the older Origin Access Identity (OAI). OAC supports SSE-KMS encryption, all S3 regions, and is recommended. If the exam mentions "restrict direct S3 access while serving through CloudFront" — OAC is the answer. OAI is legacy.</div>
+</div>
+
+<h4>Cache Behaviors</h4>
+<ul>
+<li>Rules that define how CloudFront handles different URL patterns</li>
+<li>Default behavior (<code>*</code>) plus path-based behaviors (<code>/api/*</code>, <code>/images/*</code>)</li>
+<li>Each behavior can point to a different origin and have different cache settings</li>
+<li>Can configure: TTL, viewer protocol policy, allowed HTTP methods, compression</li>
+</ul>
+
+<pre><code># Example: Multi-origin CloudFront
+/api/*     → ALB origin (no caching, all methods)
+/static/*  → S3 origin (max caching, GET only)
+*          → S3 origin (default, moderate caching)</code></pre>
+
+<h4>Cache Invalidation</h4>
+<ul>
+<li>Force CloudFront to remove objects from edge caches before TTL expires</li>
+<li><code>/*</code> invalidates everything (expensive at scale)</li>
+<li><code>/images/logo.png</code> invalidates specific file</li>
+<li>First 1,000 invalidation paths/month free, then $0.005 per path</li>
+<li>Better alternative: <strong>versioned file names</strong> (e.g., <code>style-v2.css</code>) — no invalidation needed</li>
+</ul>
+
+<h3>CloudFront Security Features</h3>
+
+<div class="table-wrap">
+<table>
+<tr><th>Feature</th><th>Purpose</th><th>Exam Trigger</th></tr>
+<tr><td><strong>HTTPS</strong></td><td>SSL/TLS between viewer↔edge and edge↔origin</td><td>Always enforce HTTPS (redirect HTTP→HTTPS)</td></tr>
+<tr><td><strong>Signed URLs</strong></td><td>Time-limited access to specific files</td><td>Premium video content, paid downloads</td></tr>
+<tr><td><strong>Signed Cookies</strong></td><td>Time-limited access to multiple files</td><td>Subscription content, member areas</td></tr>
+<tr><td><strong>Geo Restriction</strong></td><td>Whitelist/blacklist countries</td><td>Content licensing, compliance</td></tr>
+<tr><td><strong>Field-Level Encryption</strong></td><td>Encrypt specific POST fields at edge</td><td>Credit card data encrypted before reaching origin</td></tr>
+<tr><td><strong>WAF Integration</strong></td><td>Web Application Firewall rules at edge</td><td>Block SQL injection, XSS, rate limiting</td></tr>
+</table>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">Signed URLs vs Signed Cookies — Exam Trap</div>
+<div class="callout-body">
+<strong>Signed URL</strong>: Access to a <em>single</em> file. When RTMP (streaming) is needed. When client doesn't support cookies.<br>
+<strong>Signed Cookie</strong>: Access to <em>multiple</em> files (e.g., all files in /premium/). When you don't want to change URLs.<br>
+<strong>S3 Pre-signed URL</strong> (different!): Gives direct access to S3 object, bypasses CloudFront. Issued by IAM user.
+</div>
+</div>
+
+<h3>CloudFront Functions vs Lambda@Edge</h3>
+<div class="table-wrap">
+<table>
+<tr><th>Feature</th><th>CloudFront Functions</th><th>Lambda@Edge</th></tr>
+<tr><td>Runtime</td><td>JavaScript only</td><td>Node.js, Python</td></tr>
+<tr><td>Execution Location</td><td>Edge locations (218+)</td><td>Regional edge caches (13)</td></tr>
+<tr><td>Execution Time</td><td>< 1ms</td><td>Up to 5-30 seconds</td></tr>
+<tr><td>Memory</td><td>2 MB</td><td>128 MB - 10 GB</td></tr>
+<tr><td>Network Access</td><td>No</td><td>Yes</td></tr>
+<tr><td>Triggers</td><td>Viewer request/response only</td><td>Viewer + origin request/response</td></tr>
+<tr><td>Scale</td><td>Millions of requests/sec</td><td>Thousands of requests/sec</td></tr>
+<tr><td>Use Case</td><td>URL rewrites, header manipulation, redirects, cache key normalization</td><td>Dynamic content, A/B testing, auth, image transformation</td></tr>
+<tr><td>Cost</td><td>1/6th of Lambda@Edge</td><td>Standard Lambda pricing</td></tr>
+</table>
+</div>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — When to Use Which</div>
+<div class="callout-body">
+<strong>"Lightweight, simple transformations at the edge"</strong> → CloudFront Functions (header manipulation, URL rewrites, redirects)<br>
+<strong>"Complex logic at the edge, needs network access or longer execution"</strong> → Lambda@Edge (auth against a database, A/B testing with backend calls, image resizing)
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ TAB 3: GLOBAL ACCELERATOR ============ -->
+<div class="tab-content" id="tab3">
+<div class="card">
+<h2>AWS Global Accelerator</h2>
+<p>Provides <strong>static Anycast IP addresses</strong> that serve as a fixed entry point to your applications, routing traffic through AWS's global network instead of the public internet.</p>
+
+<div class="callout why-box">
+<div class="callout-title">Global Accelerator vs CloudFront — Why Both Exist</div>
+<div class="callout-body">
+<strong>CloudFront</strong> caches <em>content</em> at the edge. Great for static/cacheable content.<br>
+<strong>Global Accelerator</strong> routes <em>connections</em> through AWS's backbone. Great for dynamic, non-cacheable, TCP/UDP traffic. No caching — every request goes to the origin, but via AWS's optimized network instead of the public internet.
+</div>
+</div>
+
+<div class="diagram-wrap">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+<rect width="720" height="250" rx="14" fill="#111827"/>
+<text x="360" y="28" text-anchor="middle" font-family="Outfit" font-size="14" font-weight="700" fill="#e2e8f0">Global Accelerator — How It Works</text>
+
+<!-- Without GA -->
+<text x="360" y="60" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="600" fill="#ef4444">Without Global Accelerator</text>
+<rect x="40" y="72" width="80" height="35" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="80" y="94" text-anchor="middle" font-family="Outfit" font-size="10" fill="#e2e8f0">User (SG)</text>
+<rect x="170" y="72" width="380" height="35" rx="6" fill="rgba(239,68,68,0.08)" stroke="#ef4444"/>
+<text x="360" y="94" text-anchor="middle" font-family="Outfit" font-size="10" fill="#ef4444">Public Internet — 15+ hops, variable latency, packet loss</text>
+<rect x="600" y="72" width="80" height="35" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="640" y="94" text-anchor="middle" font-family="Outfit" font-size="10" fill="#e2e8f0">App (US)</text>
+<line x1="120" y1="90" x2="168" y2="90" stroke="#ef4444" stroke-width="1"/>
+<line x1="550" y1="90" x2="598" y2="90" stroke="#ef4444" stroke-width="1"/>
+
+<!-- With GA -->
+<text x="360" y="140" text-anchor="middle" font-family="Outfit" font-size="12" font-weight="600" fill="#10b981">With Global Accelerator</text>
+<rect x="40" y="152" width="80" height="35" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="80" y="174" text-anchor="middle" font-family="Outfit" font-size="10" fill="#e2e8f0">User (SG)</text>
+
+<rect x="170" y="152" width="100" height="35" rx="6" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"/>
+<text x="220" y="168" text-anchor="middle" font-family="Outfit" font-size="9" font-weight="600" fill="#f59e0b">Edge (SG)</text>
+<text x="220" y="181" text-anchor="middle" font-family="Outfit" font-size="8" fill="#94a3b8">Anycast IP</text>
+
+<rect x="310" y="152" width="250" height="35" rx="6" fill="rgba(16,185,129,0.08)" stroke="#10b981"/>
+<text x="435" y="174" text-anchor="middle" font-family="Outfit" font-size="10" fill="#10b981">AWS Global Network — optimized, consistent, low loss</text>
+
+<rect x="600" y="152" width="80" height="35" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="640" y="174" text-anchor="middle" font-family="Outfit" font-size="10" fill="#e2e8f0">App (US)</text>
+
+<line x1="120" y1="170" x2="168" y2="170" stroke="#f59e0b" stroke-width="1.5"/>
+<line x1="270" y1="170" x2="308" y2="170" stroke="#10b981" stroke-width="1.5"/>
+<line x1="560" y1="170" x2="598" y2="170" stroke="#10b981" stroke-width="1.5"/>
+
+<text x="360" y="220" text-anchor="middle" font-family="Outfit" font-size="11" fill="#94a3b8">User enters AWS at nearest edge → traffic rides AWS backbone → reaches origin</text>
+<text x="360" y="238" text-anchor="middle" font-family="Outfit" font-size="11" fill="#10b981">Result: 60% fewer hops, consistent latency, no packet loss</text>
+</svg>
+</div>
+
+<h3>Key Features</h3>
+<ul>
+<li><strong>2 static Anycast IPs</strong> — Never change, global entry points</li>
+<li><strong>Health checking</strong> — Automatic failover to healthy endpoints in < 30 seconds</li>
+<li><strong>Endpoint groups</strong> — One per region, with traffic dial (0-100%) for weighted routing</li>
+<li><strong>Endpoints</strong> — ALB, NLB, EC2, Elastic IP</li>
+<li><strong>Client affinity</strong> — Can route same client to same endpoint (session stickiness)</li>
+<li>Supports <strong>TCP and UDP</strong> (CloudFront is HTTP/HTTPS/WebSocket only)</li>
+</ul>
+
+<h3>CloudFront vs Global Accelerator — Decision Matrix</h3>
+<div class="table-wrap">
+<table>
+<tr><th>Factor</th><th style="color:var(--accent)">CloudFront</th><th style="color:var(--green)">Global Accelerator</th></tr>
+<tr><td>Content Type</td><td>Cacheable (static + dynamic HTTP)</td><td>Non-cacheable (gaming, IoT, VoIP)</td></tr>
+<tr><td>Protocol</td><td>HTTP / HTTPS / WebSocket</td><td>TCP / UDP</td></tr>
+<tr><td>Caching</td><td>Yes — edge caching is the main feature</td><td>No caching — all traffic goes to origin</td></tr>
+<tr><td>IP Addresses</td><td>Dynamic (many edge IPs)</td><td>2 static Anycast IPs</td></tr>
+<tr><td>Use Case</td><td>Website, API, video streaming</td><td>Gaming, IoT, VoIP, financial trading</td></tr>
+<tr><td>Failover</td><td>Origin groups (on 5xx errors)</td><td>Automatic endpoint failover (< 30s)</td></tr>
+<tr><td>DDoS Protection</td><td>Shield Standard (free)</td><td>Shield Standard (free)</td></tr>
+</table>
+</div>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Decision Framework</div>
+<div class="callout-body">
+<strong>"Improve performance for HTTP/HTTPS content"</strong> → CloudFront<br>
+<strong>"Static IP addresses needed"</strong> → Global Accelerator<br>
+<strong>"Gaming, IoT, UDP, or non-HTTP"</strong> → Global Accelerator<br>
+<strong>"Deterministic, fast failover across regions"</strong> → Global Accelerator<br>
+<strong>"Cache content at the edge"</strong> → CloudFront<br>
+<strong>"IP whitelisting by clients"</strong> → Global Accelerator (static IPs)
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ TAB 4: EXAM PREP ============ -->
+<div class="tab-content" id="tab4">
+<div class="card">
+<h2>Exam-Style Questions — Route 53, CloudFront & Edge</h2>
+
+<div class="quiz-q" id="q1">
+<p>Q1: A company hosts an application in us-east-1 and eu-west-1. They want users to be routed to the region that provides the best experience. Which Route 53 routing policy should be used?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q1"> A) Geolocation routing</label>
+<label><input type="radio" name="q1"> B) Weighted routing with 50/50 split</label>
+<label><input type="radio" name="q1"> C) Latency-based routing</label>
+<label><input type="radio" name="q1"> D) Failover routing</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q1a')">Reveal Answer</button>
+<div class="quiz-answer" id="q1a"><strong>Answer: C</strong><br>"Best experience" = lowest latency. Latency-based routing measures actual network latency and sends users to the region with the best performance. Geolocation routes by location (not latency). Weighted splits traffic by percentages. Failover is for DR.</div>
+</div>
+
+<div class="quiz-q" id="q2">
+<p>Q2: A company wants to serve their website at the naked domain (example.com) pointing to an Application Load Balancer. Which DNS record type should be used?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q2"> A) CNAME record pointing to the ALB DNS name</label>
+<label><input type="radio" name="q2"> B) A record with a static IP address</label>
+<label><input type="radio" name="q2"> C) ALIAS record pointing to the ALB</label>
+<label><input type="radio" name="q2"> D) MX record pointing to the ALB</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q2a')">Reveal Answer</button>
+<div class="quiz-answer" id="q2a"><strong>Answer: C</strong><br>CNAME cannot be used at the zone apex (naked domain) — DNS specification prohibits it. ALIAS is Route 53's solution: it works at the apex, resolves to AWS resources like ALB, and queries are free. ALB doesn't have a static IP (B). MX is for mail (D).</div>
+</div>
+
+<div class="quiz-q" id="q3">
+<p>Q3: A media company needs to restrict access to premium video content so only paying subscribers can view it. The content is served through CloudFront from an S3 origin. What is the recommended approach?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q3"> A) S3 pre-signed URLs for each video</label>
+<label><input type="radio" name="q3"> B) CloudFront signed cookies</label>
+<label><input type="radio" name="q3"> C) S3 bucket policy restricting by IP</label>
+<label><input type="radio" name="q3"> D) CloudFront geo-restriction</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q3a')">Reveal Answer</button>
+<div class="quiz-answer" id="q3a"><strong>Answer: B</strong><br>Signed cookies provide access to <em>multiple files</em> (all premium content) without changing URLs. Signed URLs would work but are per-file and would require changing all video URLs. S3 pre-signed URLs bypass CloudFront. Geo-restriction blocks by country, not by subscription status.</div>
+</div>
+
+<div class="quiz-q" id="q4">
+<p>Q4: A gaming company has real-time multiplayer servers in 4 AWS regions. Players need consistent, low-latency connections using UDP, and the company needs static IP addresses for firewall whitelisting. What should the architect use?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q4"> A) CloudFront with multiple origins</label>
+<label><input type="radio" name="q4"> B) Route 53 latency-based routing</label>
+<label><input type="radio" name="q4"> C) AWS Global Accelerator</label>
+<label><input type="radio" name="q4"> D) Network Load Balancer with Elastic IPs in each region</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q4a')">Reveal Answer</button>
+<div class="quiz-answer" id="q4a"><strong>Answer: C</strong><br>Three signals point to Global Accelerator: UDP protocol (CloudFront doesn't support UDP), static IP addresses (Anycast IPs), and consistent low-latency (AWS backbone). Route 53 latency routing helps with DNS but doesn't improve the actual network path. NLBs per region doesn't provide a unified static IP or backbone routing.</div>
+</div>
+
+<div class="quiz-q" id="q5">
+<p>Q5: An application serves content to users in Europe and must comply with data residency requirements. European users' requests must ONLY be processed by servers in the EU, regardless of latency. Which Route 53 routing policy should be used?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q5"> A) Latency-based routing</label>
+<label><input type="radio" name="q5"> B) Geolocation routing</label>
+<label><input type="radio" name="q5"> C) Geoproximity routing</label>
+<label><input type="radio" name="q5"> D) Multi-value routing</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q5a')">Reveal Answer</button>
+<div class="quiz-answer" id="q5a"><strong>Answer: B</strong><br>"Data residency", "compliance", "users in [specific region] MUST be served by [specific location]" = <strong>Geolocation routing</strong>. Latency-based might route EU users to a non-EU region if it's faster. Geoproximity is about distance with bias, not strict geographic boundaries. Remember to add a default record for geolocation.</div>
+</div>
+
+<div class="quiz-q" id="q6">
+<p>Q6: A company wants to add URL rewrite rules at CloudFront's edge to normalize request paths (e.g., redirect /PRODUCTS to /products). The transformation must be fast and handle millions of requests per second. What should they use?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q6"> A) Lambda@Edge on viewer request</label>
+<label><input type="radio" name="q6"> B) CloudFront Functions on viewer request</label>
+<label><input type="radio" name="q6"> C) Application logic on the origin server</label>
+<label><input type="radio" name="q6"> D) AWS WAF rules</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q6a')">Reveal Answer</button>
+<div class="quiz-answer" id="q6a"><strong>Answer: B</strong><br>URL rewrites are lightweight, need sub-millisecond execution, and must handle massive scale — exactly what CloudFront Functions are designed for. Lambda@Edge works but is overkill (slower, more expensive). Origin-side logic increases latency. WAF is for security rules, not URL transformations.</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Quick-Recall Cheat Sheet</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Concept</th><th>Key Fact</th></tr>
+<tr><td>CNAME vs ALIAS</td><td>CNAME can't be at zone apex. ALIAS can. ALIAS queries are free.</td></tr>
+<tr><td>Route 53 SLA</td><td>100% availability SLA — only AWS service with this.</td></tr>
+<tr><td>Health Check + Private</td><td>Use CloudWatch Alarm → Route 53 health check monitors the alarm.</td></tr>
+<tr><td>Weighted Routing</td><td>Traffic splitting by percentage. A/B testing. Blue-green.</td></tr>
+<tr><td>Latency Routing</td><td>"Best performance" — measures actual network latency.</td></tr>
+<tr><td>Geolocation</td><td>"Compliance/data residency" — strict location-based. Needs default record.</td></tr>
+<tr><td>Failover</td><td>Active-passive DR. Primary + secondary. Health check required.</td></tr>
+<tr><td>CloudFront OAC</td><td>Modern way to restrict S3 access through CloudFront only. Replaces OAI.</td></tr>
+<tr><td>Signed URL</td><td>Single file access, time-limited.</td></tr>
+<tr><td>Signed Cookie</td><td>Multiple files access, time-limited.</td></tr>
+<tr><td>CF Functions</td><td>Lightweight (JS), sub-ms, viewer request/response, millions RPS.</td></tr>
+<tr><td>Lambda@Edge</td><td>Complex (Node/Python), up to 30s, viewer+origin events, network access.</td></tr>
+<tr><td>Global Accelerator</td><td>Static Anycast IPs, TCP/UDP, AWS backbone, no caching, fast failover.</td></tr>
+<tr><td>CloudFront vs GA</td><td>CF = cache content. GA = route connections. CF = HTTP. GA = TCP/UDP.</td></tr>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+function switchTab(idx){document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',i===idx)});document.querySelectorAll('.tab-content').forEach((c,i)=>{c.classList.toggle('active',i===idx)});window.scrollTo({top:document.querySelector('.tabs').offsetTop-20,behavior:'smooth'})}
+function reveal(id){const el=document.getElementById(id);el.style.display=el.style.display==='block'?'none':'block'}
+</script>
+</body>
+</html>

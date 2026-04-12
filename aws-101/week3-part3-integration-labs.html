@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 Part 3 — App Integration, Labs & Patterns | AWS SAA-C03</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Source+Serif+4:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e17;--surface:#111827;--surface2:#1a2235;--surface3:#243049;--border:#2a3a55;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--accent:#10b981;--accent2:#059669;--green:#10b981;--green-bg:rgba(16,185,129,0.08);--green-border:rgba(16,185,129,0.25);--orange:#f59e0b;--orange-bg:rgba(245,158,11,0.08);--orange-border:rgba(245,158,11,0.25);--red:#ef4444;--red-bg:rgba(239,68,68,0.08);--red-border:rgba(239,68,68,0.25);--purple:#a78bfa;--purple-bg:rgba(167,139,250,0.08);--purple-border:rgba(167,139,250,0.25);--blue:#3b82f6;--blue-bg:rgba(59,130,246,0.08);--blue-border:rgba(59,130,246,0.25);--cyan:#06b6d4;--pink:#ec4899}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:60px 20px 40px;position:relative}
+.header::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,0.06) 0%,transparent 70%);pointer-events:none}
+.week-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;margin-bottom:16px}
+.header h1{font-family:'Source Serif 4',serif;font-size:clamp(32px,5vw,48px);font-weight:700;line-height:1.15;margin-bottom:12px;background:linear-gradient(135deg,#e2e8f0 30%,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:18px;color:var(--text2);max-width:650px;margin:0 auto}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:32px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 22px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text3);border-bottom:3px solid transparent;white-space:nowrap;transition:all .25s;border-radius:8px 8px 0 0}
+.tab:hover{color:var(--text);background:var(--surface)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface)}
+.tab-content{display:none;animation:fadeUp .4s ease}.tab-content.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:24px}
+.card h2{font-family:'Source Serif 4',serif;font-size:26px;font-weight:700;margin-bottom:8px;color:#fff}
+.card h3{font-size:20px;font-weight:600;margin:24px 0 12px;color:var(--accent)}
+.card h4{font-size:16px;font-weight:600;margin:18px 0 8px;color:var(--purple)}
+.card p,.card li{font-size:15px;color:var(--text2);margin-bottom:8px}
+.card ul,.card ol{padding-left:20px}
+.card li{margin-bottom:6px}
+.callout{border-radius:10px;padding:18px 22px;margin:18px 0;font-size:14px}
+.callout-title{font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.exam-tip{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.exam-tip .callout-body{color:var(--text2)}
+.danger{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.danger .callout-body{color:var(--text2)}
+.why-box{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+.why-box .callout-body{color:var(--text2)}
+.production{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+.production .callout-body{color:var(--text2)}
+.info{background:var(--orange-bg);border:1px solid var(--orange-border);color:var(--orange)}
+.info .callout-body{color:var(--text2)}
+.table-wrap{overflow-x:auto;margin:18px 0;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--surface2);color:var(--accent);padding:12px 16px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid var(--border);color:var(--text2)}
+tr:hover td{background:rgba(16,185,129,0.03)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surface2);padding:2px 7px;border-radius:5px;color:var(--accent)}
+pre{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:13px;color:var(--text)}
+.diagram-wrap{margin:24px 0;text-align:center;overflow-x:auto}
+.diagram-wrap svg{max-width:100%;height:auto}
+.quiz-q{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:22px;margin:16px 0}
+.quiz-q p{font-weight:600;color:#fff;margin-bottom:12px;font-size:15px}
+.quiz-opts label{display:block;padding:8px 14px;margin:4px 0;border-radius:8px;cursor:pointer;color:var(--text2);font-size:14px;transition:background .2s}
+.quiz-opts label:hover{background:var(--surface3)}
+.quiz-opts input{margin-right:10px}
+.reveal-btn{margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px}
+.reveal-btn:hover{background:var(--accent2)}
+.quiz-answer{display:none;margin-top:14px;padding:14px;border-radius:8px;background:var(--green-bg);border:1px solid var(--green-border);font-size:14px;color:var(--text2)}
+.quiz-answer strong{color:var(--green)}
+@media(max-width:768px){.card{padding:20px}.header{padding:40px 16px 24px}.tab{padding:10px 14px;font-size:13px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<div class="week-badge">Week 3 · Part 3 of 3</div>
+<h1>App Integration, Labs & Patterns</h1>
+<p>SQS, SNS, EventBridge, Step Functions, API Gateway — plus hands-on labs and Terraform networking code</p>
+</div>
+
+<div class="container">
+<div class="tabs">
+<div class="tab active" onclick="switchTab(0)">SQS & SNS</div>
+<div class="tab" onclick="switchTab(1)">EventBridge & Step Functions</div>
+<div class="tab" onclick="switchTab(2)">API Gateway</div>
+<div class="tab" onclick="switchTab(3)">Labs & Terraform</div>
+<div class="tab" onclick="switchTab(4)">Exam Prep</div>
+</div>
+
+<!-- ============ TAB 0: SQS & SNS ============ -->
+<div class="tab-content active" id="tab0">
+<div class="card">
+<h2>Amazon SQS — Decoupled Message Queuing</h2>
+<p>SQS is a fully managed message queuing service that decouples producers from consumers. Instead of Service A calling Service B directly (tight coupling), A puts a message on a queue and B reads it when ready.</p>
+
+<div class="callout why-box">
+<div class="callout-title">Why Decoupling Matters</div>
+<div class="callout-body">Without queues: if Service B goes down, Service A fails too (cascade failure). With SQS: Service A puts messages in the queue and succeeds. When B comes back, it processes the backlog. This is the foundation of resilient, scalable architectures.</div>
+</div>
+
+<h3>Standard vs FIFO Queues</h3>
+<div class="table-wrap">
+<table>
+<tr><th>Feature</th><th style="color:var(--green)">Standard Queue</th><th style="color:var(--blue)">FIFO Queue</th></tr>
+<tr><td>Throughput</td><td><strong>Unlimited</strong> — near-infinite TPS</td><td>300 TPS (3,000 with batching)</td></tr>
+<tr><td>Ordering</td><td>Best-effort (may be out of order)</td><td><strong>Guaranteed FIFO</strong></td></tr>
+<tr><td>Delivery</td><td>At-least-once (possible duplicates)</td><td><strong>Exactly-once</strong> processing</td></tr>
+<tr><td>Queue Name</td><td>Any valid name</td><td>Must end in <code>.fifo</code></td></tr>
+<tr><td>Use Case</td><td>High-volume, order not critical</td><td>Financial transactions, order processing</td></tr>
+</table>
+</div>
+
+<h3>Key SQS Concepts</h3>
+<ul>
+<li><strong>Message Size</strong>: Max 256 KB. For larger payloads, use SQS Extended Client Library (stores data in S3, sends pointer in SQS)</li>
+<li><strong>Retention</strong>: 1 minute to 14 days (default 4 days)</li>
+<li><strong>Visibility Timeout</strong>: After a consumer reads a message, it becomes invisible to other consumers for this duration (default 30 seconds, max 12 hours). If processing takes longer, use <code>ChangeMessageVisibility</code> API</li>
+<li><strong>Long Polling</strong>: Consumer waits up to 20 seconds for messages (reduces empty responses and cost). Set <code>WaitTimeSeconds > 0</code></li>
+<li><strong>Dead Letter Queue (DLQ)</strong>: Messages that fail processing after N attempts (MaxReceiveCount) are moved to a DLQ for troubleshooting</li>
+</ul>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — Visibility Timeout</div>
+<div class="callout-body">If consumers are processing the same message twice, the visibility timeout is too <strong>short</strong>. If messages sit invisible too long, it's too <strong>long</strong>. This is a classic troubleshooting question.</div>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">Exam Trap — SQS + Auto Scaling</div>
+<div class="callout-body">SQS alone doesn't scale consumers. Use CloudWatch metric <code>ApproximateNumberOfMessagesVisible</code> to trigger Auto Scaling for EC2/ECS consumers. When queue depth increases → scale out workers. This pattern appears in every other exam.</div>
+</div>
+
+<h3>SQS Access Control</h3>
+<ul>
+<li><strong>IAM policies</strong> — Who can send/receive (identity-based)</li>
+<li><strong>SQS Access Policy</strong> (resource-based) — Cross-account access, allowing other services (SNS, S3) to write to queue</li>
+<li><strong>Encryption</strong>: SSE-SQS (AWS managed) or SSE-KMS (customer managed). In-transit encryption with HTTPS.</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>Amazon SNS — Pub/Sub Messaging</h2>
+<p>SNS is a publish/subscribe messaging service. One message published → multiple subscribers receive it simultaneously. Fan-out pattern.</p>
+
+<div class="diagram-wrap">
+<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="230" rx="14" fill="#111827"/>
+<text x="350" y="28" text-anchor="middle" font-family="Outfit" font-size="14" font-weight="700" fill="#e2e8f0">SNS Fan-Out Pattern</text>
+
+<!-- Publisher -->
+<rect x="40" y="85" width="120" height="50" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+<text x="100" y="115" text-anchor="middle" font-family="Outfit" font-size="11" font-weight="500" fill="#e2e8f0">Order Service</text>
+
+<!-- SNS Topic -->
+<rect x="230" y="75" width="140" height="70" rx="10" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="2"/>
+<text x="300" y="105" text-anchor="middle" font-family="Outfit" font-size="13" font-weight="700" fill="#f59e0b">SNS Topic</text>
+<text x="300" y="125" text-anchor="middle" font-family="Outfit" font-size="10" fill="#94a3b8">"order-events"</text>
+<line x1="160" y1="110" x2="228" y2="110" stroke="#f59e0b" stroke-width="1.5"/>
+
+<!-- Subscribers -->
+<rect x="450" y="20" width="210" height="40" rx="8" fill="rgba(59,130,246,0.08)" stroke="#3b82f6"/>
+<text x="555" y="45" text-anchor="middle" font-family="Outfit" font-size="11" fill="#3b82f6">SQS Queue → Fulfillment</text>
+<line x1="370" y1="95" x2="448" y2="40" stroke="#3b82f6" stroke-width="1"/>
+
+<rect x="450" y="75" width="210" height="40" rx="8" fill="rgba(16,185,129,0.08)" stroke="#10b981"/>
+<text x="555" y="100" text-anchor="middle" font-family="Outfit" font-size="11" fill="#10b981">Lambda → Send Email</text>
+<line x1="370" y1="105" x2="448" y2="95" stroke="#10b981" stroke-width="1"/>
+
+<rect x="450" y="130" width="210" height="40" rx="8" fill="rgba(167,139,250,0.08)" stroke="#a78bfa"/>
+<text x="555" y="155" text-anchor="middle" font-family="Outfit" font-size="11" fill="#a78bfa">SQS Queue → Analytics</text>
+<line x1="370" y1="115" x2="448" y2="150" stroke="#a78bfa" stroke-width="1"/>
+
+<rect x="450" y="185" width="210" height="40" rx="8" fill="rgba(236,72,153,0.08)" stroke="#ec4899"/>
+<text x="555" y="210" text-anchor="middle" font-family="Outfit" font-size="11" fill="#ec4899">HTTP Endpoint → Partner API</text>
+<line x1="370" y1="125" x2="448" y2="205" stroke="#ec4899" stroke-width="1"/>
+</svg>
+</div>
+
+<h3>SNS Subscriber Types</h3>
+<ul>
+<li>SQS queues, Lambda functions, HTTP/HTTPS endpoints, email, SMS, Kinesis Data Firehose, mobile push</li>
+<li>Up to <strong>12.5 million subscriptions</strong> per topic, <strong>100,000 topics</strong> per account</li>
+</ul>
+
+<h3>SNS + SQS Fan-Out — The Most Important Pattern</h3>
+<p>Publish once to an SNS topic → fan out to multiple SQS queues. Each queue processes independently. This is the de-facto pattern for event-driven architectures and appears in nearly every exam.</p>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — SNS + SQS Fan-Out</div>
+<div class="callout-body">When a question says "one event needs to trigger multiple independent processing workflows" — the answer is <strong>SNS → multiple SQS queues</strong>. Examples: order placed → send email + update inventory + send to analytics. FIFO topics work with FIFO queues for ordered fan-out.</div>
+</div>
+
+<h3>Message Filtering</h3>
+<p>Subscribers can set <strong>filter policies</strong> (JSON) to receive only messages matching certain attributes. Without filtering, subscribers receive ALL messages on the topic.</p>
+<pre><code># Filter policy on analytics SQS subscription:
+{
+  "order_type": ["premium"],
+  "amount": [{"numeric": [">=", 100]}]
+}
+# Only receives messages where order_type=premium AND amount>=100</code></pre>
+</div>
+</div>
+
+<!-- ============ TAB 1: EVENTBRIDGE & STEP FUNCTIONS ============ -->
+<div class="tab-content" id="tab1">
+<div class="card">
+<h2>Amazon EventBridge — Serverless Event Bus</h2>
+<p>EventBridge is the evolution of CloudWatch Events. It's a serverless event bus that connects applications using events from AWS services, SaaS apps, and custom applications.</p>
+
+<div class="callout why-box">
+<div class="callout-title">EventBridge vs SNS — When to Use Which</div>
+<div class="callout-body">
+<strong>SNS</strong>: Simple pub/sub, high throughput, when you need fan-out to SQS/Lambda/HTTP.<br>
+<strong>EventBridge</strong>: Complex event routing with <em>content-based filtering</em> (rules that match on event content), scheduled events (cron), SaaS integration (Zendesk, Datadog, Auth0), and schema discovery. EventBridge is the more sophisticated choice for event-driven architectures.
+</div>
+</div>
+
+<h3>Key Concepts</h3>
+<ul>
+<li><strong>Event Bus</strong> — Default (AWS events), custom (your events), or partner (SaaS events)</li>
+<li><strong>Rules</strong> — Match events by pattern (content-based) and route to targets</li>
+<li><strong>Targets</strong> — Lambda, SQS, SNS, Step Functions, API Gateway, Kinesis, ECS tasks, and 15+ others</li>
+<li><strong>Schema Registry</strong> — Automatically discovers and stores event schemas</li>
+<li><strong>Archive & Replay</strong> — Store events and replay them later (great for debugging)</li>
+<li><strong>Scheduler</strong> — Run events on a schedule (cron or rate expressions) — replaces CloudWatch Events scheduling</li>
+</ul>
+
+<pre><code># EventBridge Rule — Match pattern
+{
+  "source": ["com.alienops.orders"],
+  "detail-type": ["Order Created"],
+  "detail": {
+    "amount": [{"numeric": [">=", 500]}],
+    "region": ["APAC"]
+  }
+}
+# Only triggers for orders >= $500 from APAC region</code></pre>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — EventBridge Scheduler</div>
+<div class="callout-body">For "run a Lambda function every 5 minutes" or "trigger an ECS task at 2 AM daily" — <strong>EventBridge Scheduler</strong> (or EventBridge rule with schedule expression). This replaced the older CloudWatch Events cron functionality.</div>
+</div>
+</div>
+
+<div class="card">
+<h2>AWS Step Functions — Visual Workflows</h2>
+<p>Step Functions lets you orchestrate multiple AWS services into serverless workflows using a visual state machine. Each step can be a Lambda function, ECS task, DynamoDB operation, SNS publish, or other AWS service action.</p>
+
+<h3>Workflow Types</h3>
+<div class="table-wrap">
+<table>
+<tr><th>Feature</th><th style="color:var(--green)">Standard Workflow</th><th style="color:var(--blue)">Express Workflow</th></tr>
+<tr><td>Duration</td><td>Up to 1 year</td><td>Up to 5 minutes</td></tr>
+<tr><td>Execution</td><td>Exactly-once</td><td>At-least-once (async) / At-most-once (sync)</td></tr>
+<tr><td>Pricing</td><td>Per state transition</td><td>Per execution + duration + memory</td></tr>
+<tr><td>Use Case</td><td>Long-running: order processing, ETL, human approval</td><td>High-volume: IoT data, streaming, real-time</td></tr>
+</table>
+</div>
+
+<h3>Key States</h3>
+<ul>
+<li><strong>Task</strong> — Do work (invoke Lambda, call API, run ECS task)</li>
+<li><strong>Choice</strong> — Branching logic (if/else)</li>
+<li><strong>Parallel</strong> — Execute branches simultaneously</li>
+<li><strong>Wait</strong> — Delay for X seconds or until a specific time</li>
+<li><strong>Map</strong> — Iterate over a collection (like forEach)</li>
+<li><strong>Succeed / Fail</strong> — Terminal states</li>
+</ul>
+
+<div class="callout production">
+<div class="callout-title">Production Pattern — Step Functions for Order Processing</div>
+<div class="callout-body">
+1. Validate order (Lambda) → 2. Check inventory (DynamoDB) → 3. Process payment (Lambda) → 4. If payment fails → retry 3 times with exponential backoff → 5. If still fails → send to DLQ → 6. If succeeds → Ship order (ECS task) + Send confirmation (SNS).<br><br>
+This orchestration with retry logic, error handling, and parallel execution is exactly what Step Functions excels at.
+</div>
+</div>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — Step Functions vs SQS</div>
+<div class="callout-body">
+<strong>Step Functions</strong>: When you need orchestration — sequential/parallel steps, error handling, retries, human approval, visual workflow. Think "workflow coordinator."<br>
+<strong>SQS</strong>: When you need decoupling — buffer between producer/consumer, handle traffic spikes, loose coupling. Think "message buffer."<br>
+They often work together: Step Functions can push to SQS as one of its steps.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ TAB 2: API GATEWAY ============ -->
+<div class="tab-content" id="tab2">
+<div class="card">
+<h2>Amazon API Gateway</h2>
+<p>A fully managed service to create, publish, maintain, and secure APIs at any scale. It's the front door for your backend services.</p>
+
+<h3>API Types</h3>
+<div class="table-wrap">
+<table>
+<tr><th>Type</th><th>Protocol</th><th>Use Case</th><th>Key Feature</th></tr>
+<tr><td><strong>REST API</strong></td><td>HTTP</td><td>Full-featured APIs with caching, throttling, API keys</td><td>Most features, higher cost</td></tr>
+<tr><td><strong>HTTP API</strong></td><td>HTTP</td><td>Simple APIs, Lambda proxy, OIDC/OAuth2</td><td>70% cheaper, lower latency</td></tr>
+<tr><td><strong>WebSocket API</strong></td><td>WebSocket</td><td>Real-time bidirectional (chat, gaming, dashboards)</td><td>Persistent connections</td></tr>
+</table>
+</div>
+
+<h3>Key Features</h3>
+<ul>
+<li><strong>Throttling</strong>: Default 10,000 RPS per account per region, burst 5,000. Per-method throttling available.</li>
+<li><strong>Caching</strong>: 300 MB - 237 GB cache. Reduces backend calls. TTL 0-3600s.</li>
+<li><strong>Stages</strong>: dev, staging, prod — each with independent configuration and deployment.</li>
+<li><strong>Usage Plans + API Keys</strong>: Rate limiting per customer. Not for authentication — for throttling/metering.</li>
+<li><strong>Authorization</strong>: IAM, Cognito User Pools, Lambda authorizer (custom JWT/token validation).</li>
+<li><strong>Integration Types</strong>: Lambda proxy (most common), HTTP proxy, AWS service integration, Mock.</li>
+</ul>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — REST vs HTTP API</div>
+<div class="callout-body">
+If the question mentions <strong>caching, API keys, usage plans, request validation, WAF integration, or private APIs</strong> → <strong>REST API</strong>.<br>
+If the question mentions <strong>lowest cost, lowest latency, simple Lambda proxy, or OAuth2/OIDC auth</strong> → <strong>HTTP API</strong>.<br>
+Default exam answer for "API in front of Lambda" is usually REST API unless cost optimization is the priority.
+</div>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">Exam Trap — API Gateway 29-Second Timeout</div>
+<div class="callout-body">API Gateway has a <strong>hard limit of 29 seconds</strong> for integration timeout. If your backend takes longer, API Gateway returns 504. For long-running operations, use an asynchronous pattern: API Gateway → Lambda → start Step Functions → return immediately → client polls for status.</div>
+</div>
+</div>
+</div>
+
+<!-- ============ TAB 3: LABS & TERRAFORM ============ -->
+<div class="tab-content" id="tab3">
+<div class="card">
+<h2>Hands-On Lab 1: Production VPC with Multi-AZ</h2>
+<p>Build the complete VPC architecture from the overview diagram.</p>
+
+<h4>Steps</h4>
+<ol>
+<li>Create VPC with CIDR <code>10.0.0.0/16</code>, enable DNS hostnames</li>
+<li>Create 4 subnets: 2 public (<code>10.0.1.0/24</code>, <code>10.0.2.0/24</code>) + 2 private (<code>10.0.3.0/24</code>, <code>10.0.4.0/24</code>) across 2 AZs</li>
+<li>Create and attach Internet Gateway</li>
+<li>Create 2 NAT Gateways (one per AZ) with Elastic IPs</li>
+<li>Create route tables: public (→ IGW) and private per AZ (→ local NAT GW)</li>
+<li>Create Security Groups with chaining: ALB-SG → App-SG → DB-SG</li>
+<li>Create custom NACL for public subnets allowing HTTP/HTTPS/SSH + ephemeral outbound</li>
+<li>Create S3 Gateway Endpoint and add to private route tables</li>
+<li>Enable VPC Flow Logs → CloudWatch Logs</li>
+</ol>
+
+<div class="callout info">
+<div class="callout-title">Cost Warning</div>
+<div class="callout-body">NAT Gateways cost ~$0.045/hr each (~$32/month each). For learning, you can use 1 NAT GW and share it. Delete when not in use. The S3 Gateway Endpoint is free.</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Hands-On Lab 2: Route 53 + CloudFront + S3</h2>
+<ol>
+<li>Create S3 bucket with static website enabled (your AlienOps landing page)</li>
+<li>Create CloudFront distribution with S3 origin + OAC</li>
+<li>Update S3 bucket policy to only allow CloudFront access</li>
+<li>Request ACM certificate in <strong>us-east-1</strong> (required for CloudFront)</li>
+<li>Configure CloudFront to use custom domain + ACM cert</li>
+<li>Create Route 53 ALIAS record: <code>alienops.online</code> → CloudFront distribution</li>
+<li>Test: direct S3 URL should be blocked, CloudFront URL works, custom domain works with HTTPS</li>
+</ol>
+
+<div class="callout exam-tip">
+<div class="callout-title">Exam Tip — ACM Region for CloudFront</div>
+<div class="callout-body">ACM certificates for CloudFront <strong>must</strong> be in <code>us-east-1</code> regardless of where your origin is. For ALB/API Gateway, ACM cert must be in the <strong>same region as the resource</strong>. This is a guaranteed exam question.</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Hands-On Lab 3: SNS + SQS Fan-Out</h2>
+<ol>
+<li>Create SNS topic: <code>order-events</code></li>
+<li>Create 2 SQS queues: <code>fulfillment-queue</code> and <code>analytics-queue</code></li>
+<li>Subscribe both queues to the SNS topic</li>
+<li>Add filter policy on analytics queue: only receive <code>order_type: "premium"</code></li>
+<li>Create DLQ: <code>fulfillment-dlq</code> with maxReceiveCount = 3</li>
+<li>Publish test messages via AWS CLI with different attributes</li>
+<li>Verify: fulfillment gets all messages, analytics gets only premium</li>
+</ol>
+</div>
+
+<div class="card">
+<h2>Terraform — VPC Module for AlienOps</h2>
+<pre><code># modules/vpc/main.tf — Production VPC Module
+
+variable "project_name" { default = "alienops" }
+variable "vpc_cidr"     { default = "10.0.0.0/16" }
+variable "azs"          { default = ["ap-southeast-1a", "ap-southeast-1b"] }
+
+# VPC
+resource "aws_vpc" "main" {
+  cidr_block           = var.vpc_cidr
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = { Name = "${var.project_name}-vpc" }
+}
+
+# Internet Gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+  tags   = { Name = "${var.project_name}-igw" }
+}
+
+# Public Subnets (one per AZ)
+resource "aws_subnet" "public" {
+  count                   = length(var.azs)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index + 1)
+  availability_zone       = var.azs[count.index]
+  map_public_ip_on_launch = true
+
+  tags = { Name = "${var.project_name}-public-${count.index + 1}" }
+}
+
+# Private Subnets (one per AZ)
+resource "aws_subnet" "private" {
+  count             = length(var.azs)
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + 3)
+  availability_zone = var.azs[count.index]
+
+  tags = { Name = "${var.project_name}-private-${count.index + 1}" }
+}
+
+# Elastic IPs for NAT Gateways
+resource "aws_eip" "nat" {
+  count  = length(var.azs)
+  domain = "vpc"
+  tags   = { Name = "${var.project_name}-nat-eip-${count.index + 1}" }
+}
+
+# NAT Gateways (one per AZ for HA)
+resource "aws_nat_gateway" "main" {
+  count         = length(var.azs)
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
+
+  tags       = { Name = "${var.project_name}-nat-${count.index + 1}" }
+  depends_on = [aws_internet_gateway.main]
+}
+
+# Public Route Table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = { Name = "${var.project_name}-public-rt" }
+}
+
+resource "aws_route_table_association" "public" {
+  count          = length(var.azs)
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public.id
+}
+
+# Private Route Tables (one per AZ → local NAT GW)
+resource "aws_route_table" "private" {
+  count  = length(var.azs)
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main[count.index].id
+  }
+
+  tags = { Name = "${var.project_name}-private-rt-${count.index + 1}" }
+}
+
+resource "aws_route_table_association" "private" {
+  count          = length(var.azs)
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private[count.index].id
+}
+
+# S3 Gateway Endpoint (FREE — saves NAT costs)
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.ap-southeast-1.s3"
+
+  route_table_ids = aws_route_table.private[*].id
+
+  tags = { Name = "${var.project_name}-s3-endpoint" }
+}
+
+# VPC Flow Logs
+resource "aws_flow_log" "main" {
+  vpc_id               = aws_vpc.main.id
+  traffic_type         = "ALL"
+  log_destination_type = "cloud-watch-logs"
+  log_destination      = aws_cloudwatch_log_group.flow_logs.arn
+  iam_role_arn         = aws_iam_role.flow_logs.arn
+}
+
+resource "aws_cloudwatch_log_group" "flow_logs" {
+  name              = "/aws/vpc/flow-logs/${var.project_name}"
+  retention_in_days = 14
+}
+
+# Outputs
+output "vpc_id"             { value = aws_vpc.main.id }
+output "public_subnet_ids"  { value = aws_subnet.public[*].id }
+output "private_subnet_ids" { value = aws_subnet.private[*].id }</code></pre>
+
+<div class="callout production">
+<div class="callout-title">AlienOps Capstone Connection</div>
+<div class="callout-body">This Terraform module becomes the networking foundation for your capstone project. It uses <code>count</code> and <code>cidrsubnet()</code> functions from Day 13's Terraform advanced patterns. The S3 Gateway Endpoint saves NAT Gateway costs for all S3 traffic from private subnets — a real production optimization.</div>
+</div>
+</div>
+</div>
+
+<!-- ============ TAB 4: EXAM PREP ============ -->
+<div class="tab-content" id="tab4">
+<div class="card">
+<h2>Exam-Style Questions — Integration Services</h2>
+
+<div class="quiz-q" id="q1">
+<p>Q1: An e-commerce application needs to process orders asynchronously. When order volume spikes, some orders are being processed twice. Which solution prevents duplicate processing?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q1"> A) SQS Standard queue with increased visibility timeout</label>
+<label><input type="radio" name="q1"> B) SQS FIFO queue with deduplication enabled</label>
+<label><input type="radio" name="q1"> C) SNS topic with SQS subscription</label>
+<label><input type="radio" name="q1"> D) EventBridge with Lambda target</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q1a')">Reveal Answer</button>
+<div class="quiz-answer" id="q1a"><strong>Answer: B</strong><br>SQS FIFO queues provide <strong>exactly-once processing</strong> through message deduplication (using deduplication IDs or content-based deduplication). Standard queues provide at-least-once delivery, which means duplicates are possible. Increasing visibility timeout reduces duplicates but doesn't eliminate them.</div>
+</div>
+
+<div class="quiz-q" id="q2">
+<p>Q2: When a new image is uploaded to S3, it must be processed by three independent services: thumbnail generation, metadata extraction, and content moderation. What architecture provides the most decoupled solution?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q2"> A) S3 event → Lambda → calls all three services sequentially</label>
+<label><input type="radio" name="q2"> B) S3 event → SNS topic → 3 SQS queues (one per service)</label>
+<label><input type="radio" name="q2"> C) S3 event → Step Functions → parallel state with 3 Lambda functions</label>
+<label><input type="radio" name="q2"> D) S3 event → EventBridge → 3 Lambda targets</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q2a')">Reveal Answer</button>
+<div class="quiz-answer" id="q2a"><strong>Answer: B</strong><br>SNS + SQS fan-out is the most decoupled pattern. Each service reads from its own queue independently — if one fails, others continue. Option A is tightly coupled. Step Functions (C) adds orchestration complexity. EventBridge (D) works but SQS provides buffering and retry, which is more resilient.</div>
+</div>
+
+<div class="quiz-q" id="q3">
+<p>Q3: A company needs to run a data processing pipeline every day at 3 AM UTC. The pipeline involves 5 sequential steps with error handling and retry logic. Which combination of services is most appropriate?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q3"> A) CloudWatch Events (cron) → Lambda chain</label>
+<label><input type="radio" name="q3"> B) EventBridge Scheduler → Step Functions workflow</label>
+<label><input type="radio" name="q3"> C) SQS with delay queues → Lambda consumers</label>
+<label><input type="radio" name="q3"> D) SNS scheduled publish → Lambda subscribers</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q3a')">Reveal Answer</button>
+<div class="quiz-answer" id="q3a"><strong>Answer: B</strong><br>EventBridge Scheduler handles the cron trigger. Step Functions handles the sequential steps with built-in error handling, retry logic, and visual monitoring. Lambda chaining (A) is fragile — if one fails, the chain breaks with no coordination. SQS (C) is for decoupling, not orchestration. SNS (D) can't schedule.</div>
+</div>
+
+<div class="quiz-q" id="q4">
+<p>Q4: An application processes messages from an SQS queue using a fleet of EC2 instances. During peak hours, the queue depth grows and processing falls behind. What should the architect implement?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q4"> A) Increase the SQS message retention period</label>
+<label><input type="radio" name="q4"> B) Enable SQS long polling with 20-second wait</label>
+<label><input type="radio" name="q4"> C) Auto Scaling group triggered by ApproximateNumberOfMessagesVisible CloudWatch metric</label>
+<label><input type="radio" name="q4"> D) Switch to SQS FIFO queue for better throughput</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q4a')">Reveal Answer</button>
+<div class="quiz-answer" id="q4a"><strong>Answer: C</strong><br>Scale consumers based on queue depth. The <code>ApproximateNumberOfMessagesVisible</code> metric in CloudWatch triggers Auto Scaling to add more EC2 workers. Retention (A) just keeps messages longer, doesn't process faster. Long polling (B) reduces empty receives, doesn't help with backlog. FIFO (D) has LOWER throughput than standard.</div>
+</div>
+
+<div class="quiz-q" id="q5">
+<p>Q5: A REST API backed by Lambda functions needs to handle up to 50,000 concurrent requests with response caching for repeated queries. Which API Gateway type should be used?</p>
+<div class="quiz-opts">
+<label><input type="radio" name="q5"> A) HTTP API with Lambda integration</label>
+<label><input type="radio" name="q5"> B) REST API with caching enabled</label>
+<label><input type="radio" name="q5"> C) WebSocket API with connection management</label>
+<label><input type="radio" name="q5"> D) Application Load Balancer with Lambda target</label>
+</div>
+<button class="reveal-btn" onclick="reveal('q5a')">Reveal Answer</button>
+<div class="quiz-answer" id="q5a"><strong>Answer: B</strong><br>REST API supports response caching — HTTP API does not. The question specifically mentions caching, which is only available in REST API. While HTTP API is cheaper and lower latency, it lacks the caching feature required here.</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Integration Services Decision Matrix</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Exam Keyword</th><th>Service</th><th>Why</th></tr>
+<tr><td>"decouple", "buffer", "queue"</td><td><strong>SQS</strong></td><td>Point-to-point message queue</td></tr>
+<tr><td>"fan-out", "publish to multiple"</td><td><strong>SNS + SQS</strong></td><td>One message → many consumers</td></tr>
+<tr><td>"exactly-once", "ordered"</td><td><strong>SQS FIFO</strong></td><td>Dedup + ordering guarantees</td></tr>
+<tr><td>"event-driven", "SaaS events", "schedule"</td><td><strong>EventBridge</strong></td><td>Advanced routing, cron, SaaS integration</td></tr>
+<tr><td>"orchestrate", "workflow", "sequential steps"</td><td><strong>Step Functions</strong></td><td>Visual workflow with error handling</td></tr>
+<tr><td>"API", "REST", "rate limiting"</td><td><strong>API Gateway</strong></td><td>Managed API with throttling, auth, caching</td></tr>
+<tr><td>"real-time chat", "bidirectional"</td><td><strong>WebSocket API</strong></td><td>Persistent connections</td></tr>
+<tr><td>"cron job", "every 5 minutes"</td><td><strong>EventBridge Scheduler</strong></td><td>Replaces CloudWatch Events cron</td></tr>
+</table>
+</div>
+</div>
+
+<div class="card">
+<h2>Week 3 Complete Cheat Sheet</h2>
+<div class="table-wrap">
+<table>
+<tr><th>Topic</th><th>Key Fact</th></tr>
+<tr><td colspan="2" style="background:var(--surface3);color:var(--accent);font-weight:700">VPC & Networking</td></tr>
+<tr><td>VPC CIDR</td><td>/16 to /28. AWS reserves 5 IPs/subnet. Default VPC = 172.31.0.0/16</td></tr>
+<tr><td>Public subnet</td><td>Route table → IGW + instance has public IP</td></tr>
+<tr><td>NAT GW HA</td><td>One per AZ. Each private RT → local NAT GW</td></tr>
+<tr><td>SG vs NACL</td><td>SG=stateful+allow. NACL=stateless+allow/deny+numbered</td></tr>
+<tr><td>VPC Peering</td><td>NOT transitive. No CIDR overlap. Update both RTs</td></tr>
+<tr><td>Gateway Endpoint</td><td>S3 + DynamoDB. Free. Route table entry</td></tr>
+<tr><td>Interface Endpoint</td><td>70+ services. ENI. Works from on-prem via VPN/DX</td></tr>
+<tr><td>Transit Gateway</td><td>Hub-and-spoke. Transitive routing. Up to 5000 VPCs</td></tr>
+<tr><td>Direct Connect</td><td>Dedicated fiber. NOT encrypted. Weeks to set up</td></tr>
+<tr><td>DX + VPN</td><td>IPsec overlay = consistent + encrypted</td></tr>
+<tr><td>EFA</td><td>HPC/MPI. OS-bypass. Linux only</td></tr>
+<tr><td>Egress-Only IGW</td><td>IPv6 outbound only. NAT GW doesn't support IPv6</td></tr>
+<tr><td colspan="2" style="background:var(--surface3);color:var(--accent);font-weight:700">Route 53 & Edge</td></tr>
+<tr><td>ALIAS vs CNAME</td><td>ALIAS works at apex, free queries. CNAME can't be at apex</td></tr>
+<tr><td>Latency routing</td><td>"Best performance" — measures actual latency</td></tr>
+<tr><td>Geolocation</td><td>"Compliance/data residency" — strict location. Need default record</td></tr>
+<tr><td>Failover</td><td>Active-passive DR. Health check mandatory on primary</td></tr>
+<tr><td>CloudFront OAC</td><td>Restrict S3 access to CloudFront only. Replaces OAI</td></tr>
+<tr><td>CF Functions vs L@E</td><td>CF Functions = lightweight, sub-ms. L@E = complex, network access</td></tr>
+<tr><td>Global Accelerator</td><td>Static IPs, TCP/UDP, no caching, AWS backbone, fast failover</td></tr>
+<tr><td>ACM for CloudFront</td><td>MUST be in us-east-1</td></tr>
+<tr><td colspan="2" style="background:var(--surface3);color:var(--accent);font-weight:700">Application Integration</td></tr>
+<tr><td>SQS Standard</td><td>Unlimited TPS, best-effort order, at-least-once</td></tr>
+<tr><td>SQS FIFO</td><td>300 TPS, guaranteed order, exactly-once. Name ends .fifo</td></tr>
+<tr><td>Visibility Timeout</td><td>Default 30s. Too short = duplicates. Too long = delays</td></tr>
+<tr><td>SNS Fan-Out</td><td>SNS → multiple SQS queues. The exam's favorite pattern</td></tr>
+<tr><td>EventBridge</td><td>Advanced event routing, SaaS integration, cron, schema registry</td></tr>
+<tr><td>Step Functions</td><td>Visual workflow orchestration. Standard (1yr) vs Express (5min)</td></tr>
+<tr><td>API GW timeout</td><td>29 seconds hard limit. Use async pattern for longer ops</td></tr>
+<tr><td>REST vs HTTP API</td><td>REST = caching + API keys + WAF. HTTP = cheaper + faster</td></tr>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+function switchTab(idx){document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',i===idx)});document.querySelectorAll('.tab-content').forEach((c,i)=>{c.classList.toggle('active',i===idx)});window.scrollTo({top:document.querySelector('.tabs').offsetTop-20,behavior:'smooth'})}
+function reveal(id){const el=document.getElementById(id);el.style.display=el.style.display==='block'?'none':'block'}
+</script>
+</body>
+</html>

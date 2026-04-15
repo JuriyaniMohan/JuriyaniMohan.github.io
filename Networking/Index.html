@@ -1,1 +1,242 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Networking Concepts</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0f1e;
+      color: #e0e6f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      color: #4fc3f7;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #90a4ae;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .nav-link {
+      color: #4fc3f7;
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 4px solid transparent;
+      transition: 0.3s;
+    }
+
+    .nav-link:hover {
+      border-bottom: 2px solid #4fc3f7;
+    }
+
+    /* CARD */
+    .card {
+      background: #131929;
+      border: 1px solid #1e3a5f;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .card h2 {
+      color: #4fc3f7;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+    }
+
+    /* BADGES */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .badge {
+      background: #0d3b2e;
+      color: #4caf96;
+      border: 1px solid #4caf96;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .badge:hover {
+      background: #4caf96;
+      color: #0a0f1e;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(76, 175, 150, 0.25);
+    }
+
+    /* STACK */
+    .stack {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stack-item {
+      background: #0d1a2e;
+      border-radius: 8px;
+      padding: 14px;
+      transition: 0.3s;
+    }
+
+    .stack-item:hover {
+      transform: scale(1.03);
+    }
+
+    .label {
+      color: #90a4ae;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .value {
+      color: #e0e6f0;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    footer {
+      text-align: center;
+      color: #455a6a;
+      margin-top: 24px;
+      font-size: 13px;
+    }
+
+    /* BLINKER */
+    h1::before {
+      content: '';
+      color: #10b981;
+      margin-right: 6px;
+      animation: fade 1s step-end infinite;
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+    @keyframes fade { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* SCROLL REVEAL */
+    .reveal { opacity: 0; transform: translateY(25px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .stack {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+
+  <link rel="stylesheet" href="assets/modern-theme.css">
+</head>
+
+<body>
+  <div class="container">
+<h1>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/networkx/networkx-original.svg" alt="Network logo" width="40" height="40" /> Networking </h1>
+<p class="subtitle" align="center">Networking in Depth</p>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link" href="#">Projects</a>
+  <a class="nav-link" href="about.html">About</a>
+</div>
+
+<!-- DAYS SECTION -->
+<div class="card reveal">
+  <h2>📅 Sections</h2>
+
+  <div class="badges">
+    <a class="badge" href="AZ104-Identity-Governance-Complete-Training-Guide-DAY01.html">Core Networking Concepts</a>
+    <a class="badge" href="AZ104-Day2-Networking-Complete-Training-Guide.html">DNS Section 1</a>
+    <a class="badge" href="AZ104-Day2-Networking-Complete-Training-Guide.html">DNS Section 2</a>
+  </div>
+</div>
+
+<!-- STACK SECTION -->
+<div class="card reveal">
+  <h2>🛠️ Tech Stack</h2>
+
+  <div class="stack">
+    <div class="stack-item">
+      <div class="label">Domain</div>
+      <div class="value">Microsoft Azure</div>
+    </div>
+
+    <div class="stack-item">
+      <div class="label">Repo Author</div>
+      <div class="value">Mohan Juriyani</div>
+    </div>
+
+    <div class="stack-item">
+      <div class="label">Hosting</div>
+      <div class="value">GitHub Pages</div>
+    </div>
+
+    <div class="stack-item">
+      <div class="label">Connect</div>
+      <div class="value">
+        <a href="https://linkedin.com/in/mohanjuriyani" target="_blank" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="20" alt="LinkedIn">
+          LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="reveal">
+  <p>&copy; 2026 Mohan Juriyani | Cloud Infrastructure Engineer</p>
+</footer>
+
+  </div>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Page load
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.container').style.opacity = '1';
+    document.querySelector('.container').style.transform = 'translateY(0)';
+  });
+</script>
+</body>
+</html>

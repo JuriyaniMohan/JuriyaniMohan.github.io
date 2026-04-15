@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Networking Fundamentals — Complete Reference Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #151d2e;
+  --bg-code: #0d1321;
+  --border: #1e2a42;
+  --border-accent: #2563eb;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #22d3ee;
+  --accent-green: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-red: #f87171;
+  --accent-purple: #a78bfa;
+  --accent-orange: #fb923c;
+  --accent-pink: #f472b6;
+  --glow-blue: rgba(59, 130, 246, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.75;
+  font-size: 16px;
+}
+
+/* ── NAV ── */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 14, 23, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+}
+.top-nav-inner {
+  max-width: 1300px; margin: 0 auto;
+  display: flex; align-items: center; gap: 2rem;
+  height: 56px; overflow-x: auto;
+}
+.top-nav a {
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.82rem; font-weight: 500;
+  white-space: nowrap; letter-spacing: 0.03em;
+  transition: color 0.2s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.top-nav a:hover { color: var(--accent-cyan); }
+.nav-logo {
+  color: var(--accent-cyan) !important;
+  font-weight: 700; font-size: 0.9rem !important;
+  border-right: 1px solid var(--border);
+  padding-right: 2rem; margin-right: 0.5rem;
+}
+
+/* ── MAIN ── */
+.container {
+  max-width: 1100px; margin: 0 auto;
+  padding: 80px 2rem 4rem;
+}
+
+/* ── HERO ── */
+.hero {
+  text-align: center; padding: 4rem 0 3rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+}
+.hero h1 {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 2.8rem; font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+.hero .subtitle {
+  color: var(--text-secondary); font-size: 1.1rem;
+  max-width: 700px; margin: 0 auto;
+  line-height: 1.7;
+}
+.hero .badge {
+  display: inline-block; margin-top: 1.5rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 0.4rem 1.2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem; color: var(--accent-green);
+}
+
+/* ── SECTIONS ── */
+.section {
+  margin-bottom: 4rem;
+  padding-top: 1rem;
+}
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; color: var(--accent-cyan);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.section h2 {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 1.9rem; font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid var(--border-accent);
+  display: inline-block;
+}
+.section h3 {
+  font-size: 1.25rem; font-weight: 600;
+  color: var(--accent-blue);
+  margin: 2rem 0 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.section h3::before {
+  content: '▸'; color: var(--accent-cyan);
+  font-size: 1rem;
+}
+.section h4 {
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--accent-amber);
+  margin: 1.5rem 0 0.6rem;
+}
+p { margin-bottom: 1rem; color: var(--text-secondary); }
+strong { color: var(--text-primary); font-weight: 600; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1.2rem 0;
+}
+.card.highlight {
+  border-left: 3px solid var(--accent-cyan);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.04), var(--bg-card));
+}
+.card.warn {
+  border-left: 3px solid var(--accent-amber);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.04), var(--bg-card));
+}
+.card.success {
+  border-left: 3px solid var(--accent-green);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.04), var(--bg-card));
+}
+.card.example {
+  border-left: 3px solid var(--accent-purple);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.04), var(--bg-card));
+}
+.card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 0.6rem;
+  color: var(--accent-cyan);
+}
+.card.warn .card-label { color: var(--accent-amber); }
+.card.success .card-label { color: var(--accent-green); }
+.card.example .card-label { color: var(--accent-purple); }
+
+/* ── CODE ── */
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--accent-green);
+}
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88em;
+  background: var(--bg-code);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  color: var(--accent-cyan);
+}
+
+/* ── TABLES ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+}
+thead th {
+  background: var(--bg-code);
+  color: var(--accent-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border-accent);
+}
+tbody td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+tbody tr:hover { background: rgba(37, 99, 235, 0.05); }
+td code {
+  color: var(--accent-green);
+}
+
+/* ── DIAGRAM BOXES ── */
+.diagram {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── BINARY GRID ── */
+.binary-row {
+  display: flex; gap: 2px; margin: 0.3rem 0; flex-wrap: wrap;
+}
+.bit {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem; font-weight: 700;
+  border-radius: 4px;
+}
+.bit.net { background: var(--accent-blue); color: #fff; }
+.bit.host { background: var(--border); color: var(--text-secondary); }
+.bit-sep {
+  width: 8px; display: flex; align-items: center;
+  justify-content: center; color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+/* ── STEP INDICATORS ── */
+.steps { counter-reset: step; margin: 1rem 0; }
+.step {
+  counter-increment: step;
+  padding: 1rem 1rem 1rem 3.5rem;
+  position: relative;
+  margin-bottom: 0.5rem;
+  border-left: 2px solid var(--border);
+  margin-left: 1rem;
+}
+.step::before {
+  content: counter(step);
+  position: absolute; left: -14px; top: 1rem;
+  width: 26px; height: 26px;
+  background: var(--accent-blue);
+  color: #fff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; font-weight: 700;
+}
+
+/* ── FLOW ARROWS ── */
+.flow {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 0.5rem; margin: 1rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+}
+.flow-node {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.5rem 1rem;
+  color: var(--accent-cyan);
+}
+.flow-arrow { color: var(--accent-amber); font-weight: 700; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 1.8rem; }
+  .container { padding: 70px 1rem 2rem; }
+  .top-nav-inner { gap: 1rem; }
+  pre { font-size: 0.78rem; padding: 0.8rem; }
+  table { font-size: 0.82rem; }
+  .diagram { font-size: 0.72rem; padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="top-nav">
+<div class="top-nav-inner">
+  <a href="#" class="nav-logo">NET/REF</a>
+  <a href="#ip-basics">IP Basics</a>
+  <a href="#binary">Binary Math</a>
+  <a href="#subnetting">Subnetting</a>
+  <a href="#cidr">CIDR Notation</a>
+  <a href="#gateway">Gateway &amp; Routes</a>
+  <a href="#traffic">Traffic Flow</a>
+  <a href="#topology">Topology</a>
+  <a href="#find-free">Free IPs</a>
+  <a href="#tools">Tools &amp; Commands</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+</div>
+</nav>
+
+<div class="container">
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <h1>Networking Fundamentals</h1>
+  <p class="subtitle">A complete reference guide covering IP addressing, subnetting, gateways, routing, traffic flow, and network topology — from binary math to production troubleshooting.</p>
+  <span class="badge">v1.0 &mdash; Complete Reference &mdash; April 2026</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 1: WHAT IS AN IP ADDRESS?                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="ip-basics">
+<div class="section-num">Chapter 01</div>
+<h2>What Is an IP Address?</h2>
+
+<h3>What Is It?</h3>
+<p>An <strong>IP address</strong> (Internet Protocol address) is a unique numerical label assigned to every device connected to a network. Think of it as a <strong>postal address for your computer</strong> — without it, no data can be delivered to or from your device.</p>
+
+<p>There are two versions in use today:</p>
+
+<table>
+<thead><tr><th>Feature</th><th>IPv4</th><th>IPv6</th></tr></thead>
+<tbody>
+<tr><td>Format</td><td><code>192.168.1.10</code></td><td><code>2001:0db8::1</code></td></tr>
+<tr><td>Size</td><td>32 bits (4 octets)</td><td>128 bits (8 groups of 16 bits)</td></tr>
+<tr><td>Total Addresses</td><td>~4.3 billion</td><td>~340 undecillion</td></tr>
+<tr><td>Notation</td><td>Dotted decimal</td><td>Hexadecimal colon-separated</td></tr>
+</tbody>
+</table>
+
+<p>This guide focuses primarily on <strong>IPv4</strong> because it's where subnetting, gateway, and routing concepts are most commonly taught and used in enterprise environments.</p>
+
+<h3>Why Does It Exist?</h3>
+<p>Every device on a network needs a way to be identified. When your browser requests a web page, the server needs to know <strong>where to send the response back</strong>. The IP address solves this — it provides a structured, hierarchical addressing system so routers can efficiently move packets across the internet.</p>
+
+<div class="card highlight">
+<div class="card-label">Analogy</div>
+<p style="margin:0;">Think of a phone call. You dial a number (the IP address) and the phone network routes your call to the right person. Without the number, the network has no idea where to connect you. IP works the same way for data packets.</p>
+</div>
+
+<h3>Structure of an IPv4 Address</h3>
+<p>An IPv4 address has <strong>32 bits</strong>, written as four decimal numbers separated by dots. Each number is called an <strong>octet</strong> (8 bits = 1 byte). Each octet ranges from 0 to 255.</p>
+
+<pre>
+  192  .  168  .   1   .  10
+  ───     ───     ───     ──
+  1st     2nd     3rd     4th
+ octet   octet   octet   octet
+
+In binary:
+  11000000 . 10101000 . 00000001 . 00001010
+  ────────   ────────   ────────   ────────
+   8 bits     8 bits     8 bits     8 bits
+                                            = 32 bits total
+</pre>
+
+<h3>Types of IP Addresses</h3>
+
+<h4>Public vs Private</h4>
+<table>
+<thead><tr><th>Type</th><th>Purpose</th><th>Example Ranges</th></tr></thead>
+<tbody>
+<tr><td><strong>Public</strong></td><td>Globally unique, routable on the internet</td><td><code>8.8.8.8</code>, <code>142.250.190.14</code></td></tr>
+<tr><td><strong>Private</strong></td><td>Used inside internal networks, NOT routable on the internet</td><td>See below</td></tr>
+</tbody>
+</table>
+
+<h4>Private IP Ranges (RFC 1918)</h4>
+<table>
+<thead><tr><th>Class</th><th>Range</th><th>CIDR</th><th>Total Hosts</th><th>Typical Use</th></tr></thead>
+<tbody>
+<tr><td>A</td><td><code>10.0.0.0</code> – <code>10.255.255.255</code></td><td><code>10.0.0.0/8</code></td><td>16,777,214</td><td>Large enterprises, cloud VPCs</td></tr>
+<tr><td>B</td><td><code>172.16.0.0</code> – <code>172.31.255.255</code></td><td><code>172.16.0.0/12</code></td><td>1,048,574</td><td>Medium orgs, Docker default</td></tr>
+<tr><td>C</td><td><code>192.168.0.0</code> – <code>192.168.255.255</code></td><td><code>192.168.0.0/16</code></td><td>65,534</td><td>Home routers, small offices</td></tr>
+</tbody>
+</table>
+
+<h4>Special Addresses</h4>
+<table>
+<thead><tr><th>Address</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>127.0.0.1</code></td><td>Loopback — your own machine ("localhost")</td></tr>
+<tr><td><code>0.0.0.0</code></td><td>Means "all interfaces" or "any address" (used in routing/binding)</td></tr>
+<tr><td><code>255.255.255.255</code></td><td>Limited broadcast — sends to all devices on the local network</td></tr>
+<tr><td><code>169.254.x.x</code></td><td>APIPA — self-assigned when DHCP fails</td></tr>
+</tbody>
+</table>
+
+<h4>Static vs Dynamic</h4>
+<p><strong>Static IP:</strong> Manually configured, doesn't change. Used for servers, network printers, routers. You set it yourself in the OS or device config.</p>
+<p><strong>Dynamic IP:</strong> Automatically assigned by a <strong>DHCP server</strong> (Dynamic Host Configuration Protocol). Most end-user devices (laptops, phones) get dynamic IPs. The DHCP server hands out an IP from a defined pool, along with the subnet mask, gateway, and DNS servers.</p>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 2: BINARY MATH FOR NETWORKING                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="binary">
+<div class="section-num">Chapter 02</div>
+<h2>Binary Math — The Foundation</h2>
+
+<p>You <strong>cannot</strong> understand subnetting without understanding binary. Every IP address, every subnet mask — it's all binary under the hood. The decimal notation (<code>192.168.1.0</code>) is just a human-friendly representation.</p>
+
+<h3>Binary Place Values</h3>
+<p>Each bit position has a value based on powers of 2:</p>
+
+<pre>
+Bit position:    7      6      5      4      3     2     1     0
+Power of 2:     2⁷     2⁶     2⁵     2⁴     2³    2²    2¹    2⁰
+Value:         128     64     32     16      8     4     2     1
+</pre>
+
+<h3>Decimal to Binary Conversion</h3>
+<p>To convert a decimal number (like 192) to binary, check each power of 2 from left to right. If the value fits, write a <code>1</code> and subtract; otherwise write a <code>0</code>.</p>
+
+<div class="card example">
+<div class="card-label">Worked Example — Convert 192 to Binary</div>
+<pre style="background:transparent;border:none;padding:0;margin:0;color:var(--text-secondary);">
+Start: 192
+
+128 fits into 192?  YES → bit = 1,  remainder = 192 - 128 = 64
+ 64 fits into 64?   YES → bit = 1,  remainder =  64 -  64 =  0
+ 32 fits into 0?    NO  → bit = 0
+ 16 fits into 0?    NO  → bit = 0
+  8 fits into 0?    NO  → bit = 0
+  4 fits into 0?    NO  → bit = 0
+  2 fits into 0?    NO  → bit = 0
+  1 fits into 0?    NO  → bit = 0
+
+Result: 192 in binary = 1 1 0 0 0 0 0 0
+</pre>
+</div>
+
+<div class="card example">
+<div class="card-label">Worked Example — Convert 10 to Binary</div>
+<pre style="background:transparent;border:none;padding:0;margin:0;color:var(--text-secondary);">
+Start: 10
+
+128 fits? NO → 0     remaining: 10
+ 64 fits? NO → 0     remaining: 10
+ 32 fits? NO → 0     remaining: 10
+ 16 fits? NO → 0     remaining: 10
+  8 fits? YES → 1    remaining: 10 - 8 = 2
+  4 fits? NO → 0     remaining: 2
+  2 fits? YES → 1    remaining: 2 - 2 = 0
+  1 fits? NO → 0     remaining: 0
+
+Result: 10 in binary = 0 0 0 0 1 0 1 0
+</pre>
+</div>
+
+<h3>Binary to Decimal Conversion</h3>
+<p>Add up the values of all positions where the bit is <code>1</code>.</p>
+
+<div class="card example">
+<div class="card-label">Example — 11000000 to Decimal</div>
+<pre style="background:transparent;border:none;padding:0;margin:0;color:var(--text-secondary);">
+Bit:     1    1    0    0    0    0    0    0
+Value: 128   64   32   16    8    4    2    1
+
+Sum = 128 + 64 = 192
+</pre>
+</div>
+
+<h3>Full IP Address in Binary</h3>
+<pre>
+IP:  192  .  168  .   1   .  10
+
+     11000000 . 10101000 . 00000001 . 00001010
+</pre>
+
+<div class="card warn">
+<div class="card-label">Key Insight</div>
+<p style="margin:0;">Each octet has exactly 8 bits. The maximum value for an octet is <code>11111111</code> = 128+64+32+16+8+4+2+1 = <strong>255</strong>. That's why IP octets range from 0 to 255.</p>
+</div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 3: SUBNETTING                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="subnetting">
+<div class="section-num">Chapter 03</div>
+<h2>Subnetting — What, Why, and How</h2>
+
+<h3>What Is a Subnet?</h3>
+<p>A <strong>subnet</strong> (subnetwork) is a logical division of a larger network into smaller, more manageable pieces. Every IP address has two parts:</p>
+
+<pre>
+   ┌─────────────────────┬──────────────────┐
+   │    Network Part     │    Host Part     │
+   │  (identifies the    │  (identifies the │
+   │   network/subnet)   │   specific       │
+   │                     │   device)        │
+   └─────────────────────┴──────────────────┘
+</pre>
+
+<p>The <strong>subnet mask</strong> defines where the boundary sits between the network and host portions.</p>
+
+<h3>Why Subnetting Exists</h3>
+
+<div class="card highlight">
+<div class="card-label">The 5 Reasons</div>
+<p><strong>1. Network Segmentation:</strong> Divide a large flat network into isolated segments. The accounting team doesn't need to see engineering's traffic.</p>
+<p><strong>2. Broadcast Control:</strong> Every subnet is a broadcast domain. Without subnetting, a broadcast from one device reaches EVERY device — causing congestion on large networks.</p>
+<p><strong>3. Security:</strong> Subnets allow firewall rules between segments. You can restrict database servers from being reachable by guest WiFi.</p>
+<p><strong>4. Efficient IP Usage:</strong> Don't waste a /16 (65,534 IPs) on an office with 20 people. Use a /27 (30 IPs) instead.</p>
+<p style="margin:0;"><strong>5. Routing Efficiency:</strong> Routers work with network addresses, not individual hosts. More subnets = more granular routing control.</p>
+</div>
+
+<h3>The Subnet Mask</h3>
+<p>The subnet mask is a 32-bit number that "masks" the IP address to reveal the network portion. Bits set to <code>1</code> = network part, bits set to <code>0</code> = host part.</p>
+
+<pre>
+IP Address:   192.168.1.10     = 11000000.10101000.00000001.00001010
+Subnet Mask:  255.255.255.0    = 11111111.11111111.11111111.00000000
+                                  ├── network (24 bits) ──┤├ host ─┤
+
+AND operation (bitwise):
+  11000000.10101000.00000001.00001010  (IP)
+& 11111111.11111111.11111111.00000000  (Mask)
+= 11000000.10101000.00000001.00000000  → 192.168.1.0 (Network Address)
+</pre>
+
+<h3>Common Subnet Masks</h3>
+<table>
+<thead><tr><th>CIDR</th><th>Subnet Mask</th><th>Binary (last octet)</th><th>Total IPs</th><th>Usable Hosts</th></tr></thead>
+<tbody>
+<tr><td><code>/8</code></td><td><code>255.0.0.0</code></td><td><code>11111111.00000000...</code></td><td>16,777,216</td><td>16,777,214</td></tr>
+<tr><td><code>/16</code></td><td><code>255.255.0.0</code></td><td><code>...11111111.00000000.00000000</code></td><td>65,536</td><td>65,534</td></tr>
+<tr><td><code>/24</code></td><td><code>255.255.255.0</code></td><td><code>...11111111.00000000</code></td><td>256</td><td>254</td></tr>
+<tr><td><code>/25</code></td><td><code>255.255.255.128</code></td><td><code>10000000</code></td><td>128</td><td>126</td></tr>
+<tr><td><code>/26</code></td><td><code>255.255.255.192</code></td><td><code>11000000</code></td><td>64</td><td>62</td></tr>
+<tr><td><code>/27</code></td><td><code>255.255.255.224</code></td><td><code>11100000</code></td><td>32</td><td>30</td></tr>
+<tr><td><code>/28</code></td><td><code>255.255.255.240</code></td><td><code>11110000</code></td><td>16</td><td>14</td></tr>
+<tr><td><code>/29</code></td><td><code>255.255.255.248</code></td><td><code>11111000</code></td><td>8</td><td>6</td></tr>
+<tr><td><code>/30</code></td><td><code>255.255.255.252</code></td><td><code>11111100</code></td><td>4</td><td>2</td></tr>
+<tr><td><code>/31</code></td><td><code>255.255.255.254</code></td><td><code>11111110</code></td><td>2</td><td>2 *</td></tr>
+<tr><td><code>/32</code></td><td><code>255.255.255.255</code></td><td><code>11111111</code></td><td>1</td><td>1 **</td></tr>
+</tbody>
+</table>
+<p><em>* /31 is special (RFC 3021) — used for point-to-point links, no broadcast address needed.</em><br>
+<em>** /32 is a host route — represents a single specific IP address. Used in routing tables and firewall rules.</em></p>
+
+<div class="card warn">
+<div class="card-label">Why Usable Hosts = Total - 2</div>
+<p>In every subnet, <strong>two addresses are reserved</strong>:</p>
+<p><strong>Network Address</strong> (first IP, all host bits = 0): Identifies the subnet itself. Example: <code>192.168.1.0/24</code></p>
+<p style="margin:0;"><strong>Broadcast Address</strong> (last IP, all host bits = 1): Sends to all devices in the subnet. Example: <code>192.168.1.255/24</code></p>
+</div>
+
+<h3>How to Calculate: Step-by-Step</h3>
+
+<div class="card example">
+<div class="card-label">Problem: Given 192.168.1.10/24, find Network, Broadcast, Usable Range</div>
+
+<div class="steps">
+<div class="step">
+<strong>Identify the mask.</strong> /24 means 24 network bits → subnet mask = 255.255.255.0. Host bits = 32 - 24 = 8 bits.
+</div>
+<div class="step">
+<strong>Find the Network Address.</strong> Set all host bits to 0. Since /24, the last octet is all host bits → 192.168.1.<strong>0</strong>
+</div>
+<div class="step">
+<strong>Find the Broadcast Address.</strong> Set all host bits to 1. Last octet = 11111111 = 255 → 192.168.1.<strong>255</strong>
+</div>
+<div class="step">
+<strong>Find the Usable Range.</strong> First usable = Network + 1 = 192.168.1.<strong>1</strong>. Last usable = Broadcast - 1 = 192.168.1.<strong>254</strong>
+</div>
+<div class="step">
+<strong>Count usable hosts.</strong> 2^8 - 2 = 256 - 2 = <strong>254 usable hosts</strong>
+</div>
+</div>
+</div>
+
+<div class="card example">
+<div class="card-label">Harder Problem: Given 10.50.100.130/18, find everything</div>
+
+<div class="steps">
+<div class="step">
+<strong>Identify the mask.</strong> /18 = 18 network bits. Mask = 255.255.<strong>192</strong>.0<br>
+Why 192? → 18 bits total. First two octets = 16 bits (all 1s). We need 2 more bits from the 3rd octet.<br>
+3rd octet: <code>11000000</code> = 128 + 64 = 192. Remaining = all 0.<br>
+Host bits = 32 - 18 = 14 bits.
+</div>
+<div class="step">
+<strong>Find the block size.</strong> In the 3rd octet, the mask is 192. Block size = 256 - 192 = <strong>64</strong>.<br>
+Subnets in the 3rd octet start at: 0, 64, 128, 192...<br>
+Our 3rd octet is 100. The largest multiple of 64 that is ≤ 100 is <strong>64</strong>.
+</div>
+<div class="step">
+<strong>Network Address:</strong> 10.50.<strong>64</strong>.0<br>
+(3rd octet snaps down to 64, 4th octet = 0)
+</div>
+<div class="step">
+<strong>Next subnet starts at:</strong> 10.50.<strong>128</strong>.0<br>
+So broadcast = 10.50.<strong>127</strong>.255 (one IP before the next subnet)
+</div>
+<div class="step">
+<strong>Usable range:</strong> 10.50.64.<strong>1</strong> → 10.50.127.<strong>254</strong><br>
+Usable hosts = 2^14 - 2 = 16,384 - 2 = <strong>16,382</strong>
+</div>
+</div>
+</div>
+
+<h3>The Magic Shortcut: Block Size Method</h3>
+<div class="card success">
+<div class="card-label">Quick Calculation</div>
+<p><strong>Block size = 256 - (subnet mask value in the interesting octet)</strong></p>
+<p>The "interesting octet" is the one where the mask is neither 255 nor 0.</p>
+<p>Subnets start at multiples of the block size in that octet.</p>
+<pre style="background:transparent;border:none;padding:0;margin:0;color:var(--text-secondary);">
+/25 → 255.255.255.128 → block = 256-128 = 128 → subnets: .0, .128
+/26 → 255.255.255.192 → block = 256-192 =  64 → subnets: .0, .64, .128, .192
+/27 → 255.255.255.224 → block = 256-224 =  32 → subnets: .0, .32, .64, .96, .128...
+/28 → 255.255.255.240 → block = 256-240 =  16 → subnets: .0, .16, .32, .48, .64...
+/29 → 255.255.255.248 → block = 256-248 =   8 → subnets: .0, .8, .16, .24, .32...
+/30 → 255.255.255.252 → block = 256-252 =   4 → subnets: .0, .4, .8, .12, .16...
+</pre>
+</div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 4: CIDR IN DEPTH                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="cidr">
+<div class="section-num">Chapter 04</div>
+<h2>CIDR Notation — /18, /24, /32 Explained</h2>
+
+<h3>What Is CIDR?</h3>
+<p><strong>CIDR</strong> (Classless Inter-Domain Routing, pronounced "cider") is the modern way to express an IP address and its associated subnet. The number after the slash tells you <strong>how many bits are used for the network portion</strong>.</p>
+
+<pre>
+192.168.1.0 /24
+            ───
+            └─ 24 bits for network, remaining 8 bits for hosts
+
+10.0.0.0 /8
+          ──
+          └─ 8 bits for network, remaining 24 bits for hosts
+</pre>
+
+<h3>Understanding Every CIDR from /0 to /32</h3>
+
+<div class="card highlight">
+<div class="card-label">The Formula</div>
+<p><strong>Total addresses = 2^(32 - prefix)</strong></p>
+<p><strong>Usable hosts = 2^(32 - prefix) - 2</strong></p>
+<p style="margin:0;">Higher prefix number → smaller subnet → fewer hosts. Lower prefix → larger subnet → more hosts.</p>
+</div>
+
+<h4>Visual: How prefix length splits the bits</h4>
+<pre>
+/8   NNNNNNNN.HHHHHHHH.HHHHHHHH.HHHHHHHH   2²⁴ = 16,777,216 IPs
+/16  NNNNNNNN.NNNNNNNN.HHHHHHHH.HHHHHHHH   2¹⁶ =     65,536 IPs
+/18  NNNNNNNN.NNNNNNNN.NNHHHHHH.HHHHHHHH   2¹⁴ =     16,384 IPs
+/24  NNNNNNNN.NNNNNNNN.NNNNNNNN.HHHHHHHH   2⁸  =        256 IPs
+/27  NNNNNNNN.NNNNNNNN.NNNNNNNN.NNNHHHHH   2⁵  =         32 IPs
+/30  NNNNNNNN.NNNNNNNN.NNNNNNNN.NNNNNNHH   2²  =          4 IPs
+/32  NNNNNNNN.NNNNNNNN.NNNNNNNN.NNNNNNNN   2⁰  =          1 IP
+
+N = Network bit (fixed)    H = Host bit (variable)
+</pre>
+
+<h3>When to Use Which Size</h3>
+<table>
+<thead><tr><th>CIDR</th><th>Usable Hosts</th><th>Real-World Use Case</th></tr></thead>
+<tbody>
+<tr><td><code>/30</code></td><td>2</td><td>Point-to-point link between two routers</td></tr>
+<tr><td><code>/29</code></td><td>6</td><td>Tiny DMZ or server VLAN</td></tr>
+<tr><td><code>/28</code></td><td>14</td><td>Small office, printer VLAN</td></tr>
+<tr><td><code>/27</code></td><td>30</td><td>Small team network</td></tr>
+<tr><td><code>/26</code></td><td>62</td><td>Department network</td></tr>
+<tr><td><code>/25</code></td><td>126</td><td>Medium office floor</td></tr>
+<tr><td><code>/24</code></td><td>254</td><td>Standard office LAN (most common)</td></tr>
+<tr><td><code>/23</code></td><td>510</td><td>Large floor or building</td></tr>
+<tr><td><code>/22</code></td><td>1,022</td><td>Campus network segment</td></tr>
+<tr><td><code>/20</code></td><td>4,094</td><td>Data center subnet</td></tr>
+<tr><td><code>/18</code></td><td>16,382</td><td>Cloud VPC subnet (AWS, GCP)</td></tr>
+<tr><td><code>/16</code></td><td>65,534</td><td>Entire VPC or large campus</td></tr>
+<tr><td><code>/32</code></td><td>1</td><td>Host route in routing table, loopback, firewall rule</td></tr>
+</tbody>
+</table>
+
+<h3>Supernetting / Aggregation (CIDR in reverse)</h3>
+<p>CIDR also lets you <strong>combine</strong> multiple smaller subnets into a single larger one (called <strong>route summarization</strong> or <strong>supernetting</strong>).</p>
+<pre>
+Instead of advertising 4 separate /24 routes:
+  10.1.0.0/24
+  10.1.1.0/24
+  10.1.2.0/24
+  10.1.3.0/24
+
+You can advertise 1 summary route:
+  10.1.0.0/22      ← covers all four /24s
+
+This reduces routing table size and improves router performance.
+</pre>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 5: GATEWAY & ROUTING                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="gateway">
+<div class="section-num">Chapter 05</div>
+<h2>Gateways and Routing</h2>
+
+<h3>What Is a Gateway?</h3>
+<p>A <strong>gateway</strong> (specifically, a <strong>default gateway</strong>) is the IP address of the router that your device sends traffic to when the destination is <strong>outside your local subnet</strong>. It's your "exit door" to other networks and the internet.</p>
+
+<div class="card highlight">
+<div class="card-label">Analogy</div>
+<p style="margin:0;">You live in an apartment building (your subnet). If you want to talk to your neighbor (same subnet), you just walk down the hall. If you want to visit someone in another building (different subnet), you must go through the <strong>main entrance</strong> (the gateway) and take the road (the routing infrastructure).</p>
+</div>
+
+<pre>
+Your PC: 192.168.1.10/24
+Gateway: 192.168.1.1         ← This is the router's interface on YOUR subnet
+
+When you access google.com:
+  - Destination: 142.250.190.14 (Google's IP)
+  - Is 142.250.190.14 in 192.168.1.0/24? → NO
+  - Send packet to default gateway (192.168.1.1)
+  - Router takes it from there
+</pre>
+
+<h3>What Is a Route?</h3>
+<p>A <strong>route</strong> is an entry in a <strong>routing table</strong> that tells the device (or router): "To reach network X, send the packet to Y via interface Z."</p>
+
+<h4>Viewing the Routing Table</h4>
+<pre>
+# Linux
+$ ip route show
+default via 192.168.1.1 dev eth0 proto dhcp
+192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.10
+10.10.0.0/16 via 192.168.1.254 dev eth0
+
+# Windows
+C:\> route print
+
+# macOS
+$ netstat -rn
+</pre>
+
+<h4>Reading a Route Entry</h4>
+<pre>
+  10.10.0.0/16 via 192.168.1.254 dev eth0
+  ──────────── ─── ───────────── ─── ────
+       │         │       │         │    │
+       │         │       │         │    └─ Out through this interface
+       │         │       │         └────── keyword
+       │         │       └────────────── Next-hop router (gateway for this route)
+       │         └────────────────────── keyword
+       └──────────────────────────────── Destination network
+
+Translation: "To reach anything in 10.10.0.0/16, send it to 192.168.1.254 through eth0"
+</pre>
+
+<h3>How Routing Decisions Work</h3>
+<p>When your device wants to send a packet, it follows this process:</p>
+
+<div class="steps">
+<div class="step">
+<strong>Check the destination IP.</strong> Where does this packet need to go?
+</div>
+<div class="step">
+<strong>Check the routing table.</strong> Is there a specific route for that destination network?
+</div>
+<div class="step">
+<strong>Longest Prefix Match.</strong> If multiple routes match, the <strong>most specific one wins</strong> (highest prefix number).<br>
+Example: A packet to <code>10.10.5.20</code> matches both <code>10.0.0.0/8</code> and <code>10.10.0.0/16</code>. The /16 route wins because it's more specific.
+</div>
+<div class="step">
+<strong>Use the default route if nothing else matches.</strong> The default route (<code>0.0.0.0/0</code>) is the "catch all" — it matches everything. This points to your default gateway.
+</div>
+</div>
+
+<div class="card warn">
+<div class="card-label">Critical Concept — Longest Prefix Match</div>
+<pre style="background:transparent;border:none;padding:0;margin:0;color:var(--text-secondary);">
+Routing table:
+  0.0.0.0/0       via 192.168.1.1     ← matches everything (lowest priority)
+  10.0.0.0/8      via 10.0.0.1        ← matches all 10.x.x.x
+  10.10.0.0/16    via 10.10.0.1       ← matches 10.10.x.x
+  10.10.5.0/24    via 10.10.5.1       ← matches 10.10.5.x
+  10.10.5.20/32   via 10.10.5.254     ← matches ONLY 10.10.5.20
+
+Packet destined for 10.10.5.20 → uses the /32 route (most specific)
+Packet destined for 10.10.5.99 → uses the /24 route
+Packet destined for 10.10.99.1 → uses the /16 route
+Packet destined for 10.99.1.1  → uses the /8 route
+Packet destined for 8.8.8.8   → uses the /0 default route
+</pre>
+</div>
+
+<h3>Static Routes vs Dynamic Routing</h3>
+<table>
+<thead><tr><th>Feature</th><th>Static Routes</th><th>Dynamic Routing</th></tr></thead>
+<tbody>
+<tr><td>Configuration</td><td>Manually added by admin</td><td>Learned automatically via protocols</td></tr>
+<tr><td>Adapts to failures?</td><td>No — manual update needed</td><td>Yes — automatically recalculates</td></tr>
+<tr><td>Protocols</td><td>N/A</td><td>OSPF, BGP, EIGRP, RIP, IS-IS</td></tr>
+<tr><td>Use case</td><td>Small networks, stub routes</td><td>Enterprise, ISP, data centers</td></tr>
+<tr><td>Overhead</td><td>Zero</td><td>CPU/memory for protocol processing</td></tr>
+</tbody>
+</table>
+
+<pre>
+# Adding a static route on Linux:
+$ sudo ip route add 10.20.0.0/16 via 192.168.1.254 dev eth0
+
+# Removing it:
+$ sudo ip route del 10.20.0.0/16
+
+# Adding on Windows:
+C:\> route add 10.20.0.0 mask 255.255.0.0 192.168.1.254
+</pre>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 6: HOW NETWORK TRAFFIC FLOWS                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="traffic">
+<div class="section-num">Chapter 06</div>
+<h2>How Network Traffic Flows</h2>
+
+<h3>The Complete Journey of a Packet</h3>
+<p>Let's trace what happens when you type <code>https://google.com</code> in your browser, from your laptop to Google's server and back. This involves <strong>every layer</strong> of the network stack.</p>
+
+<h4>Step 1: DNS Resolution</h4>
+<div class="flow">
+  <span class="flow-node">Browser</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-node">OS DNS Cache</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-node">DNS Resolver (e.g., 8.8.8.8)</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-node">Returns: 142.250.190.14</span>
+</div>
+<p>Your browser doesn't know what "google.com" means in terms of networking. It asks the DNS resolver to translate it into an IP address. This was covered in detail in your DNS guide.</p>
+
+<h4>Step 2: Is the Destination Local or Remote?</h4>
+<pre>
+Your IP:    192.168.1.10  /24   → Network: 192.168.1.0
+Destination: 142.250.190.14     → Network: 142.250.190.0 (different!)
+
+192.168.1.0 ≠ 142.250.190.0 → Destination is REMOTE
+→ Send to default gateway: 192.168.1.1
+</pre>
+
+<h4>Step 3: ARP Resolution (Layer 2)</h4>
+<p>Your device knows the gateway's IP (192.168.1.1), but to send an Ethernet frame on the local network, it needs the gateway's <strong>MAC address</strong>.</p>
+
+<pre>
+Your PC → ARP Request (broadcast): "Who has 192.168.1.1? Tell 192.168.1.10"
+Router  → ARP Reply (unicast):     "192.168.1.1 is at aa:bb:cc:dd:ee:ff"
+
+Now your PC caches: 192.168.1.1 = aa:bb:cc:dd:ee:ff
+</pre>
+
+<h4>Step 4: Packet Construction</h4>
+<pre>
+┌─────────────────────────────────────────────────────────────────┐
+│ Ethernet Frame (Layer 2)                                        │
+│ ┌───────────────┬───────────────┬──────────────────────────────┐│
+│ │ Dst MAC:      │ Src MAC:      │ Type: 0x0800 (IPv4)         ││
+│ │ aa:bb:cc:dd:  │ 11:22:33:44:  │                              ││
+│ │ ee:ff         │ 55:66         │                              ││
+│ │ (ROUTER)      │ (YOUR PC)     │                              ││
+│ └───────────────┴───────────────┴──────────────────────────────┘│
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │ IP Packet (Layer 3)                                        │  │
+│  │ Src IP: 192.168.1.10    Dst IP: 142.250.190.14            │  │
+│  │ TTL: 64    Protocol: TCP                                   │  │
+│  │                                                            │  │
+│  │  ┌──────────────────────────────────────────────────────┐  │  │
+│  │  │ TCP Segment (Layer 4)                                 │  │  │
+│  │  │ Src Port: 52431 (random)   Dst Port: 443 (HTTPS)     │  │  │
+│  │  │                                                       │  │  │
+│  │  │  ┌─────────────────────────────────────────────────┐  │  │  │
+│  │  │  │ Application Data (Layer 7)                       │  │  │  │
+│  │  │  │ TLS ClientHello / HTTP GET / ...                 │  │  │  │
+│  │  │  └─────────────────────────────────────────────────┘  │  │  │
+│  │  └──────────────────────────────────────────────────────┘  │  │
+│  └────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+</pre>
+
+<div class="card highlight">
+<div class="card-label">Key Insight — MAC vs IP</div>
+<p><strong>MAC address changes at every hop.</strong> When the router receives your frame, it strips the Ethernet header, looks at the destination IP, finds the next hop, and creates a <strong>new</strong> Ethernet frame with the next router's MAC as destination.</p>
+<p style="margin:0;"><strong>IP address stays the same end-to-end</strong> (until NAT modifies it). The source and destination IP addresses remain constant throughout the journey.</p>
+</div>
+
+<h4>Step 5: Router-to-Router Forwarding</h4>
+<div class="diagram">
+Your PC          Home Router       ISP Router        Google's Edge Router    Google Server
+192.168.1.10     192.168.1.1       203.0.113.1       142.250.0.1            142.250.190.14
+    │                │                  │                  │                      │
+    │── Eth Frame ──→│                  │                  │                      │
+    │  dst MAC=router│                  │                  │                      │
+    │                │── New Frame ────→│                  │                      │
+    │                │  dst MAC=ISP     │                  │                      │
+    │                │  src IP=YOUR_PUBLIC_IP (NAT!)       │                      │
+    │                │                  │── New Frame ────→│                      │
+    │                │                  │                  │── Deliver ──────────→│
+    │                │                  │                  │                      │
+    │                │                  │                  │←──── Response ───────│
+    │                │                  │←── Forward ──────│                      │
+    │                │←── Forward ──────│                  │                      │
+    │←── Deliver ────│  (reverse NAT)   │                  │                      │
+    │                │                  │                  │                      │
+</div>
+
+<h4>Step 6: NAT (Network Address Translation)</h4>
+<p>Your home router performs <strong>NAT</strong> — it replaces your private source IP with its public IP before sending the packet to the internet.</p>
+
+<pre>
+OUTGOING (your PC → internet):
+  Original:   Src=192.168.1.10   Dst=142.250.190.14
+  After NAT:  Src=203.0.113.50   Dst=142.250.190.14
+                   ↑ (router's public IP)
+
+  Router records: 192.168.1.10:52431 ↔ 203.0.113.50:52431
+
+INCOMING (internet → your PC):
+  Arrives:    Src=142.250.190.14  Dst=203.0.113.50
+  After NAT:  Src=142.250.190.14  Dst=192.168.1.10
+                                       ↑ (translated back to your private IP)
+</pre>
+
+<h3>Local vs Remote Communication Summary</h3>
+<table>
+<thead><tr><th>Scenario</th><th>Same Subnet?</th><th>Process</th></tr></thead>
+<tbody>
+<tr><td>PC (192.168.1.10) → Printer (192.168.1.50)</td><td>Yes (/24)</td><td>Direct ARP → send on Layer 2. No router needed.</td></tr>
+<tr><td>PC (192.168.1.10) → Server (10.0.5.20)</td><td>No</td><td>ARP for gateway → send to router → router forwards</td></tr>
+<tr><td>PC (192.168.1.10) → Google (142.250.x.x)</td><td>No</td><td>Gateway → NAT → ISP → internet → Google</td></tr>
+</tbody>
+</table>
+
+<h3>How to Trace Traffic Flow</h3>
+<pre>
+# Trace the path packets take to a destination:
+$ traceroute google.com        # Linux/macOS
+$ tracert google.com           # Windows
+
+# Example output:
+1   1.2 ms    192.168.1.1        ← Your gateway (home router)
+2   5.4 ms    10.0.0.1           ← ISP's first router
+3  12.1 ms    203.0.113.1        ← ISP backbone
+4  15.3 ms    72.14.236.206      ← Google's network edge
+5  16.0 ms    142.250.190.14     ← Destination
+
+# See where packets are going right now (Linux):
+$ ss -tunp                      # Active connections with process info
+$ netstat -tunp                 # Older equivalent
+
+# Monitor live traffic:
+$ sudo tcpdump -i eth0 -nn      # All traffic on eth0
+$ sudo tcpdump -i eth0 host 10.0.5.20   # Traffic to/from specific host
+$ sudo tcpdump -i eth0 port 443         # Only HTTPS traffic
+</pre>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 7: NETWORK TOPOLOGY                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="topology">
+<div class="section-num">Chapter 07</div>
+<h2>Network Topology</h2>
+
+<h3>What Is Network Topology?</h3>
+<p><strong>Network topology</strong> describes how devices (nodes) are arranged and connected in a network. There are two types:</p>
+<p><strong>Physical topology:</strong> How cables and hardware are physically laid out.</p>
+<p><strong>Logical topology:</strong> How data actually flows through the network (can differ from physical).</p>
+
+<h3>Common Topology Types</h3>
+
+<h4>1. Star Topology ★</h4>
+<div class="diagram">
+              ┌──────┐
+              │  PC1 │
+              └──┬───┘
+                 │
+   ┌──────┐  ┌──┴───┐  ┌──────┐
+   │  PC2 ├──┤SWITCH├──┤  PC3 │
+   └──────┘  └──┬───┘  └──────┘
+                 │
+              ┌──┴───┐
+              │  PC4 │
+              └──────┘
+</div>
+<p><strong>What:</strong> All devices connect to a central switch/hub.<br>
+<strong>Pros:</strong> Easy to manage, one device failure doesn't affect others, easy to add new devices.<br>
+<strong>Cons:</strong> Central switch is a single point of failure. If the switch dies, everything goes down.<br>
+<strong>Used in:</strong> Almost every modern office LAN. This is the most common topology today.</p>
+
+<h4>2. Mesh Topology</h4>
+<div class="diagram">
+     ┌──────┐──────────────┌──────┐
+     │  R1  │              │  R2  │
+     └──┬───┘              └──┬───┘
+        │  ╲              ╱   │
+        │    ╲          ╱     │
+        │      ╲      ╱       │
+        │        ╲  ╱         │
+     ┌──┴───┐──────────────┌──┴───┐
+     │  R3  │              │  R4  │
+     └──────┘──────────────└──────┘
+</div>
+<p><strong>What:</strong> Every device connects to every other device (full mesh) or many others (partial mesh).<br>
+<strong>Pros:</strong> Maximum redundancy. Multiple path failures can be tolerated.<br>
+<strong>Cons:</strong> Expensive — number of links = n(n-1)/2 for full mesh.<br>
+<strong>Used in:</strong> WAN links between data centers, ISP backbone, critical infrastructure.</p>
+
+<h4>3. Hub-and-Spoke (Extended Star)</h4>
+<div class="diagram">
+  Branch Office 1          Branch Office 2          Branch Office 3
+   ┌─────────┐              ┌─────────┐              ┌─────────┐
+   │ Switch  │              │ Switch  │              │ Switch  │
+   └────┬────┘              └────┬────┘              └────┬────┘
+        │                        │                        │
+        │      ┌──────────────┐  │                        │
+        └──────┤  HQ Router   ├──┘                        │
+               │  (Hub)       ├───────────────────────────┘
+               └──────────────┘
+</div>
+<p><strong>What:</strong> All remote sites connect to a central hub (HQ). Traffic between branches flows through HQ.<br>
+<strong>Pros:</strong> Centralized management, lower cost than full mesh.<br>
+<strong>Cons:</strong> Hub is a bottleneck and single point of failure. Branch-to-branch latency is doubled.<br>
+<strong>Used in:</strong> Enterprise WAN (VPN tunnels from branches to HQ).</p>
+
+<h4>4. Ring Topology</h4>
+<div class="diagram">
+        ┌──────┐
+        │  R1  │
+     ╱──└──┬───┘──╲
+   ╱       │        ╲
+┌──┴───┐           ┌──┴───┐
+│  R4  │           │  R2  │
+└──┬───┘           └──┬───┘
+   ╲       │        ╱
+     ╲──┌──┴───┐──╱
+        │  R3  │
+        └──────┘
+</div>
+<p><strong>What:</strong> Devices connected in a circular loop. Data travels in one direction (or both in dual-ring).<br>
+<strong>Pros:</strong> Predictable performance, no collisions.<br>
+<strong>Cons:</strong> A single break kills the network (unless dual ring). Adding devices disrupts the ring.<br>
+<strong>Used in:</strong> SONET/SDH fiber rings, some industrial networks. Less common today.</p>
+
+<h4>5. Bus Topology (Legacy)</h4>
+<div class="diagram">
+  ═══╤═══════╤═══════╤═══════╤═══════╤═══
+     │       │       │       │       │
+   ┌─┴─┐  ┌─┴─┐  ┌─┴─┐  ┌─┴─┐  ┌─┴─┐
+   │PC1│  │PC2│  │PC3│  │PC4│  │PC5│
+   └───┘  └───┘  └───┘  └───┘  └───┘
+</div>
+<p><strong>What:</strong> All devices share a single cable (the "bus"). Terminators at each end.<br>
+<strong>Pros:</strong> Cheap, simple.<br>
+<strong>Cons:</strong> One cable break = entire network down. Collisions. Terrible performance at scale.<br>
+<strong>Used in:</strong> Legacy 10BASE2/10BASE5 Ethernet. Basically extinct.</p>
+
+<h3>Real-World Enterprise Topology</h3>
+<p>Modern enterprise networks use a <strong>hierarchical 3-tier model</strong> (or collapsed 2-tier in smaller environments):</p>
+
+<div class="diagram">
+                          ┌───────────────┐
+                    ╔═════╡   INTERNET     ╞═════╗
+                    ║     └───────────────┘      ║
+                    ║                             ║
+              ┌─────╨─────┐               ┌──────╨────┐
+              │ Firewall  │               │ Firewall  │     ← SECURITY LAYER
+              └─────┬─────┘               └─────┬─────┘
+                    │                             │
+           ┌───────┴───────┐             ┌───────┴───────┐
+           │  Core Switch  ├─────────────┤  Core Switch  │  ← CORE LAYER
+           │  (Layer 3)    │  redundant  │  (Layer 3)    │    (high-speed backbone)
+           └───┬───────┬───┘   link      └───┬───────┬───┘
+               │       │                     │       │
+        ┌──────┴─┐  ┌──┴──────┐       ┌─────┴──┐ ┌──┴─────┐
+        │ Dist   │  │  Dist   │       │  Dist  │ │  Dist  │  ← DISTRIBUTION LAYER
+        │ Switch │  │  Switch │       │ Switch │ │ Switch │    (routing, policy, ACLs)
+        └───┬────┘  └───┬────┘       └───┬────┘ └───┬────┘
+            │            │                │          │
+     ┌──────┤     ┌──────┤         ┌─────┤    ┌─────┤
+     │      │     │      │         │     │    │     │
+   ┌─┴─┐ ┌─┴─┐ ┌─┴─┐ ┌─┴─┐   ┌──┴┐ ┌──┴┐ ┌┴──┐ ┌┴──┐
+   │Acc│ │Acc│ │Acc│ │Acc│   │Acc│ │Acc│ │Acc│ │Acc│     ← ACCESS LAYER
+   │Sw │ │Sw │ │Sw │ │Sw │   │Sw │ │Sw │ │Sw │ │Sw │      (end-user ports)
+   └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘   └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘
+     │      │     │      │       │     │     │     │
+   PCs   Phones  PCs  Servers  PCs   PCs   APs   IoT
+</div>
+
+<table>
+<thead><tr><th>Layer</th><th>Role</th><th>Typical Equipment</th></tr></thead>
+<tbody>
+<tr><td><strong>Core</strong></td><td>High-speed backbone, moves traffic fast between distribution blocks</td><td>Chassis switches (Cisco Nexus, Arista 7500)</td></tr>
+<tr><td><strong>Distribution</strong></td><td>Policy enforcement, inter-VLAN routing, ACLs, QoS</td><td>Layer 3 switches (Cisco Catalyst 9500)</td></tr>
+<tr><td><strong>Access</strong></td><td>Connects end devices — PCs, phones, APs, printers</td><td>Layer 2 switches (Cisco Catalyst 9200)</td></tr>
+</tbody>
+</table>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 8: FINDING FREE IPs                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="find-free">
+<div class="section-num">Chapter 08</div>
+<h2>How to Find Free (Available) IPs</h2>
+
+<h3>Why You Need This</h3>
+<p>When adding a new server, printer, or device to a network, you need an IP that isn't already in use. Assigning a duplicate IP causes an <strong>IP conflict</strong> — both devices lose connectivity.</p>
+
+<h3>Method 1: DHCP (Automatic)</h3>
+<p>If your network uses DHCP, the DHCP server automatically tracks which IPs are leased and hands out free ones. Check the DHCP lease table on your router/server:</p>
+<pre>
+# On a Linux DHCP server (ISC DHCP):
+$ cat /var/lib/dhcp/dhcpd.leases
+
+# On Windows DHCP Server:
+# Open DHCP Manager → Address Leases → see all active leases
+
+# On most home routers:
+# Web interface → DHCP → Client List
+</pre>
+
+<h3>Method 2: Ping Sweep</h3>
+<p>Scan the subnet to see which IPs respond:</p>
+<pre>
+# Linux — sweep the entire /24:
+$ for i in $(seq 1 254); do
+    ping -c 1 -W 1 192.168.1.$i &>/dev/null && echo "192.168.1.$i is ALIVE"
+  done
+
+# Using nmap (much faster):
+$ nmap -sn 192.168.1.0/24
+
+# Output:
+Nmap scan report for 192.168.1.1
+Host is up (0.002s latency).
+Nmap scan report for 192.168.1.10
+Host is up (0.001s latency).
+Nmap scan report for 192.168.1.50
+Host is up (0.003s latency).
+
+# IPs that DON'T appear in the output are likely free.
+</pre>
+
+<h3>Method 3: ARP Table Check</h3>
+<pre>
+# Show devices your machine has recently communicated with:
+$ arp -a                    # macOS / older Linux
+$ ip neigh show             # modern Linux
+
+# Output:
+192.168.1.1 dev eth0 lladdr aa:bb:cc:dd:ee:ff REACHABLE
+192.168.1.10 dev eth0 lladdr 11:22:33:44:55:66 REACHABLE
+
+# Combine with ping sweep first for comprehensive results
+</pre>
+
+<h3>Method 4: IPAM Tools (Enterprise)</h3>
+<p>In production environments, nobody does manual ping sweeps. You use an <strong>IPAM</strong> (IP Address Management) tool:</p>
+<table>
+<thead><tr><th>Tool</th><th>Type</th><th>Use Case</th></tr></thead>
+<tbody>
+<tr><td>Infoblox</td><td>Enterprise (commercial)</td><td>DNS + DHCP + IPAM integrated</td></tr>
+<tr><td>BlueCat</td><td>Enterprise (commercial)</td><td>Large-scale DDI management</td></tr>
+<tr><td>phpIPAM</td><td>Open source</td><td>Web-based, good for medium orgs</td></tr>
+<tr><td>NetBox</td><td>Open source</td><td>Network source of truth, used by many data centers</td></tr>
+</tbody>
+</table>
+
+<div class="card warn">
+<div class="card-label">Caution</div>
+<p style="margin:0;">A ping sweep may miss devices that have firewalls blocking ICMP. Some devices won't respond to ping even though they're using that IP. Always cross-reference with ARP tables and DHCP leases for accuracy.</p>
+</div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 9: TOOLS & COMMANDS                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="tools">
+<div class="section-num">Chapter 09</div>
+<h2>Essential Networking Tools &amp; Commands</h2>
+
+<h3>IP Configuration</h3>
+<pre>
+# Linux — view IP addresses:
+$ ip addr show
+$ ip -4 addr show              # IPv4 only
+$ ip addr show dev eth0        # specific interface
+
+# Linux — set a static IP:
+$ sudo ip addr add 192.168.1.100/24 dev eth0
+$ sudo ip link set eth0 up
+
+# Windows:
+C:\> ipconfig /all              # show all interface details
+C:\> ipconfig /release          # release DHCP lease
+C:\> ipconfig /renew            # request new DHCP lease
+
+# macOS:
+$ ifconfig en0                  # show interface details
+$ networksetup -setmanual "Wi-Fi" 192.168.1.100 255.255.255.0 192.168.1.1
+</pre>
+
+<h3>Connectivity Testing</h3>
+<pre>
+# Ping — test reachability:
+$ ping 8.8.8.8                  # ping Google DNS
+$ ping -c 4 192.168.1.1        # send exactly 4 pings (Linux/macOS)
+$ ping -n 4 192.168.1.1        # send exactly 4 pings (Windows)
+
+# Traceroute — show the path:
+$ traceroute 8.8.8.8            # Linux/macOS (uses UDP)
+$ traceroute -I 8.8.8.8         # Linux (uses ICMP, like Windows)
+$ tracert 8.8.8.8               # Windows
+
+# MTR — combined ping + traceroute (real-time):
+$ mtr 8.8.8.8
+</pre>
+
+<h3>DNS Tools</h3>
+<pre>
+# Lookup:
+$ dig google.com                # full DNS query
+$ dig +short google.com         # just the IP
+$ nslookup google.com           # works everywhere
+
+# Reverse lookup:
+$ dig -x 8.8.8.8                # IP → hostname
+
+# Check DNS cache (Windows):
+C:\> ipconfig /displaydns
+C:\> ipconfig /flushdns          # clear DNS cache
+</pre>
+
+<h3>Port &amp; Connection Analysis</h3>
+<pre>
+# Show active connections:
+$ ss -tunlp                     # Linux (modern)
+$ netstat -tunlp                # Linux (older) / macOS
+
+# Flags:  -t=TCP  -u=UDP  -n=numeric  -l=listening  -p=process
+
+# Test if a specific port is reachable:
+$ telnet 10.0.5.20 3306         # test MySQL port
+$ nc -zv 10.0.5.20 3306         # netcat (better)
+$ curl -v telnet://10.0.5.20:3306   # using curl
+
+# Scan ports:
+$ nmap -p 1-1000 10.0.5.20     # scan first 1000 ports
+$ nmap -sV 10.0.5.20           # detect service versions
+</pre>
+
+<h3>Packet Capture</h3>
+<pre>
+# tcpdump — capture traffic:
+$ sudo tcpdump -i eth0 -nn                          # all traffic, numeric
+$ sudo tcpdump -i eth0 host 10.0.5.20               # specific host
+$ sudo tcpdump -i eth0 port 443                     # HTTPS traffic
+$ sudo tcpdump -i eth0 -w capture.pcap              # save to file
+$ sudo tcpdump -i eth0 'src 192.168.1.10 and dst port 80'  # complex filter
+
+# Read saved capture:
+$ tcpdump -r capture.pcap
+# Or open in Wireshark for graphical analysis
+</pre>
+
+<h3>Subnet Calculator (CLI)</h3>
+<pre>
+# Install ipcalc:
+$ sudo apt install ipcalc       # Debian/Ubuntu
+$ brew install ipcalc            # macOS
+
+# Usage:
+$ ipcalc 192.168.1.10/24
+
+Address:   192.168.1.10         11000000.10101000.00000001. 00001010
+Netmask:   255.255.255.0 = 24   11111111.11111111.11111111. 00000000
+Wildcard:  0.0.0.255            00000000.00000000.00000000. 11111111
+=>
+Network:   192.168.1.0/24       11000000.10101000.00000001. 00000000
+HostMin:   192.168.1.1          11000000.10101000.00000001. 00000001
+HostMax:   192.168.1.254        11000000.10101000.00000001. 11111110
+Broadcast: 192.168.1.255        11000000.10101000.00000001. 11111111
+Hosts/Net: 254                   Class C, Private Internet
+
+$ ipcalc 10.50.100.130/18
+Address:   10.50.100.130        00001010.00110010.01 100100.10000010
+Netmask:   255.255.192.0 = 18   11111111.11111111.11 000000.00000000
+=>
+Network:   10.50.64.0/18
+HostMin:   10.50.64.1
+HostMax:   10.50.127.254
+Broadcast: 10.50.127.255
+Hosts/Net: 16382
+</pre>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 10: CHEAT SHEET                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="cheatsheet">
+<div class="section-num">Chapter 10</div>
+<h2>Quick Reference Cheat Sheet</h2>
+
+<h3>CIDR ↔ Mask ↔ Hosts Table (Complete)</h3>
+<table>
+<thead><tr><th>CIDR</th><th>Subnet Mask</th><th>Wildcard Mask</th><th>Total IPs</th><th>Usable Hosts</th><th>Block Size</th></tr></thead>
+<tbody>
+<tr><td><code>/32</code></td><td><code>255.255.255.255</code></td><td><code>0.0.0.0</code></td><td>1</td><td>1</td><td>-</td></tr>
+<tr><td><code>/31</code></td><td><code>255.255.255.254</code></td><td><code>0.0.0.1</code></td><td>2</td><td>2</td><td>-</td></tr>
+<tr><td><code>/30</code></td><td><code>255.255.255.252</code></td><td><code>0.0.0.3</code></td><td>4</td><td>2</td><td>4</td></tr>
+<tr><td><code>/29</code></td><td><code>255.255.255.248</code></td><td><code>0.0.0.7</code></td><td>8</td><td>6</td><td>8</td></tr>
+<tr><td><code>/28</code></td><td><code>255.255.255.240</code></td><td><code>0.0.0.15</code></td><td>16</td><td>14</td><td>16</td></tr>
+<tr><td><code>/27</code></td><td><code>255.255.255.224</code></td><td><code>0.0.0.31</code></td><td>32</td><td>30</td><td>32</td></tr>
+<tr><td><code>/26</code></td><td><code>255.255.255.192</code></td><td><code>0.0.0.63</code></td><td>64</td><td>62</td><td>64</td></tr>
+<tr><td><code>/25</code></td><td><code>255.255.255.128</code></td><td><code>0.0.0.127</code></td><td>128</td><td>126</td><td>128</td></tr>
+<tr><td><code>/24</code></td><td><code>255.255.255.0</code></td><td><code>0.0.0.255</code></td><td>256</td><td>254</td><td>256</td></tr>
+<tr><td><code>/23</code></td><td><code>255.255.254.0</code></td><td><code>0.0.1.255</code></td><td>512</td><td>510</td><td>-</td></tr>
+<tr><td><code>/22</code></td><td><code>255.255.252.0</code></td><td><code>0.0.3.255</code></td><td>1,024</td><td>1,022</td><td>-</td></tr>
+<tr><td><code>/21</code></td><td><code>255.255.248.0</code></td><td><code>0.0.7.255</code></td><td>2,048</td><td>2,046</td><td>-</td></tr>
+<tr><td><code>/20</code></td><td><code>255.255.240.0</code></td><td><code>0.0.15.255</code></td><td>4,096</td><td>4,094</td><td>-</td></tr>
+<tr><td><code>/19</code></td><td><code>255.255.224.0</code></td><td><code>0.0.31.255</code></td><td>8,192</td><td>8,190</td><td>-</td></tr>
+<tr><td><code>/18</code></td><td><code>255.255.192.0</code></td><td><code>0.0.63.255</code></td><td>16,384</td><td>16,382</td><td>-</td></tr>
+<tr><td><code>/17</code></td><td><code>255.255.128.0</code></td><td><code>0.0.127.255</code></td><td>32,768</td><td>32,766</td><td>-</td></tr>
+<tr><td><code>/16</code></td><td><code>255.255.0.0</code></td><td><code>0.0.255.255</code></td><td>65,536</td><td>65,534</td><td>-</td></tr>
+</tbody>
+</table>
+
+<h3>Quick Subnetting Formula Card</h3>
+<div class="card success">
+<div class="card-label">Formulas You Must Know</div>
+<pre style="background:transparent;border:none;padding:0;margin:0;color:var(--text-secondary);">
+Total IPs in subnet          = 2^(32 - prefix)
+Usable hosts                 = 2^(32 - prefix) - 2
+Number of subnets possible   = 2^(prefix - original_prefix)
+Block size (interesting oct) = 256 - mask_value_in_that_octet
+Network address              = IP AND mask  (bitwise AND)
+Broadcast address            = Network OR (NOT mask)  (bitwise OR with wildcard)
+Wildcard mask                = 255.255.255.255 - subnet_mask
+</pre>
+</div>
+
+<h3>OSI Model Quick Reference</h3>
+<table>
+<thead><tr><th>Layer</th><th>Name</th><th>Protocol Data Unit</th><th>Key Protocols</th><th>Devices</th></tr></thead>
+<tbody>
+<tr><td>7</td><td>Application</td><td>Data</td><td>HTTP, DNS, SMTP, SSH, FTP</td><td>-</td></tr>
+<tr><td>6</td><td>Presentation</td><td>Data</td><td>TLS/SSL, JPEG, ASCII</td><td>-</td></tr>
+<tr><td>5</td><td>Session</td><td>Data</td><td>NetBIOS, RPC</td><td>-</td></tr>
+<tr><td>4</td><td>Transport</td><td>Segment/Datagram</td><td>TCP, UDP</td><td>-</td></tr>
+<tr><td>3</td><td>Network</td><td>Packet</td><td>IP, ICMP, OSPF, BGP</td><td>Router, L3 Switch</td></tr>
+<tr><td>2</td><td>Data Link</td><td>Frame</td><td>Ethernet, Wi-Fi, ARP</td><td>Switch, Bridge</td></tr>
+<tr><td>1</td><td>Physical</td><td>Bits</td><td>Electrical/Optical signals</td><td>Cable, Hub, NIC</td></tr>
+</tbody>
+</table>
+
+<h3>Troubleshooting Flowchart</h3>
+<div class="diagram">
+  "I can't reach the server!"
+          │
+          ▼
+  ┌─ Can you ping yourself (127.0.0.1)? ──── NO ──→ NIC/TCP stack broken
+  │       │
+  │      YES
+  │       ▼
+  ├─ Can you ping your own IP? ──── NO ──→ IP not configured properly
+  │       │
+  │      YES
+  │       ▼
+  ├─ Can you ping the gateway? ──── NO ──→ Layer 2 issue (cable, switch, VLAN)
+  │       │                                 or wrong gateway configured
+  │      YES
+  │       ▼
+  ├─ Can you ping 8.8.8.8? ──── NO ──→ Routing issue beyond your gateway
+  │       │                              (ISP problem, firewall blocking)
+  │      YES
+  │       ▼
+  ├─ Can you ping google.com? ──── NO ──→ DNS resolution issue
+  │       │                                (check /etc/resolv.conf)
+  │      YES
+  │       ▼
+  └─ Can you reach the service port? ──── NO ──→ Firewall blocking, service down,
+          │                                       or wrong port
+         YES
+          ▼
+    Check application-level config (auth, TLS, headers, etc.)
+</div>
+
+<h3>Common Port Numbers</h3>
+<table>
+<thead><tr><th>Port</th><th>Protocol</th><th>Service</th></tr></thead>
+<tbody>
+<tr><td>20-21</td><td>TCP</td><td>FTP (data + control)</td></tr>
+<tr><td>22</td><td>TCP</td><td>SSH, SCP, SFTP</td></tr>
+<tr><td>23</td><td>TCP</td><td>Telnet (insecure!)</td></tr>
+<tr><td>25</td><td>TCP</td><td>SMTP (email sending)</td></tr>
+<tr><td>53</td><td>TCP/UDP</td><td>DNS</td></tr>
+<tr><td>67-68</td><td>UDP</td><td>DHCP (server-client)</td></tr>
+<tr><td>80</td><td>TCP</td><td>HTTP</td></tr>
+<tr><td>110</td><td>TCP</td><td>POP3 (email retrieval)</td></tr>
+<tr><td>143</td><td>TCP</td><td>IMAP (email retrieval)</td></tr>
+<tr><td>443</td><td>TCP</td><td>HTTPS (TLS)</td></tr>
+<tr><td>3306</td><td>TCP</td><td>MySQL</td></tr>
+<tr><td>5432</td><td>TCP</td><td>PostgreSQL</td></tr>
+<tr><td>6379</td><td>TCP</td><td>Redis</td></tr>
+<tr><td>8080</td><td>TCP</td><td>HTTP Alternate / Proxy</td></tr>
+<tr><td>8443</td><td>TCP</td><td>HTTPS Alternate</td></tr>
+</tbody>
+</table>
+
+<h3>TCP vs UDP</h3>
+<table>
+<thead><tr><th>Feature</th><th>TCP</th><th>UDP</th></tr></thead>
+<tbody>
+<tr><td>Connection</td><td>Connection-oriented (3-way handshake)</td><td>Connectionless</td></tr>
+<tr><td>Reliability</td><td>Guaranteed delivery, retransmissions</td><td>Best-effort, no guarantees</td></tr>
+<tr><td>Ordering</td><td>Packets arrive in order</td><td>No ordering guarantee</td></tr>
+<tr><td>Speed</td><td>Slower (overhead)</td><td>Faster (minimal overhead)</td></tr>
+<tr><td>Use cases</td><td>Web, email, file transfer, SSH</td><td>DNS, video streaming, gaming, VoIP</td></tr>
+</tbody>
+</table>
+
+<pre>
+TCP 3-Way Handshake:
+
+Client                     Server
+   │                          │
+   │──── SYN ────────────────→│   "Hey, want to talk?"
+   │                          │
+   │←─── SYN-ACK ────────────│   "Sure, I'm ready!"
+   │                          │
+   │──── ACK ────────────────→│   "Great, let's go."
+   │                          │
+   │←───── DATA ─────────────→│   Connection established!
+</pre>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div style="text-align:center; padding: 3rem 0 2rem; border-top: 1px solid var(--border); margin-top: 2rem;">
+  <p style="color:var(--text-muted); font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;">
+    NET/REF — Networking Fundamentals Reference Guide<br>
+    Built for hands-on learning &bull; April 2026
+  </p>
+</div>
+
+</div><!-- /container -->
+</body>
+</html>

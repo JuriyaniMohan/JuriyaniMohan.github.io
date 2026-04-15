@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNS Deep Dive — Part 2: Hierarchy, Resolvers & Caching</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e17;
+  --bg-card: #111827;
+  --bg-card-alt: #0f1729;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --accent3: #f472b6;
+  --accent4: #34d399;
+  --accent5: #fbbf24;
+  --terminal-bg: #0c1220;
+  --terminal-green: #4ade80;
+  --terminal-prompt: #818cf8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.grain {
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hero {
+  position: relative;
+  padding: 80px 40px 60px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(129,140,248,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 50%, rgba(244,114,182,0.08) 0%, transparent 50%);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  background: linear-gradient(135deg, var(--accent2), var(--accent3), var(--accent5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  letter-spacing: -1px;
+}
+
+.hero .subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin-top: 12px;
+  position: relative;
+}
+
+.hero .part-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent2), var(--accent3));
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  letter-spacing: 1px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.toc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 48px;
+}
+
+.toc h3 {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent2);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.toc ul { list-style: none; }
+.toc li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.toc li:last-child { border-bottom: none; }
+.toc a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toc a:hover { color: var(--accent2); }
+.toc .num {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent3);
+  font-size: 0.8rem;
+  min-width: 28px;
+}
+
+section { margin-bottom: 56px; }
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.9rem;
+  margin-bottom: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+h2 .icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent2);
+  margin: 28px 0 12px;
+}
+
+h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  color: var(--accent3);
+  margin: 20px 0 8px;
+}
+
+p { margin-bottom: 14px; color: var(--text-dim); font-size: 0.95rem; }
+
+.highlight { color: var(--accent); font-weight: 600; }
+.highlight2 { color: var(--accent2); font-weight: 600; }
+.highlight3 { color: var(--accent3); font-weight: 600; }
+.highlight4 { color: var(--accent4); font-weight: 600; }
+.highlight5 { color: var(--accent5); font-weight: 600; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+}
+
+.card.accent-border { border-left: 3px solid var(--accent); }
+.card.accent2-border { border-left: 3px solid var(--accent2); }
+.card.accent3-border { border-left: 3px solid var(--accent3); }
+.card.accent4-border { border-left: 3px solid var(--accent4); }
+.card.accent5-border { border-left: 3px solid var(--accent5); }
+
+.card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.terminal {
+  background: var(--terminal-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: rgba(255,255,255,0.04);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.terminal-dot.r { background: #ef4444; }
+.terminal-dot.y { background: #fbbf24; }
+.terminal-dot.g { background: #22c55e; }
+
+.terminal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+
+.terminal-body {
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text-dim);
+}
+
+.terminal-body .prompt { color: var(--terminal-prompt); }
+.terminal-body .cmd { color: var(--terminal-green); }
+.terminal-body .comment { color: #4b5563; }
+.terminal-body .val { color: var(--accent5); }
+.terminal-body .key { color: var(--accent); }
+.terminal-body .section-head { color: var(--accent3); font-weight: 700; }
+
+.analogy {
+  background: linear-gradient(135deg, rgba(129,140,248,0.06), rgba(244,114,182,0.06));
+  border: 1px solid rgba(129,140,248,0.15);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 14px 0;
+  font-style: italic;
+  color: var(--text);
+  position: relative;
+}
+.analogy::before {
+  content: '💡';
+  position: absolute;
+  top: -10px; left: 16px;
+  font-size: 1.2rem;
+  font-style: normal;
+}
+
+.hierarchy-tree {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 20px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 2;
+  overflow-x: auto;
+}
+
+.tree-root { color: var(--accent3); font-weight: 700; font-size: 1rem; }
+.tree-tld { color: var(--accent5); font-weight: 600; }
+.tree-sld { color: var(--accent); }
+.tree-sub { color: var(--accent4); }
+.tree-line { color: #334155; }
+
+.vs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.vs-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.vs-card h4 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.vs-card ul {
+  list-style: none;
+  margin-top: 10px;
+}
+
+.vs-card li {
+  padding: 5px 0;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.vs-card li::before {
+  margin-right: 8px;
+}
+
+.vs-card.pro li::before { content: '✅'; }
+.vs-card.con li::before { content: '⚠️'; }
+
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  padding: 20px;
+}
+
+.flow-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  text-align: center;
+  min-width: 80px;
+}
+
+.flow-arrow {
+  color: var(--accent2);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.key-value {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 4px 16px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.key-value dt {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  font-size: 0.82rem;
+}
+.key-value dd { color: var(--text-dim); }
+
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th {
+  background: rgba(129,140,248,0.08);
+  color: var(--accent2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-dim);
+}
+
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.separator {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 48px 0;
+}
+
+.big-diagram {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 24px 0;
+  overflow-x: auto;
+}
+
+.big-diagram h4 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 1.1rem;
+}
+
+.footer-note {
+  text-align: center;
+  padding: 48px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.footer-note .tag {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent2), var(--accent3));
+  color: #000;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 50px 20px 40px; }
+  h2 { font-size: 1.5rem; }
+  .key-value { grid-template-columns: 1fr; }
+  .vs-grid { grid-template-columns: 1fr; }
+  .flow-diagram { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="hero">
+  <div class="part-badge">PART 2 OF 2</div>
+  <h1>DNS Deep Dive</h1>
+  <p class="subtitle">// Hierarchy, Resolvers, Forwarders & Caching Servers</p>
+</header>
+
+<div class="container">
+
+<nav class="toc">
+  <h3>📋 Contents</h3>
+  <ul>
+    <li><a href="#hierarchy"><span class="num">01</span> DNS Hierarchy — Root, TLD, Authoritative</a></li>
+    <li><a href="#root"><span class="num">02</span> Root Name Servers — The Foundation</a></li>
+    <li><a href="#tld"><span class="num">03</span> TLD Servers — The Categories</a></li>
+    <li><a href="#authoritative"><span class="num">04</span> Authoritative Name Servers — The Final Answer</a></li>
+    <li><a href="#resolver"><span class="num">05</span> What is a Resolver? (Recursive Resolver)</a></li>
+    <li><a href="#forwarder"><span class="num">06</span> What is a Forwarder?</a></li>
+    <li><a href="#resolver-vs-forwarder"><span class="num">07</span> Resolver vs Forwarder — How They Work Together</a></li>
+    <li><a href="#cache-vs-full"><span class="num">08</span> Cache-Only DNS vs Full DNS Server</a></li>
+    <li><a href="#zones"><span class="num">09</span> Zones, Zone Files & Zone Transfers</a></li>
+    <li><a href="#security"><span class="num">10</span> DNS Security — DNSSEC, DoH, DoT</a></li>
+    <li><a href="#dig-practice"><span class="num">11</span> dig Practice — Tracing the Hierarchy</a></li>
+    <li><a href="#troubleshoot"><span class="num">12</span> DNS Troubleshooting Cheat Sheet</a></li>
+  </ul>
+</nav>
+
+<!-- SECTION 1: HIERARCHY -->
+<section id="hierarchy">
+  <h2><span class="icon" style="background:rgba(244,114,182,0.12);color:var(--accent3);">🏛️</span> DNS Hierarchy — The Complete Tree</h2>
+
+  <p>The DNS system is organized as an <span class="highlight3">inverted tree</span>, with the root at the top. Every domain name on the internet is part of this single, global tree. The hierarchy has distinct levels, each managed by different entities.</p>
+
+  <div class="hierarchy-tree">
+<span class="tree-root">                            . (Root)</span>
+<span class="tree-line">                ┌───────────┼───────────┐</span>
+<span class="tree-tld">              .com          .org         .net         .io   .gov   .edu   ...</span>
+<span class="tree-line">         ┌──────┼──────┐</span>
+<span class="tree-sld">      google   amazon  github</span>
+<span class="tree-line">    ┌────┼────┐</span>
+<span class="tree-sub">  www   mail  maps   drive   cloud</span>
+
+<span style="color:var(--accent3);">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+
+<span class="tree-root">Level 0 — ROOT</span>        <span class="comment">│ 13 root server clusters (a.root-servers.net → m.root-servers.net)</span>
+                       <span class="comment">│ Managed by ICANN, IANA, and various orgs</span>
+                       <span class="comment">│ Knows where ALL TLDs live</span>
+
+<span class="tree-tld">Level 1 — TLD</span>         <span class="comment">│ .com, .org, .net (generic TLDs — gTLDs)</span>
+                       <span class="comment">│ .uk, .sg, .jp (country code TLDs — ccTLDs)</span>
+                       <span class="comment">│ .gov, .edu, .mil (sponsored TLDs — sTLDs)</span>
+                       <span class="comment">│ .app, .dev, .cloud (new gTLDs)</span>
+                       <span class="comment">│ Managed by registries (Verisign for .com/.net)</span>
+
+<span class="tree-sld">Level 2 — SLD</span>         <span class="comment">│ The domain you register: google.com, github.com</span>
+  <span style="color:var(--text-dim);">(Second Level)</span>     <span class="comment">│ Managed by domain owner / registrant</span>
+                       <span class="comment">│ Your authoritative name servers live here</span>
+
+<span class="tree-sub">Level 3+ — Subdomains</span> <span class="comment">│ www, mail, api, blog, dev, staging, etc.</span>
+                       <span class="comment">│ Created by domain owner as needed</span>
+                       <span class="comment">│ Can be further delegated (sub.sub.domain.com)</span>
+  </div>
+
+  <div class="analogy">
+    Think of it like a corporate org chart. The CEO (Root) oversees VPs (TLDs), who manage Directors (domains), who manage Managers (subdomains). When an employee (resolver) needs to find someone, they start at the top and get directed down the chain until they find the right person.
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 2: ROOT SERVERS -->
+<section id="root">
+  <h2><span class="icon" style="background:rgba(52,211,153,0.12);color:var(--accent4);">🌍</span> Root Name Servers — The Foundation</h2>
+
+  <p>There are <span class="highlight4">13 root server identities</span> (named a.root-servers.net through m.root-servers.net), but thanks to <span class="highlight">Anycast routing</span>, there are actually <strong>1,700+ physical servers</strong> distributed globally. The root servers don't know the IP for <code>www.google.com</code> — they only know where to find the TLD servers (like the .com servers).</p>
+
+  <div class="card accent4-border">
+    <p class="card-title" style="color:var(--accent4);">The 13 Root Server Identities</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Letter</th><th>Operator</th><th>IPv4</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>A</td><td>Verisign</td><td>198.41.0.4</td></tr>
+          <tr><td>B</td><td>USC-ISI</td><td>199.9.14.201</td></tr>
+          <tr><td>C</td><td>Cogent</td><td>192.33.4.12</td></tr>
+          <tr><td>D</td><td>University of Maryland</td><td>199.7.91.13</td></tr>
+          <tr><td>E</td><td>NASA</td><td>192.203.230.10</td></tr>
+          <tr><td>F</td><td>ISC</td><td>192.5.5.241</td></tr>
+          <tr><td>G</td><td>US DoD</td><td>192.112.36.4</td></tr>
+          <tr><td>H</td><td>US Army Research Lab</td><td>198.97.190.53</td></tr>
+          <tr><td>I</td><td>Netnod (Sweden)</td><td>192.36.148.17</td></tr>
+          <tr><td>J</td><td>Verisign</td><td>192.58.128.30</td></tr>
+          <tr><td>K</td><td>RIPE NCC</td><td>193.0.14.129</td></tr>
+          <tr><td>L</td><td>ICANN</td><td>199.7.83.42</td></tr>
+          <tr><td>M</td><td>WIDE Project (Japan)</td><td>202.12.27.33</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title" style="color:var(--accent);">Why Only 13?</p>
+    <p>The original DNS protocol used UDP with a 512-byte packet size limit. Fitting all root server addresses (with IPv4) into a single UDP response meant a maximum of 13 entries. Today, with EDNS0 (Extended DNS), larger packets are possible, but the 13-identity convention remains.</p>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 3: TLD -->
+<section id="tld">
+  <h2><span class="icon" style="background:rgba(251,191,36,0.12);color:var(--accent5);">📁</span> TLD Servers — The Categories</h2>
+
+  <p><span class="highlight5">Top-Level Domain (TLD)</span> servers manage the top-level zones. When the root server tells the resolver "for .com, go to the .com TLD server," the TLD server then points to the authoritative name server for the specific domain.</p>
+
+  <div class="card accent5-border">
+    <p class="card-title" style="color:var(--accent5);">Types of TLDs</p>
+    <dl class="key-value">
+      <dt>gTLD (Generic)</dt><dd>.com, .org, .net, .info, .biz — open to anyone</dd>
+      <dt>New gTLD</dt><dd>.app, .dev, .cloud, .io, .xyz, .tech — introduced since 2012</dd>
+      <dt>ccTLD (Country)</dt><dd>.us, .uk, .sg, .jp, .de, .in — tied to countries/territories</dd>
+      <dt>sTLD (Sponsored)</dt><dd>.gov, .edu, .mil, .museum — restricted to qualifying organizations</dd>
+      <dt>Infrastructure</dt><dd>.arpa — used for reverse DNS and other infrastructure (managed by IANA)</dd>
+    </dl>
+  </div>
+
+  <p><span class="highlight5">Key point:</span> The TLD server for <code>.com</code> doesn't know the IP of <code>www.google.com</code>. It only knows which name servers are <strong>authoritative</strong> for <code>google.com</code> (i.e., <code>ns1.google.com</code>, <code>ns2.google.com</code>, etc.).</p>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 4: AUTHORITATIVE -->
+<section id="authoritative">
+  <h2><span class="icon" style="background:rgba(56,189,248,0.12);color:var(--accent);">✅</span> Authoritative Name Servers (ANS)</h2>
+
+  <p>The <span class="highlight">Authoritative Name Server</span> is the final stop in the DNS resolution chain. It holds the actual DNS records (A, AAAA, MX, CNAME, etc.) for a domain and gives the <strong>definitive answer</strong>. There is no guessing or caching involved — this is the source of truth.</p>
+
+  <div class="card accent-border">
+    <p class="card-title" style="color:var(--accent);">Authoritative Server Properties</p>
+    <dl class="key-value">
+      <dt>Definitive</dt><dd>It owns the zone file and provides the canonical answer</dd>
+      <dt>Non-recursive</dt><dd>It does NOT chase other servers — it answers only for its own zones</dd>
+      <dt>Two types</dt><dd><strong>Primary (Master)</strong> — holds the read-write zone file. <strong>Secondary (Slave)</strong> — holds a read-only copy, updated via zone transfers.</dd>
+      <dt>AA flag</dt><dd>Sets the "Authoritative Answer" flag in DNS responses (visible in <code>dig</code> output as <code>aa</code>)</dd>
+      <dt>Examples</dt><dd>Cloudflare DNS, AWS Route 53, Google Cloud DNS, self-hosted BIND/PowerDNS</dd>
+    </dl>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">authoritative-check.sh</span>
+    </div>
+    <div class="terminal-body"><span class="comment"># Check if you're getting an authoritative answer</span>
+<span class="prompt">$</span> <span class="cmd">dig @ns1.google.com google.com</span>
+
+<span class="comment">;; flags: qr <span style="color:var(--accent4);font-weight:700;">aa</span> rd; QUERY: 1, ANSWER: 1</span>
+<span class="comment">;;              ↑ "aa" flag = this IS an authoritative answer</span>
+
+<span class="comment"># Compare with a recursive resolver response:</span>
+<span class="prompt">$</span> <span class="cmd">dig @8.8.8.8 google.com</span>
+
+<span class="comment">;; flags: qr rd ra; QUERY: 1, ANSWER: 1</span>
+<span class="comment">;;           ↑ NO "aa" flag = this is a cached/recursive answer</span></div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 5: RESOLVER -->
+<section id="resolver">
+  <h2><span class="icon" style="background:rgba(129,140,248,0.12);color:var(--accent2);">🔄</span> What is a Resolver?</h2>
+
+  <p>A <span class="highlight2">Recursive Resolver</span> (also called a recursive DNS server or just "resolver") is the workhorse of DNS. It sits between your device and the authoritative servers, doing all the heavy lifting of chasing down the answer through the hierarchy.</p>
+
+  <h3>How a Resolver Works</h3>
+
+  <div class="card accent2-border">
+    <p class="card-title" style="color:var(--accent2);">The Resolution Process</p>
+    <p>When your computer asks its resolver "What is the IP for www.example.com?", the resolver:</p>
+    <ol style="margin: 12px 0; padding-left: 20px; color: var(--text-dim); font-size: 0.93rem;">
+      <li style="padding: 4px 0;">Checks its own cache — if it has a recent, unexpired answer, returns it immediately</li>
+      <li style="padding: 4px 0;">If not cached, queries a <strong>Root Server</strong>: "Where is .com?" → Gets TLD server addresses</li>
+      <li style="padding: 4px 0;">Queries the <strong>.com TLD Server</strong>: "Where is example.com?" → Gets authoritative NS addresses</li>
+      <li style="padding: 4px 0;">Queries the <strong>Authoritative Name Server</strong>: "What is www.example.com?" → Gets the A record</li>
+      <li style="padding: 4px 0;">Caches the result (respecting TTL) and returns it to your device</li>
+    </ol>
+    <p>The key point: <span class="highlight2">your device sends one query and expects a final answer</span>. The resolver handles the entire iterative process behind the scenes.</p>
+  </div>
+
+  <h3>Types of Resolvers</h3>
+
+  <div class="card">
+    <dl class="key-value">
+      <dt>Stub Resolver</dt><dd>The basic resolver built into your OS. It does NOT do recursion — it just forwards the query to a configured recursive resolver. (Found in <code>/etc/resolv.conf</code> on Linux)</dd>
+      <dt>Recursive Resolver</dt><dd>The full resolver that does the actual work. Your ISP runs one, and public ones include 8.8.8.8 (Google), 1.1.1.1 (Cloudflare), 9.9.9.9 (Quad9)</dd>
+      <dt>Local Resolver</dt><dd>A resolver running on your machine or local network (e.g., systemd-resolved, dnsmasq, Pi-hole, Unbound)</dd>
+    </dl>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-box" style="border-color:var(--text-dim);">Your PC<br><small style="color:var(--text-dim)">Stub Resolver</small></div>
+    <div class="flow-arrow">→<br><small style="font-size:0.65rem;color:var(--text-dim)">recursive query</small></div>
+    <div class="flow-box" style="border-color:var(--accent2);">🔄 Recursive<br>Resolver<br><small style="color:var(--accent2)">8.8.8.8</small></div>
+    <div class="flow-arrow">→<br><small style="font-size:0.65rem;color:var(--text-dim)">iterative queries</small></div>
+    <div class="flow-box" style="border-color:var(--accent3);">Root → TLD<br>→ Auth NS</div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 6: FORWARDER -->
+<section id="forwarder">
+  <h2><span class="icon" style="background:rgba(244,114,182,0.12);color:var(--accent3);">📤</span> What is a Forwarder?</h2>
+
+  <p>A <span class="highlight3">DNS Forwarder</span> is a DNS server that doesn't resolve queries itself — instead, it <span class="highlight">forwards</span> queries to another DNS server (usually a recursive resolver) and waits for the answer. It acts as a middleman/proxy.</p>
+
+  <div class="card accent3-border">
+    <p class="card-title" style="color:var(--accent3);">Forwarder Behavior</p>
+    <dl class="key-value">
+      <dt>Receives query</dt><dd>Client sends DNS query to the forwarder</dd>
+      <dt>Checks cache</dt><dd>If the answer is in its local cache, returns it immediately</dd>
+      <dt>Forwards if miss</dt><dd>If not cached, forwards the <em>entire</em> query to an upstream resolver (like 8.8.8.8)</dd>
+      <dt>Does NOT iterate</dt><dd>Unlike a resolver, it does NOT query root → TLD → auth. It just passes the buck.</dd>
+      <dt>Caches response</dt><dd>Stores the answer for future queries with the same name</dd>
+    </dl>
+  </div>
+
+  <h3>Why Use a Forwarder?</h3>
+
+  <div class="card">
+    <p><span class="highlight5">Centralized caching:</span> One forwarder caches DNS for all devices on the network, reducing external queries.</p>
+    <p><span class="highlight4">Policy control:</span> You can log, filter, or modify DNS queries at the forwarder level (like Pi-hole blocking ads).</p>
+    <p><span class="highlight3">Reduced bandwidth:</span> Internal clients make local queries; only cache misses go to the internet.</p>
+    <p><span class="highlight">Conditional forwarding:</span> Forward queries for <code>internal.company.com</code> to the internal DNS, but forward everything else to 8.8.8.8.</p>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">forwarder-config-example.conf</span>
+    </div>
+    <div class="terminal-body"><span class="comment"># BIND9 named.conf — Forwarder configuration</span>
+
+<span class="key">options</span> {
+    <span class="key">directory</span> <span class="cmd">"/var/named"</span>;
+
+    <span class="comment">// Only forward, never try to resolve iteratively</span>
+    <span class="key">forward</span> <span class="val">only</span>;
+
+    <span class="comment">// Upstream recursive resolvers to forward to</span>
+    <span class="key">forwarders</span> {
+        <span class="cmd">8.8.8.8</span>;       <span class="comment">// Google Public DNS</span>
+        <span class="cmd">8.8.4.4</span>;       <span class="comment">// Google Public DNS (secondary)</span>
+        <span class="cmd">1.1.1.1</span>;       <span class="comment">// Cloudflare DNS</span>
+    };
+};
+
+<span class="comment"># ─── "forward only" vs "forward first" ─────────────────</span>
+<span class="comment"># forward only  → NEVER attempt recursion, fail if forwarders fail</span>
+<span class="comment"># forward first → Try forwarders first, then fall back to recursion</span></div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 7: RESOLVER VS FORWARDER -->
+<section id="resolver-vs-forwarder">
+  <h2><span class="icon" style="background:rgba(251,191,36,0.12);color:var(--accent5);">⚖️</span> Resolver vs Forwarder</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Aspect</th><th>Recursive Resolver</th><th>Forwarder</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Does recursion?</strong></td><td>✅ Yes — walks the entire hierarchy</td><td>❌ No — passes query to another server</td></tr>
+        <tr><td><strong>Contacts root servers?</strong></td><td>✅ Yes, when needed</td><td>❌ No — only contacts upstream resolver</td></tr>
+        <tr><td><strong>Caches answers?</strong></td><td>✅ Yes</td><td>✅ Yes</td></tr>
+        <tr><td><strong>Can work standalone?</strong></td><td>✅ Yes — self-sufficient</td><td>❌ No — depends on upstream resolver</td></tr>
+        <tr><td><strong>Network traffic</strong></td><td>Multiple queries per lookup (root, TLD, auth)</td><td>Single query to upstream per cache miss</td></tr>
+        <tr><td><strong>Use case</strong></td><td>ISPs, public DNS (8.8.8.8), large networks</td><td>Small offices, home networks, branch offices</td></tr>
+        <tr><td><strong>Example software</strong></td><td>Unbound, BIND (recursive mode), PowerDNS Recursor</td><td>dnsmasq, Pi-hole, BIND (forward mode), Windows DNS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>How They Work Together — Real-World Scenario</h3>
+
+  <div class="big-diagram">
+    <h4 style="color:var(--accent5);">Corporate Network DNS Flow</h4>
+    <div class="terminal-body" style="padding:0;font-size:0.78rem;">
+<span class="tree-sub">Employee Laptop</span>
+   │
+   │ <span class="comment">"What is github.com?"</span>
+   ▼
+<span class="tree-tld">Local DNS Forwarder</span> <span class="comment">(Pi-hole / dnsmasq at 192.168.1.1)</span>
+   │
+   ├─ <span class="val">Cache HIT?</span> → Return cached answer instantly
+   │
+   ├─ <span class="key">internal.company.com?</span> → Forward to <span class="tree-sld">Internal DNS Server (10.0.0.53)</span>
+   │                                         <span class="comment">(conditional forwarding)</span>
+   │
+   └─ <span class="key">Everything else?</span> → Forward to <span class="tree-root">Upstream Recursive Resolver (8.8.8.8)</span>
+                                    │
+                                    ├─ Cache HIT? → Return answer
+                                    │
+                                    └─ Cache MISS? → Full recursive resolution
+                                           │
+                                           ├→ Root Server: "Where is .com?"
+                                           ├→ TLD Server: "Where is github.com?"
+                                           └→ Auth NS: "github.com = 140.82.121.4"
+    </div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 8: CACHE-ONLY VS FULL -->
+<section id="cache-vs-full">
+  <h2><span class="icon" style="background:rgba(56,189,248,0.12);color:var(--accent);">🗄️</span> Cache-Only DNS vs Full DNS Server</h2>
+
+  <p>This is a frequently asked question, and the distinction is important for network architecture decisions.</p>
+
+  <div class="vs-grid">
+    <div class="vs-card" style="border-top: 3px solid var(--accent);">
+      <h4 style="color:var(--accent);">Cache-Only DNS Server</h4>
+      <ul class="pro">
+        <li>Does NOT host any zone files</li>
+        <li>Does NOT have authoritative data for any domain</li>
+        <li>Only resolves and caches queries from clients</li>
+        <li>Acts as a recursive resolver OR a forwarder</li>
+        <li>Its sole purpose: speed up DNS by caching results locally</li>
+        <li>If restarted, the cache is empty — starts fresh</li>
+        <li>Example: A caching Unbound server on your LAN</li>
+        <li>Lightweight — minimal configuration needed</li>
+      </ul>
+    </div>
+    <div class="vs-card" style="border-top: 3px solid var(--accent3);">
+      <h4 style="color:var(--accent3);">Full DNS Server (Authoritative)</h4>
+      <ul class="con">
+        <li>Hosts zone files for one or more domains</li>
+        <li>IS the authoritative source for those domains</li>
+        <li>Answers queries with definitive, non-cached data</li>
+        <li>Can also do caching (if configured as recursive too)</li>
+        <li>Requires zone file maintenance, serial updates, transfers</li>
+        <li>Survives restarts — zone data is persistent on disk</li>
+        <li>Example: BIND hosting your company's DNS records</li>
+        <li>More complex — needs security hardening, monitoring</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">comparison-configs.conf</span>
+    </div>
+    <div class="terminal-body"><span class="section-head">═══ CACHE-ONLY DNS Server (Unbound) ═══</span>
+
+<span class="comment"># /etc/unbound/unbound.conf</span>
+<span class="key">server:</span>
+    <span class="key">interface:</span> <span class="cmd">0.0.0.0</span>
+    <span class="key">access-control:</span> <span class="cmd">192.168.1.0/24 allow</span>
+    <span class="key">do-not-query-localhost:</span> <span class="val">yes</span>
+    <span class="comment"># No zone files! Just resolves and caches.</span>
+
+<span class="key">forward-zone:</span>
+    <span class="key">name:</span> <span class="cmd">"."</span>
+    <span class="key">forward-addr:</span> <span class="cmd">8.8.8.8</span>
+    <span class="key">forward-addr:</span> <span class="cmd">1.1.1.1</span>
+
+
+<span class="section-head">═══ FULL (Authoritative) DNS Server (BIND) ═══</span>
+
+<span class="comment"># /etc/named.conf</span>
+<span class="key">zone</span> <span class="cmd">"example.com"</span> {
+    <span class="key">type</span> <span class="val">master</span>;
+    <span class="key">file</span> <span class="cmd">"/var/named/example.com.zone"</span>;
+    <span class="key">allow-transfer</span> { <span class="cmd">192.168.1.5</span>; };  <span class="comment">// secondary server</span>
+};
+
+<span class="key">zone</span> <span class="cmd">"1.168.192.in-addr.arpa"</span> {
+    <span class="key">type</span> <span class="val">master</span>;
+    <span class="key">file</span> <span class="cmd">"/var/named/192.168.1.rev"</span>;  <span class="comment">// reverse zone</span>
+};</div>
+  </div>
+
+  <div class="card accent-border">
+    <p class="card-title" style="color:var(--accent);">Key Difference Summary</p>
+    <p>A <span class="highlight">cache-only server</span> is like a librarian who doesn't own any books — they just remember recent answers and know which library to call. A <span class="highlight3">full DNS server</span> is like a librarian who actually owns and maintains the books (zone files) and is the definitive source.</p>
+  </div>
+
+  <div class="card accent5-border">
+    <p class="card-title" style="color:var(--accent5);">⚠️ Important Distinction</p>
+    <p>A DNS server can be <strong>both</strong> authoritative and caching. For example, BIND can host zones for <code>mycompany.com</code> (authoritative) while also recursively resolving queries for <code>google.com</code> (caching). However, <strong>security best practice</strong> is to separate these roles — run your authoritative and recursive servers on different machines to reduce attack surface.</p>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 9: ZONES -->
+<section id="zones">
+  <h2><span class="icon" style="background:rgba(129,140,248,0.12);color:var(--accent2);">📂</span> Zones, Zone Files & Zone Transfers</h2>
+
+  <p>A <span class="highlight2">zone</span> is a portion of the DNS namespace that is managed by a specific organization or administrator. It contains all the DNS records for a domain and potentially its subdomains.</p>
+
+  <div class="card accent2-border">
+    <p class="card-title" style="color:var(--accent2);">Zone vs Domain</p>
+    <p>A <span class="highlight2">domain</span> is a name (like <code>example.com</code>). A <span class="highlight2">zone</span> is the actual administrative boundary — the set of records managed by one authority. If <code>dev.example.com</code> is delegated to a separate NS, then <code>example.com</code> and <code>dev.example.com</code> are <em>two different zones</em>, even though they're part of the same domain.</p>
+  </div>
+
+  <h3>Zone Transfers</h3>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">zone-transfers.txt</span>
+    </div>
+    <div class="terminal-body"><span class="section-head">Zone Transfer Types</span>
+
+<span class="key">AXFR</span> (Full Zone Transfer)
+  <span class="comment">→ Transfers the ENTIRE zone from primary to secondary</span>
+  <span class="comment">→ Used for initial sync or when incremental isn't available</span>
+  <span class="comment">→ Uses TCP port 53</span>
+
+<span class="key">IXFR</span> (Incremental Zone Transfer)
+  <span class="comment">→ Transfers only CHANGES since a given serial number</span>
+  <span class="comment">→ Much more efficient for large zones</span>
+  <span class="comment">→ Secondary says: "I have serial 2024031501, what's new?"</span>
+
+<span class="section-head">Security</span>
+
+<span class="comment"># Zone transfers should be RESTRICTED to secondary servers</span>
+<span class="comment"># An open zone transfer = attacker can map your entire DNS</span>
+<span class="key">allow-transfer</span> { <span class="cmd">192.168.1.5</span>; <span class="cmd">10.0.0.5</span>; };  <span class="comment">// only secondaries</span>
+<span class="key">allow-transfer</span> { <span class="val">none</span>; };  <span class="comment">// block all transfers (if no secondaries)</span>
+
+<span class="comment"># TSIG (Transaction Signature) adds authentication</span>
+<span class="key">key</span> <span class="cmd">"transfer-key"</span> {
+    <span class="key">algorithm</span> <span class="val">hmac-sha256</span>;
+    <span class="key">secret</span> <span class="cmd">"base64-encoded-secret"</span>;
+};</div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 10: SECURITY -->
+<section id="security">
+  <h2><span class="icon" style="background:rgba(244,114,182,0.12);color:var(--accent3);">🔒</span> DNS Security</h2>
+
+  <p>Traditional DNS is unencrypted and unauthenticated — queries travel in plaintext over UDP. This makes it vulnerable to several attacks:</p>
+
+  <div class="card accent3-border">
+    <p class="card-title" style="color:var(--accent3);">DNS Attack Vectors</p>
+    <dl class="key-value">
+      <dt>DNS Spoofing</dt><dd>Attacker injects fake DNS responses, redirecting users to malicious sites</dd>
+      <dt>Cache Poisoning</dt><dd>Corrupting a resolver's cache so it serves wrong IPs for domains</dd>
+      <dt>DNS Hijacking</dt><dd>Changing DNS settings on a device or router to point to a rogue server</dd>
+      <dt>DNS Tunneling</dt><dd>Encoding data inside DNS queries to bypass firewalls (data exfiltration)</dd>
+      <dt>DDoS via DNS</dt><dd>DNS amplification attacks using open resolvers to flood targets</dd>
+    </dl>
+  </div>
+
+  <h3>Security Solutions</h3>
+
+  <div class="card">
+    <dl class="key-value">
+      <dt>DNSSEC</dt><dd>Adds cryptographic signatures to DNS records. Resolvers can verify that the response hasn't been tampered with. Doesn't encrypt — just authenticates.</dd>
+      <dt>DoH (DNS over HTTPS)</dt><dd>Encrypts DNS queries inside HTTPS (port 443). Used by browsers (Firefox, Chrome). Harder to filter/monitor.</dd>
+      <dt>DoT (DNS over TLS)</dt><dd>Encrypts DNS queries using TLS (port 853). Easier for network admins to manage than DoH since it uses a dedicated port.</dd>
+      <dt>DoQ (DNS over QUIC)</dt><dd>Newest protocol. Uses QUIC transport for faster, encrypted DNS queries.</dd>
+    </dl>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 11: DIG PRACTICE -->
+<section id="dig-practice">
+  <h2><span class="icon" style="background:rgba(52,211,153,0.12);color:var(--accent4);">🧪</span> dig Practice — Tracing the Hierarchy</h2>
+
+  <p>Let's use <code>dig</code> to actually SEE the DNS hierarchy in action. The <code>+trace</code> flag is your best friend here.</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">dig-trace-walkthrough.sh</span>
+    </div>
+    <div class="terminal-body"><span class="comment"># ─── TRACE the full resolution path ────────────────────</span>
+<span class="prompt">$</span> <span class="cmd">dig +trace www.google.com</span>
+
+<span class="comment"># This shows EVERY step:</span>
+<span class="comment"># 1. Query root servers → get .com NS records</span>
+<span class="comment"># 2. Query .com TLD servers → get google.com NS records</span>
+<span class="comment"># 3. Query google.com auth NS → get www.google.com A record</span>
+
+<span class="comment"># ─── Step-by-step manual trace ─────────────────────────</span>
+
+<span class="comment"># Step 1: Ask root server about .com</span>
+<span class="prompt">$</span> <span class="cmd">dig @a.root-servers.net com NS</span>
+<span class="comment"># Returns: a.gtld-servers.net, b.gtld-servers.net, etc.</span>
+
+<span class="comment"># Step 2: Ask .com TLD server about google.com</span>
+<span class="prompt">$</span> <span class="cmd">dig @a.gtld-servers.net google.com NS</span>
+<span class="comment"># Returns: ns1.google.com, ns2.google.com, etc.</span>
+
+<span class="comment"># Step 3: Ask Google's authoritative NS for the final answer</span>
+<span class="prompt">$</span> <span class="cmd">dig @ns1.google.com www.google.com A</span>
+<span class="comment"># Returns: 142.250.x.x (the actual IP!)</span>
+
+<span class="comment"># ─── Other useful traces ───────────────────────────────</span>
+
+<span class="comment"># Trace SOA record</span>
+<span class="prompt">$</span> <span class="cmd">dig +trace +multiline google.com SOA</span>
+
+<span class="comment"># Check if DNSSEC is enabled</span>
+<span class="prompt">$</span> <span class="cmd">dig +dnssec google.com</span>
+
+<span class="comment"># Compare response times between DNS providers</span>
+<span class="prompt">$</span> <span class="cmd">dig @8.8.8.8 google.com | grep "Query time"</span>
+<span class="prompt">$</span> <span class="cmd">dig @1.1.1.1 google.com | grep "Query time"</span>
+<span class="prompt">$</span> <span class="cmd">dig @9.9.9.9 google.com | grep "Query time"</span>
+
+<span class="comment"># Find who is authoritative for a zone</span>
+<span class="prompt">$</span> <span class="cmd">dig +short NS google.com</span>
+
+<span class="comment"># Find the SOA (who manages this zone)</span>
+<span class="prompt">$</span> <span class="cmd">dig +short SOA google.com</span>
+
+<span class="comment"># Reverse DNS lookup</span>
+<span class="prompt">$</span> <span class="cmd">dig -x 8.8.8.8 +short</span>
+<span class="comment"># Output: dns.google.</span></div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 12: TROUBLESHOOTING -->
+<section id="troubleshoot">
+  <h2><span class="icon" style="background:rgba(251,191,36,0.12);color:var(--accent5);">🛠️</span> DNS Troubleshooting Cheat Sheet</h2>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">dns-troubleshooting.sh</span>
+    </div>
+    <div class="terminal-body"><span class="section-head">═══ DIAGNOSIS COMMANDS ═══</span>
+
+<span class="comment"># What DNS server am I using?</span>
+<span class="prompt">$</span> <span class="cmd">cat /etc/resolv.conf</span>
+<span class="prompt">$</span> <span class="cmd">resolvectl status</span>                   <span class="comment"># systemd-resolved</span>
+
+<span class="comment"># Basic connectivity test</span>
+<span class="prompt">$</span> <span class="cmd">nslookup google.com</span>
+<span class="prompt">$</span> <span class="cmd">host google.com</span>
+
+<span class="comment"># Detailed lookup with dig</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com</span>
+
+<span class="comment"># Check if DNS is the problem (try direct IP)</span>
+<span class="prompt">$</span> <span class="cmd">ping 8.8.8.8</span>                         <span class="comment"># Works? Network is fine</span>
+<span class="prompt">$</span> <span class="cmd">ping google.com</span>                      <span class="comment"># Fails? DNS is the problem</span>
+
+<span class="section-head">═══ COMMON ISSUES ═══</span>
+
+<span class="key">NXDOMAIN</span>      <span class="comment">→ Domain doesn't exist (typo? expired?)</span>
+<span class="key">SERVFAIL</span>      <span class="comment">→ DNS server error (DNSSEC validation failure?)</span>
+<span class="key">REFUSED</span>       <span class="comment">→ Server refused query (ACL? recursion disabled?)</span>
+<span class="key">Timeout</span>       <span class="comment">→ No response (firewall? server down?)</span>
+<span class="key">Wrong IP</span>      <span class="comment">→ Stale cache or DNS hijacking</span>
+
+<span class="section-head">═══ CACHE MANAGEMENT ═══</span>
+
+<span class="comment"># Flush DNS cache on Linux</span>
+<span class="prompt">$</span> <span class="cmd">sudo systemd-resolve --flush-caches</span>
+<span class="prompt">$</span> <span class="cmd">sudo resolvectl flush-caches</span>
+
+<span class="comment"># Flush DNS cache on macOS</span>
+<span class="prompt">$</span> <span class="cmd">sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder</span>
+
+<span class="comment"># Flush DNS cache on Windows</span>
+<span class="prompt">&gt;</span> <span class="cmd">ipconfig /flushdns</span>
+
+<span class="comment"># Check current cache stats (systemd-resolved)</span>
+<span class="prompt">$</span> <span class="cmd">resolvectl statistics</span>
+
+<span class="section-head">═══ IMPORTANT FILES ═══</span>
+
+<span class="key">/etc/resolv.conf</span>      <span class="comment">→ DNS server configuration</span>
+<span class="key">/etc/hosts</span>            <span class="comment">→ Local hostname overrides (checked FIRST)</span>
+<span class="key">/etc/nsswitch.conf</span>    <span class="comment">→ Name resolution order (files, dns, mdns)</span>
+<span class="key">/var/named/</span>           <span class="comment">→ Zone files (BIND)</span>
+<span class="key">/etc/named.conf</span>       <span class="comment">→ BIND configuration</span></div>
+  </div>
+</section>
+
+<div class="footer-note">
+  <div class="tag">COMPLETE REFERENCE</div>
+  <p>DNS Deep Dive — Parts 1 & 2<br>
+  Covering: Records (A, AAAA, SOA, NS, PTR, MX, CNAME, TXT, SRV) • Hierarchy (Root, TLD, ANS)<br>
+  Resolvers & Forwarders • Cache-Only vs Full DNS • Right-to-Left Resolution • <code>dig</code> Usage<br>
+  Zone Transfers • DNS Security • Troubleshooting</p>
+</div>
+
+</div>
+</body>
+</html>

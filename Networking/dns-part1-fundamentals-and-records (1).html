@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNS Deep Dive — Part 1: Fundamentals & Records</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e17;
+  --bg-card: #111827;
+  --bg-card-alt: #0f1729;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --accent3: #f472b6;
+  --accent4: #34d399;
+  --accent5: #fbbf24;
+  --terminal-bg: #0c1220;
+  --terminal-green: #4ade80;
+  --terminal-prompt: #818cf8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.grain {
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hero {
+  position: relative;
+  padding: 80px 40px 60px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(56,189,248,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 50%, rgba(129,140,248,0.08) 0%, transparent 50%);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  letter-spacing: -1px;
+}
+
+.hero .subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin-top: 12px;
+  position: relative;
+}
+
+.hero .part-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  letter-spacing: 1px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.toc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 48px;
+}
+
+.toc h3 {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.toc ul { list-style: none; }
+.toc li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.toc li:last-child { border-bottom: none; }
+.toc a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toc a:hover { color: var(--accent); }
+.toc .num {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent2);
+  font-size: 0.8rem;
+  min-width: 28px;
+}
+
+section {
+  margin-bottom: 56px;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.9rem;
+  margin-bottom: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+h2 .icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent);
+  margin: 28px 0 12px;
+}
+
+h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  color: var(--accent3);
+  margin: 20px 0 8px;
+}
+
+p { margin-bottom: 14px; color: var(--text-dim); font-size: 0.95rem; }
+
+.highlight { color: var(--accent); font-weight: 600; }
+.highlight2 { color: var(--accent2); font-weight: 600; }
+.highlight3 { color: var(--accent3); font-weight: 600; }
+.highlight4 { color: var(--accent4); font-weight: 600; }
+.highlight5 { color: var(--accent5); font-weight: 600; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+}
+
+.card.accent-border { border-left: 3px solid var(--accent); }
+.card.accent2-border { border-left: 3px solid var(--accent2); }
+.card.accent3-border { border-left: 3px solid var(--accent3); }
+.card.accent4-border { border-left: 3px solid var(--accent4); }
+.card.accent5-border { border-left: 3px solid var(--accent5); }
+
+.card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.terminal {
+  background: var(--terminal-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: rgba(255,255,255,0.04);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.terminal-dot.r { background: #ef4444; }
+.terminal-dot.y { background: #fbbf24; }
+.terminal-dot.g { background: #22c55e; }
+
+.terminal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+
+.terminal-body {
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text-dim);
+}
+
+.terminal-body .prompt { color: var(--terminal-prompt); }
+.terminal-body .cmd { color: var(--terminal-green); }
+.terminal-body .comment { color: #4b5563; }
+.terminal-body .val { color: var(--accent5); }
+.terminal-body .key { color: var(--accent); }
+.terminal-body .section-head { color: var(--accent3); font-weight: 700; }
+
+.record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.record-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  transition: transform 0.2s, border-color 0.3s;
+}
+.record-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.record-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.analogy {
+  background: linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06));
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 14px 0;
+  font-style: italic;
+  color: var(--text);
+  position: relative;
+}
+.analogy::before {
+  content: '💡';
+  position: absolute;
+  top: -10px; left: 16px;
+  font-size: 1.2rem;
+  font-style: normal;
+}
+
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  padding: 20px;
+}
+
+.flow-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  text-align: center;
+  min-width: 80px;
+}
+
+.flow-arrow {
+  color: var(--accent);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th {
+  background: rgba(56,189,248,0.08);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-dim);
+}
+
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.key-value {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 4px 16px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.key-value dt {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  font-size: 0.82rem;
+}
+.key-value dd { color: var(--text-dim); }
+
+.step-list {
+  counter-reset: step;
+  list-style: none;
+  margin: 16px 0;
+}
+.step-list li {
+  counter-increment: step;
+  padding: 10px 0 10px 48px;
+  position: relative;
+  color: var(--text-dim);
+  font-size: 0.93rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0; top: 10px;
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.separator {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 48px 0;
+}
+
+.footer-nav {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+.footer-nav span { color: var(--accent); }
+
+@media (max-width: 640px) {
+  .hero { padding: 50px 20px 40px; }
+  h2 { font-size: 1.5rem; }
+  .key-value { grid-template-columns: 1fr; }
+  .flow-diagram { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="hero">
+  <div class="part-badge">PART 1 OF 2</div>
+  <h1>DNS Deep Dive</h1>
+  <p class="subtitle">// The Domain Name System — Fundamentals & Record Types</p>
+</header>
+
+<div class="container">
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc">
+  <h3>📋 Contents</h3>
+  <ul>
+    <li><a href="#what"><span class="num">01</span> What is DNS & Why It Exists</a></li>
+    <li><a href="#how"><span class="num">02</span> How DNS Works — Step by Step</a></li>
+    <li><a href="#right-to-left"><span class="num">03</span> DNS Reads Right-to-Left (& Reverses for PTR)</a></li>
+    <li><a href="#records"><span class="num">04</span> DNS Record Types — Complete Breakdown</a></li>
+    <li><a href="#a-record"><span class="num">05</span> A Record (Address Record)</a></li>
+    <li><a href="#aaaa"><span class="num">06</span> AAAA Record (IPv6)</a></li>
+    <li><a href="#soa"><span class="num">07</span> SOA Record (Start of Authority)</a></li>
+    <li><a href="#ns"><span class="num">08</span> NS Record (Name Server)</a></li>
+    <li><a href="#ptr"><span class="num">09</span> PTR Record (Pointer / Reverse DNS)</a></li>
+    <li><a href="#mx"><span class="num">10</span> MX Record (Mail Exchange)</a></li>
+    <li><a href="#cname"><span class="num">11</span> CNAME, TXT, SRV & More</a></li>
+    <li><a href="#dig"><span class="num">12</span> Using <code>dig</code> — The DNS Swiss Army Knife</a></li>
+  </ul>
+</nav>
+
+<!-- SECTION 1: WHAT IS DNS -->
+<section id="what">
+  <h2><span class="icon" style="background:rgba(56,189,248,0.12);color:var(--accent);">🌐</span> What is DNS & Why It Exists</h2>
+
+  <p>The <span class="highlight">Domain Name System (DNS)</span> is a globally distributed, hierarchical database that translates human-readable domain names (like <span class="highlight2">google.com</span>) into machine-readable IP addresses (like <span class="highlight4">142.250.190.78</span>). It is one of the most critical pieces of internet infrastructure — without it, you'd have to memorize IP addresses for every website.</p>
+
+  <div class="analogy">
+    Think of DNS as the internet's phone book. You know a person's name (domain), and you look up their phone number (IP address) to call them. But unlike a single book, DNS is a distributed system with millions of "phone books" around the world, organized in a strict hierarchy.
+  </div>
+
+  <h3>What DNS Actually Does</h3>
+
+  <div class="card accent-border">
+    <p><span class="highlight">Forward Lookup (Name → IP):</span> Converts <code>www.example.com</code> → <code>93.184.216.34</code>. This is what happens every time you type a URL in your browser.</p>
+    <p><span class="highlight3">Reverse Lookup (IP → Name):</span> Converts <code>93.184.216.34</code> → <code>www.example.com</code>. Used for security logging, email verification, and diagnostics. Uses PTR records.</p>
+    <p><span class="highlight4">Mail Routing:</span> DNS tells email systems where to deliver mail for a domain via MX records.</p>
+    <p><span class="highlight5">Service Discovery:</span> SRV records help locate specific services (VoIP, LDAP, etc.) on a network.</p>
+    <p><span class="highlight2">Verification & Authentication:</span> TXT records store SPF, DKIM, DMARC data for email security and domain ownership verification.</p>
+  </div>
+
+  <h3>Key Characteristics</h3>
+  <div class="card">
+    <dl class="key-value">
+      <dt>Distributed</dt>
+      <dd>No single server holds all DNS data. It's spread across millions of servers worldwide.</dd>
+      <dt>Hierarchical</dt>
+      <dd>Organized in a tree structure: Root → TLD → Domain → Subdomain.</dd>
+      <dt>Redundant</dt>
+      <dd>Multiple servers at every level ensure no single point of failure.</dd>
+      <dt>Cached</dt>
+      <dd>Results are cached at every level (browser, OS, ISP) to reduce load and speed up lookups.</dd>
+      <dt>Port</dt>
+      <dd>DNS uses <strong>UDP port 53</strong> for queries and <strong>TCP port 53</strong> for zone transfers and large responses.</dd>
+    </dl>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 2: HOW DNS WORKS -->
+<section id="how">
+  <h2><span class="icon" style="background:rgba(129,140,248,0.12);color:var(--accent2);">⚙️</span> How DNS Works — Step by Step</h2>
+
+  <p>When you type <span class="highlight2">www.google.com</span> in your browser, here's the complete journey a DNS query takes:</p>
+
+  <ol class="step-list">
+    <li><strong>Browser Cache Check:</strong> Your browser first checks its own local DNS cache. If you visited google.com recently, the IP might already be stored.</li>
+    <li><strong>OS Cache Check (Stub Resolver):</strong> If not in browser cache, the OS-level resolver checks its cache. On Linux, you can check <code>/etc/hosts</code> file too — entries here override DNS.</li>
+    <li><strong>Recursive Resolver (ISP / Configured DNS):</strong> If not cached locally, the query goes to your configured DNS server (your ISP's resolver, or something like 8.8.8.8 / 1.1.1.1). This is the <span class="highlight">Recursive Resolver</span> — it does the hard work on your behalf.</li>
+    <li><strong>Root Server Query:</strong> The recursive resolver asks one of the 13 <span class="highlight3">Root Name Servers</span>: "Where can I find .com?" The root server responds with the address of the .com TLD servers.</li>
+    <li><strong>TLD Server Query:</strong> The resolver asks the <span class="highlight5">.com TLD server</span>: "Where can I find google.com?" The TLD server responds with the address of Google's authoritative name servers.</li>
+    <li><strong>Authoritative Name Server Query:</strong> The resolver asks <span class="highlight4">Google's authoritative name server</span>: "What is the IP for www.google.com?" The authoritative server responds with the final answer: the A record (e.g., <code>142.250.190.78</code>).</li>
+    <li><strong>Response Returned:</strong> The recursive resolver caches the result (for the TTL duration) and returns it to your OS, which caches it, then to your browser, which caches it, and finally connects to the IP.</li>
+  </ol>
+
+  <h3>Visual Flow</h3>
+  <div class="flow-diagram">
+    <div class="flow-box" style="border-color:var(--accent2);">🖥️<br>Browser</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--accent2);">💻<br>OS Stub<br>Resolver</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--accent);">🔄<br>Recursive<br>Resolver</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--accent3);">🌍<br>Root<br>Server</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--accent5);">📁<br>TLD<br>Server</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--accent4);">✅<br>Authoritative<br>NS</div>
+  </div>
+
+  <div class="card accent2-border">
+    <p class="card-title" style="color:var(--accent2);">⚡ Iterative vs Recursive Queries</p>
+    <p><span class="highlight2">Recursive Query:</span> Your computer sends one query to the recursive resolver and expects a final answer. The resolver does all the chasing around. Your computer says: "Get me the answer, I'll wait."</p>
+    <p><span class="highlight">Iterative Query:</span> The recursive resolver makes iterative queries to root → TLD → authoritative servers. Each server says: "I don't know the full answer, but try asking this server next." The resolver follows the chain.</p>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 3: RIGHT TO LEFT -->
+<section id="right-to-left">
+  <h2><span class="icon" style="background:rgba(244,114,182,0.12);color:var(--accent3);">🔄</span> DNS Reads Right-to-Left</h2>
+
+  <p>This is a crucial concept that confuses many people. <span class="highlight3">DNS processes domain names from RIGHT to LEFT</span>, even though we read and type them left to right.</p>
+
+  <h3>Forward Lookup — Reading Right to Left</h3>
+
+  <p>Consider the fully qualified domain name (FQDN): <span class="highlight">www.mail.google.com.</span> (yes, there's a trailing dot!)</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">dns-parsing.txt</span>
+    </div>
+    <div class="terminal-body"><span class="section-head">How DNS reads:  www.mail.google.com.</span>
+
+<span class="comment"># The trailing dot represents the ROOT zone</span>
+<span class="comment"># DNS resolution order (RIGHT → LEFT):</span>
+
+<span class="key">Step 1:</span>  <span class="val">.</span>           ← Root zone (the trailing dot)
+<span class="key">Step 2:</span>  <span class="val">com.</span>        ← TLD (Top-Level Domain)
+<span class="key">Step 3:</span>  <span class="val">google.com.</span> ← Second-Level Domain (the registered domain)
+<span class="key">Step 4:</span>  <span class="val">mail.google.com.</span>  ← Subdomain
+<span class="key">Step 5:</span>  <span class="val">www.mail.google.com.</span> ← Host / further subdomain
+
+<span class="comment"># The hierarchy from the DNS perspective:</span>
+<span class="comment">#   .  →  com  →  google  →  mail  →  www</span>
+<span class="comment"># (root) (TLD)  (domain) (sub)   (host)</span></div>
+  </div>
+
+  <h3>Reverse Lookup — Reading Left to Right</h3>
+
+  <p>For reverse DNS (IP → Name), the IP address is <span class="highlight3">reversed and placed under the special <code>in-addr.arpa</code> domain</span>. This flips the reading direction to LEFT to RIGHT, matching the DNS hierarchy:</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">reverse-dns.txt</span>
+    </div>
+    <div class="terminal-body"><span class="section-head">Reverse DNS for IP: 192.168.1.100</span>
+
+<span class="comment"># Step 1: Reverse the octets</span>
+<span class="key">Original IP:</span>  <span class="val">192.168.1.100</span>
+<span class="key">Reversed:</span>     <span class="val">100.1.168.192</span>
+
+<span class="comment"># Step 2: Append .in-addr.arpa</span>
+<span class="key">PTR Lookup:</span>   <span class="val">100.1.168.192.in-addr.arpa.</span>
+
+<span class="comment"># Why reverse? So the DNS hierarchy works naturally:</span>
+<span class="comment">#   arpa → in-addr → 192 → 168 → 1 → 100</span>
+<span class="comment"># This mirrors how IP networks are delegated:</span>
+<span class="comment">#   192.x.x.x is a /8 block</span>
+<span class="comment">#   192.168.x.x is a /16 block</span>
+<span class="comment">#   192.168.1.x is a /24 block</span>
+<span class="comment">#   192.168.1.100 is a specific host</span>
+
+<span class="comment"># For IPv6, each hex digit is reversed individually:</span>
+<span class="key">IPv6:</span>   <span class="val">2001:0db8::1</span>
+<span class="key">PTR:</span>    <span class="val">1.0.0.0...8.b.d.0.1.0.0.2.ip6.arpa.</span></div>
+  </div>
+
+  <div class="analogy">
+    Think of it like a postal address. You write: "123 Main St, Springfield, IL, USA". But the postal system processes it from the broadest to the most specific: USA → IL → Springfield → Main St → 123. DNS works the same way — it starts from the broadest category (root/TLD) and narrows down.
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 4: RECORD OVERVIEW -->
+<section id="records">
+  <h2><span class="icon" style="background:rgba(52,211,153,0.12);color:var(--accent4);">📋</span> DNS Record Types — Overview</h2>
+
+  <p>DNS records (also called <span class="highlight">Resource Records or RRs</span>) are entries in a DNS zone file that provide information about a domain. Each record has a specific type and purpose.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Record</th><th>Purpose</th><th>Example Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="highlight">A</span></td><td>Maps domain to IPv4 address</td><td>93.184.216.34</td></tr>
+        <tr><td><span class="highlight">AAAA</span></td><td>Maps domain to IPv6 address</td><td>2606:2800:220:1::</td></tr>
+        <tr><td><span class="highlight3">SOA</span></td><td>Start of Authority — zone metadata</td><td>ns1.example.com. admin.example.com. 2024010101 ...</td></tr>
+        <tr><td><span class="highlight2">NS</span></td><td>Delegates zone to name server</td><td>ns1.google.com.</td></tr>
+        <tr><td><span class="highlight5">PTR</span></td><td>Reverse lookup (IP → domain)</td><td>host.example.com.</td></tr>
+        <tr><td><span class="highlight4">MX</span></td><td>Mail exchange server</td><td>10 mail.example.com.</td></tr>
+        <tr><td><span class="highlight">CNAME</span></td><td>Alias / canonical name</td><td>www.example.com → example.com</td></tr>
+        <tr><td><span class="highlight2">TXT</span></td><td>Arbitrary text (SPF, DKIM, etc.)</td><td>"v=spf1 include:_spf.google.com ~all"</td></tr>
+        <tr><td><span class="highlight3">SRV</span></td><td>Service locator</td><td>0 5 5060 sip.example.com.</td></tr>
+        <tr><td><span class="highlight5">CAA</span></td><td>Certificate Authority Authorization</td><td>0 issue "letsencrypt.org"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 5: A RECORD -->
+<section id="a-record">
+  <h2><span class="icon" style="background:rgba(56,189,248,0.12);color:var(--accent);">🅰️</span> A Record (Address Record)</h2>
+
+  <p>The <span class="highlight">A record</span> is the most fundamental DNS record. It maps a domain name to an <span class="highlight4">IPv4 address</span> (32-bit, like <code>142.250.190.78</code>).</p>
+
+  <div class="card accent-border">
+    <p class="card-title" style="color:var(--accent);">Format</p>
+    <dl class="key-value">
+      <dt>Name</dt><dd>The domain or hostname (e.g., <code>www</code>, <code>@</code> for root)</dd>
+      <dt>TTL</dt><dd>Time-to-live in seconds — how long to cache this record</dd>
+      <dt>Class</dt><dd>Almost always <code>IN</code> (Internet)</dd>
+      <dt>Type</dt><dd><code>A</code></dd>
+      <dt>Value</dt><dd>An IPv4 address (e.g., <code>93.184.216.34</code>)</dd>
+    </dl>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">zone-file-example.txt</span>
+    </div>
+    <div class="terminal-body"><span class="comment">; A record examples in a zone file</span>
+<span class="key">@</span>       <span class="val">300</span>   IN   A   <span class="cmd">93.184.216.34</span>        <span class="comment">; root domain</span>
+<span class="key">www</span>     <span class="val">300</span>   IN   A   <span class="cmd">93.184.216.34</span>        <span class="comment">; www subdomain</span>
+<span class="key">api</span>     <span class="val">60</span>    IN   A   <span class="cmd">10.0.1.50</span>            <span class="comment">; api subdomain (short TTL)</span>
+<span class="key">blog</span>    <span class="val">3600</span>  IN   A   <span class="cmd">198.51.100.22</span>        <span class="comment">; blog on different server</span>
+
+<span class="comment">; Multiple A records = Round-robin load balancing</span>
+<span class="key">app</span>     <span class="val">60</span>    IN   A   <span class="cmd">10.0.1.10</span>
+<span class="key">app</span>     <span class="val">60</span>    IN   A   <span class="cmd">10.0.1.11</span>
+<span class="key">app</span>     <span class="val">60</span>    IN   A   <span class="cmd">10.0.1.12</span></div>
+  </div>
+
+  <p>When multiple A records exist for the same name, DNS returns them all and the client (or resolver) picks one — this is basic <span class="highlight">round-robin load balancing</span>.</p>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 6: AAAA -->
+<section id="aaaa">
+  <h2><span class="icon" style="background:rgba(129,140,248,0.12);color:var(--accent2);">6️⃣</span> AAAA Record (IPv6)</h2>
+
+  <p>The <span class="highlight2">AAAA record</span> (called "quad-A") is identical in function to the A record, but maps to an <span class="highlight2">IPv6 address</span> (128-bit) instead of IPv4. As IPv4 addresses run out, AAAA records become increasingly important.</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">aaaa-example.txt</span>
+    </div>
+    <div class="terminal-body"><span class="key">@</span>     <span class="val">300</span>   IN   AAAA   <span class="cmd">2606:2800:0220:0001:0248:1893:25c8:1946</span>
+<span class="key">www</span>   <span class="val">300</span>   IN   AAAA   <span class="cmd">2606:2800:220:1:248:1893:25c8:1946</span>
+
+<span class="comment">; Why "AAAA"? Because IPv6 addresses are 4× longer</span>
+<span class="comment">; than IPv4 (128 bits vs 32 bits), hence 4× A = AAAA</span></div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 7: SOA -->
+<section id="soa">
+  <h2><span class="icon" style="background:rgba(244,114,182,0.12);color:var(--accent3);">👑</span> SOA Record (Start of Authority)</h2>
+
+  <p>The <span class="highlight3">SOA record</span> is the king of a DNS zone. Every DNS zone <strong>must</strong> have exactly one SOA record. It defines the zone's primary authority and contains critical metadata for zone management, especially <span class="highlight">zone transfers</span> between primary and secondary DNS servers.</p>
+
+  <div class="card accent3-border">
+    <p class="card-title" style="color:var(--accent3);">SOA Record Fields</p>
+    <dl class="key-value">
+      <dt>MNAME</dt><dd>Primary (master) name server for the zone</dd>
+      <dt>RNAME</dt><dd>Email of the zone admin (the first <code>.</code> replaces <code>@</code>, so <code>admin.example.com</code> = <code>admin@example.com</code>)</dd>
+      <dt>SERIAL</dt><dd>Zone version number. Incremented on every change. Secondary servers use this to detect updates. Common format: <code>YYYYMMDDnn</code></dd>
+      <dt>REFRESH</dt><dd>How often (seconds) secondary servers check for updates from primary</dd>
+      <dt>RETRY</dt><dd>How long (seconds) secondary waits before retrying a failed refresh</dd>
+      <dt>EXPIRE</dt><dd>How long (seconds) secondary considers its data valid if it can't reach primary. After this, it stops answering queries.</dd>
+      <dt>MINIMUM (TTL)</dt><dd>The negative cache TTL — how long resolvers cache "this domain doesn't exist" (NXDOMAIN) responses</dd>
+    </dl>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">soa-record.txt</span>
+    </div>
+    <div class="terminal-body"><span class="comment">; SOA record anatomy:</span>
+<span class="key">example.com.</span>  <span class="val">86400</span>  IN  SOA  <span class="cmd">ns1.example.com.</span>  <span class="cmd">admin.example.com.</span> (
+                    <span class="val">2024031501</span>  <span class="comment">; Serial   (YYYYMMDD + revision number)</span>
+                    <span class="val">3600</span>        <span class="comment">; Refresh  (1 hour — check for updates)</span>
+                    <span class="val">900</span>         <span class="comment">; Retry    (15 min — retry on failure)</span>
+                    <span class="val">1209600</span>     <span class="comment">; Expire   (2 weeks — stop if unreachable)</span>
+                    <span class="val">86400</span>       <span class="comment">; Minimum  (1 day — negative cache TTL)</span>
+                )</div>
+  </div>
+
+  <div class="analogy">
+    The SOA record is like the title page and publishing info of a book. It tells you who wrote it (MNAME), who to contact (RNAME), what edition it is (SERIAL), and how frequently it should be checked for new editions (REFRESH).
+  </div>
+
+  <h3>Why the Serial Number Matters</h3>
+  <p>When a secondary DNS server does a zone transfer (AXFR/IXFR), it compares its local serial number with the primary's serial. If the primary's serial is higher, it downloads the updated zone. If you edit a zone file but forget to increment the serial, <span class="highlight3">secondary servers will NOT pick up the changes</span>.</p>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 8: NS -->
+<section id="ns">
+  <h2><span class="icon" style="background:rgba(251,191,36,0.12);color:var(--accent5);">🏷️</span> NS Record (Name Server)</h2>
+
+  <p>The <span class="highlight5">NS record</span> delegates a DNS zone to a specific authoritative name server. Every domain must have at least two NS records for redundancy. NS records are how the DNS hierarchy works — they are the "signposts" that point you down the tree.</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">ns-records.txt</span>
+    </div>
+    <div class="terminal-body"><span class="comment">; NS records for google.com</span>
+<span class="key">google.com.</span>   <span class="val">86400</span>   IN   NS   <span class="cmd">ns1.google.com.</span>
+<span class="key">google.com.</span>   <span class="val">86400</span>   IN   NS   <span class="cmd">ns2.google.com.</span>
+<span class="key">google.com.</span>   <span class="val">86400</span>   IN   NS   <span class="cmd">ns3.google.com.</span>
+<span class="key">google.com.</span>   <span class="val">86400</span>   IN   NS   <span class="cmd">ns4.google.com.</span>
+
+<span class="comment">; Subdomain delegation</span>
+<span class="key">dev.google.com.</span>  <span class="val">86400</span>  IN  NS  <span class="cmd">ns1.dev.google.com.</span>
+
+<span class="comment">; Glue records (needed when NS is within the same zone)</span>
+<span class="key">ns1.google.com.</span>  <span class="val">86400</span>  IN  A   <span class="cmd">216.239.32.10</span></div>
+  </div>
+
+  <div class="card accent5-border">
+    <p class="card-title" style="color:var(--accent5);">🔗 Glue Records</p>
+    <p>If <code>google.com</code>'s name servers are <code>ns1.google.com</code> and <code>ns2.google.com</code>, you have a chicken-and-egg problem: to find the IP of <code>ns1.google.com</code>, you'd need to query <code>google.com</code>'s name server... which IS <code>ns1.google.com</code>. <span class="highlight5">Glue records</span> solve this by providing A records for the name servers directly at the parent zone (the .com TLD servers).</p>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 9: PTR -->
+<section id="ptr">
+  <h2><span class="icon" style="background:rgba(52,211,153,0.12);color:var(--accent4);">🔙</span> PTR Record (Pointer / Reverse DNS)</h2>
+
+  <p>The <span class="highlight4">PTR record</span> does the opposite of an A record — it maps an <span class="highlight">IP address back to a domain name</span>. It's stored in the special <code>in-addr.arpa</code> zone (for IPv4) or <code>ip6.arpa</code> zone (for IPv6).</p>
+
+  <h3>How PTR Records Work</h3>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">ptr-explained.txt</span>
+    </div>
+    <div class="terminal-body"><span class="section-head">Reverse DNS Lookup for 142.250.190.78</span>
+
+<span class="comment"># Step 1: Reverse the IP octets</span>
+   <span class="val">142.250.190.78</span>  →  <span class="val">78.190.250.142</span>
+
+<span class="comment"># Step 2: Append .in-addr.arpa.</span>
+   <span class="cmd">78.190.250.142.in-addr.arpa.</span>
+
+<span class="comment"># Step 3: Query for PTR record at that name</span>
+   <span class="key">78.190.250.142.in-addr.arpa.</span>  IN  PTR  <span class="cmd">maa03s44-in-f14.1e100.net.</span>
+
+<span class="comment"># The zone delegation mirrors the IP allocation:</span>
+<span class="comment">#   arpa.  ← managed by IANA</span>
+<span class="comment">#     in-addr.arpa.  ← managed by IANA</span>
+<span class="comment">#       142.in-addr.arpa.  ← delegated to IP block owner</span>
+<span class="comment">#         250.142.in-addr.arpa.  ← further delegated</span></div>
+  </div>
+
+  <h3>Why PTR Records Matter</h3>
+  <div class="card accent4-border">
+    <p><span class="highlight4">Email Delivery:</span> Many mail servers reject email from IPs without valid PTR records. If your mail server's IP doesn't reverse-resolve to your domain, your emails may be flagged as spam.</p>
+    <p><span class="highlight4">Security Logging:</span> PTR lookups identify which hosts were involved in network events — logs showing <code>webserver.company.com</code> are more useful than raw IPs.</p>
+    <p><span class="highlight4">SSH & Services:</span> Some services perform reverse DNS lookups for access control and auditing purposes.</p>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 10: MX -->
+<section id="mx">
+  <h2><span class="icon" style="background:rgba(56,189,248,0.12);color:var(--accent);">📧</span> MX Record (Mail Exchange)</h2>
+
+  <p>The <span class="highlight">MX record</span> tells the internet where to deliver email for a domain. Each MX record has a <span class="highlight5">priority value</span> (lower = preferred). When sending email to <code>user@example.com</code>, the sending server queries MX records for <code>example.com</code> to find the mail server.</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">mx-records.txt</span>
+    </div>
+    <div class="terminal-body"><span class="comment">; MX records with priority (lower = higher priority)</span>
+<span class="key">example.com.</span>  <span class="val">3600</span>  IN  MX  <span class="val">10</span>  <span class="cmd">mail1.example.com.</span>   <span class="comment">; primary</span>
+<span class="key">example.com.</span>  <span class="val">3600</span>  IN  MX  <span class="val">20</span>  <span class="cmd">mail2.example.com.</span>   <span class="comment">; secondary</span>
+<span class="key">example.com.</span>  <span class="val">3600</span>  IN  MX  <span class="val">30</span>  <span class="cmd">backup.example.com.</span>  <span class="comment">; tertiary</span>
+
+<span class="comment">; Google Workspace MX records</span>
+<span class="key">company.com.</span>  <span class="val">3600</span>  IN  MX  <span class="val">1</span>   <span class="cmd">aspmx.l.google.com.</span>
+<span class="key">company.com.</span>  <span class="val">3600</span>  IN  MX  <span class="val">5</span>   <span class="cmd">alt1.aspmx.l.google.com.</span>
+<span class="key">company.com.</span>  <span class="val">3600</span>  IN  MX  <span class="val">5</span>   <span class="cmd">alt2.aspmx.l.google.com.</span></div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 11: CNAME, TXT, SRV -->
+<section id="cname">
+  <h2><span class="icon" style="background:rgba(129,140,248,0.12);color:var(--accent2);">📎</span> CNAME, TXT, SRV & More</h2>
+
+  <h3>CNAME (Canonical Name)</h3>
+  <p>An alias that points one domain name to another. When a resolver hits a CNAME, it follows the chain to the canonical name and looks up its A/AAAA record. <span class="highlight3">Important:</span> You cannot have a CNAME at the zone apex (e.g., <code>example.com</code>) alongside other records — it's only for subdomains.</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">other-records.txt</span>
+    </div>
+    <div class="terminal-body"><span class="comment">; CNAME — aliases</span>
+<span class="key">www</span>       IN  CNAME  <span class="cmd">example.com.</span>
+<span class="key">blog</span>      IN  CNAME  <span class="cmd">mysite.wordpress.com.</span>
+<span class="key">shop</span>      IN  CNAME  <span class="cmd">shops.shopify.com.</span>
+
+<span class="comment">; TXT — verification, email auth</span>
+<span class="key">@</span>         IN  TXT    <span class="cmd">"v=spf1 include:_spf.google.com ~all"</span>
+<span class="key">@</span>         IN  TXT    <span class="cmd">"google-site-verification=abc123..."</span>
+<span class="key">_dmarc</span>    IN  TXT    <span class="cmd">"v=DMARC1; p=reject; rua=mailto:dmarc@example.com"</span>
+
+<span class="comment">; SRV — service locator (format: priority weight port target)</span>
+<span class="key">_sip._tcp.example.com.</span>  IN  SRV  <span class="val">10 60 5060</span>  <span class="cmd">sipserver.example.com.</span>
+<span class="key">_ldap._tcp.example.com.</span> IN  SRV  <span class="val">0 100 389</span>  <span class="cmd">ldap.example.com.</span>
+
+<span class="comment">; CAA — Certificate Authority Authorization</span>
+<span class="key">@</span>         IN  CAA    <span class="val">0 issue</span> <span class="cmd">"letsencrypt.org"</span>
+<span class="key">@</span>         IN  CAA    <span class="val">0 issuewild</span> <span class="cmd">";"</span>  <span class="comment">; block wildcard certs</span></div>
+  </div>
+</section>
+
+<hr class="separator">
+
+<!-- SECTION 12: DIG -->
+<section id="dig">
+  <h2><span class="icon" style="background:rgba(52,211,153,0.12);color:var(--accent4);">🔧</span> Using <code>dig</code> — The DNS Swiss Army Knife</h2>
+
+  <p><span class="highlight4"><code>dig</code></span> (Domain Information Groper) is the go-to command-line tool for querying DNS. It comes with the <code>bind-utils</code> / <code>dnsutils</code> package on Linux.</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">dig-commands.sh</span>
+    </div>
+    <div class="terminal-body"><span class="comment"># ─── Basic Queries ─────────────────────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig google.com</span>              <span class="comment"># Default: query A record</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com A</span>            <span class="comment"># Explicit A record query</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com AAAA</span>         <span class="comment"># IPv6 address</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com MX</span>           <span class="comment"># Mail servers</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com NS</span>           <span class="comment"># Name servers</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com SOA</span>          <span class="comment"># Start of Authority</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com TXT</span>          <span class="comment"># TXT records (SPF, etc.)</span>
+<span class="prompt">$</span> <span class="cmd">dig google.com ANY</span>          <span class="comment"># All records (often blocked)</span>
+
+<span class="comment"># ─── Reverse DNS Lookup ────────────────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig -x 8.8.8.8</span>              <span class="comment"># PTR lookup for IP</span>
+<span class="comment"># Equivalent to: dig 8.8.8.8.in-addr.arpa. PTR</span>
+
+<span class="comment"># ─── Using a Specific DNS Server ───────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig @8.8.8.8 google.com</span>     <span class="comment"># Query Google's DNS</span>
+<span class="prompt">$</span> <span class="cmd">dig @1.1.1.1 google.com</span>     <span class="comment"># Query Cloudflare's DNS</span>
+<span class="prompt">$</span> <span class="cmd">dig @ns1.google.com google.com</span>  <span class="comment"># Direct authoritative query</span>
+
+<span class="comment"># ─── Short Output ──────────────────────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig +short google.com</span>       <span class="comment"># Just the IP, nothing else</span>
+<span class="prompt">$</span> <span class="cmd">dig +short google.com MX</span>    <span class="comment"># Just MX data</span>
+
+<span class="comment"># ─── Trace the Full Resolution Path ────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig +trace google.com</span>       <span class="comment"># Show root → TLD → auth chain</span>
+<span class="comment"># This is AMAZING for debugging — shows every step of resolution</span>
+
+<span class="comment"># ─── Check TTL & Caching ───────────────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig google.com | grep -A1 "ANSWER SECTION"</span>
+<span class="comment"># The number after the domain is the TTL in seconds</span>
+<span class="comment"># Run it twice — watch the TTL count down (cached!)</span>
+
+<span class="comment"># ─── Zone Transfer Attempt ─────────────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig @ns1.example.com example.com AXFR</span>
+<span class="comment"># Full zone transfer — usually blocked for security</span>
+
+<span class="comment"># ─── Useful Flags ──────────────────────────────────────</span>
+
+<span class="prompt">$</span> <span class="cmd">dig +noall +answer google.com</span>       <span class="comment"># Only answer section</span>
+<span class="prompt">$</span> <span class="cmd">dig +noall +authority google.com</span>    <span class="comment"># Only authority section</span>
+<span class="prompt">$</span> <span class="cmd">dig +norecurse @8.8.8.8 google.com</span> <span class="comment"># Non-recursive query</span>
+<span class="prompt">$</span> <span class="cmd">dig +stats google.com</span>               <span class="comment"># Show query time stats</span>
+<span class="prompt">$</span> <span class="cmd">dig +multiline google.com SOA</span>       <span class="comment"># Pretty-print SOA fields</span></div>
+  </div>
+
+  <h3>Reading dig Output</h3>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+      <span class="terminal-title">dig-output-explained.txt</span>
+    </div>
+    <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">dig example.com</span>
+
+<span class="comment">; &lt;&lt;&gt;&gt; DiG 9.18.18 &lt;&lt;&gt;&gt; example.com</span>
+<span class="comment">;; global options: +cmd</span>
+
+<span class="section-head">;; HEADER</span>
+<span class="comment">;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 12345</span>
+<span class="comment">;;                                          ↑ NOERROR = success</span>
+<span class="comment">;;                                            NXDOMAIN = domain doesn't exist</span>
+<span class="comment">;;                                            SERVFAIL = server error</span>
+<span class="comment">;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0</span>
+<span class="comment">;;         ↑  ↑  ↑</span>
+<span class="comment">;;         │  │  └── ra = Recursion Available</span>
+<span class="comment">;;         │  └───── rd = Recursion Desired</span>
+<span class="comment">;;         └──────── qr = Query Response</span>
+
+<span class="section-head">;; QUESTION SECTION:</span>
+<span class="key">;example.com.</span>                  IN      A
+<span class="comment">;; ^ What we asked for</span>
+
+<span class="section-head">;; ANSWER SECTION:</span>
+<span class="key">example.com.</span>     <span class="val">86400</span>   IN   A    <span class="cmd">93.184.216.34</span>
+<span class="comment">;;                ↑ TTL (seconds this answer can be cached)</span>
+
+<span class="section-head">;; Query time: 23 msec</span>
+<span class="section-head">;; SERVER: 127.0.0.53#53(127.0.0.53)</span>
+<span class="comment">;;         ↑ Which DNS server answered</span>
+<span class="section-head">;; MSG SIZE  rcvd: 56</span></div>
+  </div>
+
+</section>
+
+<div class="footer-nav">
+  <p>📄 Continue to <span>Part 2</span> → DNS Hierarchy, Resolvers, Forwarders & Caching</p>
+</div>
+
+</div>
+</body>
+</html>

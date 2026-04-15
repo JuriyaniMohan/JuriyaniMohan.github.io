@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Binary & CIDR — Learn It Forever</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --border: #1e2d47;
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #10b981;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Bebas Neue', sans-serif;
+  --radius: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 0 20px 60px; }
+
+/* ── HEADER ── */
+header {
+  padding: 40px 0 30px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.header-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+header h1 {
+  font-family: var(--display);
+  font-size: clamp(48px, 8vw, 80px);
+  line-height: 0.95;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+header h1 span { color: var(--accent); }
+
+header p {
+  font-size: 15px;
+  color: var(--text2);
+  max-width: 520px;
+  line-height: 1.7;
+}
+
+/* ── SECTION TITLES ── */
+.section-title {
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+/* ── TAB NAV ── */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 4px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.tab-btn.active { background: var(--accent); color: #000; font-weight: 600; }
+
+/* ── CONVERTER ── */
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.input-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  min-width: 120px;
+}
+
+input[type="number"], input[type="text"] {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 18px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+input:focus { border-color: var(--accent); }
+
+/* ── POSITION TABLE ── */
+.pos-table {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.bit-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+.bit-val {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.bit-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bit-btn.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  box-shadow: 0 0 16px rgba(0,212,255,0.4);
+}
+
+.bit-btn.clickable:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bit-pos {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+}
+
+/* ── RESULT BOX ── */
+.result-display {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.result-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+.result-val {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 4px;
+  word-break: break-all;
+}
+
+/* ── DIVISION STEPS ── */
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-family: var(--mono);
+}
+
+.step-cur { color: var(--accent); min-width: 40px; font-weight: 700; }
+.step-mid { color: var(--text2); flex: 1; }
+.step-bit-chip {
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.step-bit-chip.one { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+.step-bit-chip.zero { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+/* ── IP DISPLAY ── */
+.ip-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.ip-octet { font-family: var(--mono); font-weight: 700; min-width: 36px; color: var(--text); font-size: 15px; }
+
+.ip-bits { display: flex; gap: 3px; flex-wrap: wrap; }
+
+.ip-bit {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ip-bit.one { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+.ip-bit.zero { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+/* ── QUIZ ── */
+.quiz-question {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+
+.quiz-big {
+  font-family: var(--mono);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 4px;
+  margin: 10px 0 20px;
+}
+
+.quiz-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: all .15s;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.quiz-opt:hover { border-color: var(--accent); background: rgba(0,212,255,0.05); }
+.quiz-opt.correct { border-color: var(--accent3); background: rgba(16,185,129,0.1); color: var(--accent3); }
+.quiz-opt.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); color: var(--danger); }
+.quiz-opt.show-correct { border-color: var(--accent3); opacity: 0.5; background: rgba(16,185,129,0.05); }
+.quiz-opt.disabled { cursor: default; }
+
+.quiz-label {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.explain-box {
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  display: none;
+  font-family: var(--mono);
+}
+
+/* ── SCORE BAR ── */
+.score-bar-wrap { height: 5px; background: var(--border); border-radius: 3px; margin-bottom: 20px; }
+.score-bar-fill { height: 100%; border-radius: 3px; background: var(--accent3); transition: width .4s; }
+
+.score-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 14px;
+  font-family: var(--mono);
+}
+
+.score-stats strong { color: var(--text); }
+
+/* ── DRILL ── */
+.drill-big {
+  font-family: var(--mono);
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 5px;
+  text-align: center;
+  padding: 20px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+.drill-hint-row {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+.feedback-box {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: var(--mono);
+  margin-left: 8px;
+}
+
+.feedback-box.correct { background: rgba(16,185,129,0.15); color: var(--accent3); border: 1px solid rgba(16,185,129,0.3); }
+.feedback-box.wrong { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+
+.math-breakdown {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: none;
+}
+
+/* ── REFERENCE TABLE ── */
+.ref-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+.ref-table th { color: var(--text3); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.ref-table td { padding: 10px 12px; border-bottom: 1px solid rgba(30,45,71,0.5); color: var(--text2); }
+.ref-table tr:hover td { background: var(--surface2); }
+.ref-table .mono-val { color: var(--accent); font-weight: 700; letter-spacing: 2px; }
+.ref-table .dec-val { color: var(--text); font-weight: 700; }
+.ref-table .note-val { color: var(--text3); font-size: 12px; }
+
+/* ── CHEATSHEET ── */
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+
+.cheat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  transition: border-color .15s;
+}
+
+.cheat-card:hover { border-color: var(--accent); }
+.cheat-dec { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.cheat-bin { font-family: var(--mono); font-size: 13px; color: var(--accent); letter-spacing: 2px; margin-bottom: 4px; }
+.cheat-note { font-size: 11px; color: var(--text3); }
+
+/* ── SECTION SPACING ── */
+.section { margin-bottom: 40px; }
+
+/* ── PANEL TABS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── STREAK BADGE ── */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: var(--warn);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── SCROLL REVEAL ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section { animation: fadeUp .5s ease both; }
+.section:nth-child(2) { animation-delay: .05s; }
+.section:nth-child(3) { animation-delay: .1s; }
+.section:nth-child(4) { animation-delay: .15s; }
+.section:nth-child(5) { animation-delay: .2s; }
+
+/* ── ACCENT GLOW PULSE ── */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0,212,255,0.3); }
+  50% { box-shadow: 0 0 22px rgba(0,212,255,0.6); }
+}
+
+.bit-btn.on { animation: glowPulse 2s ease-in-out infinite; }
+
+/* ── RESPONSIVE ── */
+@media(max-width: 600px) {
+  header h1 { font-size: 42px; }
+  .bit-btn { width: 38px; height: 38px; font-size: 16px; }
+  .result-val { font-size: 20px; }
+  .quiz-big, .drill-big { font-size: 26px; letter-spacing: 2px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-tag">Networking Fundamentals</div>
+    <h1>BINARY &<br><span>CIDR</span></h1>
+    <p>Learn to convert any number to binary and back — the skill that makes IP addressing and subnetting click forever.</p>
+  </header>
+
+  <!-- MAIN TABS -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showMain('converter')">Converter</button>
+    <button class="tab-btn" onclick="showMain('drill')">Drill</button>
+    <button class="tab-btn" onclick="showMain('quiz')">Quiz</button>
+    <button class="tab-btn" onclick="showMain('reference')">Reference</button>
+    <button class="tab-btn" onclick="showMain('cheatsheet')">Cheat Sheet</button>
+  </div>
+
+  <!-- ══════════════════════════════ CONVERTER ══════════════════════════════ -->
+  <div id="main-converter" class="panel active">
+
+    <div class="section">
+      <div class="section-title">Number Converter</div>
+
+      <div class="card">
+        <div class="tab-nav" style="margin-bottom:20px;">
+          <button class="tab-btn active" onclick="showConv('dec')">Decimal → Binary</button>
+          <button class="tab-btn" onclick="showConv('bin')">Binary → Decimal</button>
+          <button class="tab-btn" onclick="showConv('ip')">Full IP Address</button>
+        </div>
+
+        <!-- DEC → BIN -->
+        <div id="conv-dec" class="panel active">
+          <div class="input-group">
+            <span class="input-label">Enter decimal</span>
+            <input type="number" id="dec-input" min="0" max="255" value="192" style="width:120px;" oninput="decToBin()"/>
+            <span style="font-size:13px;color:var(--text3);">(0 – 255)</span>
+          </div>
+          <div class="result-display">
+            <div><div class="result-label">Binary result</div><div class="result-val" id="dec-result">11000000</div></div>
+            <div style="font-size:12px;color:var(--text3);font-family:var(--mono);" id="dec-check">✓ 128+64 = 192</div>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Position table</div>
+          <div class="pos-table" id="pos-table-dec"></div>
+          <div style="font-size:12px;color:var(--text3);margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;">Division steps (read bottom → top)</div>
+          <div id="steps-list"></div>
+        </div>
+
+        <!-- BIN → DEC (click switches) -->
+        <div id="conv-bin" class="panel">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Click each bit to toggle it on (1) or off (0):</div>
+          <div class="pos-table" id="bit-switches"></div>
+          <div class="result-display">
+            <div><div class="result-label">Decimal value</div><div class="result-val" id="bin-result" style="color:var(--accent3);">0</div></div>
+          </div>
+          <div class="math-breakdown" id="bin-math" style="display:block;"></div>
+        </div>
+
+        <!-- IP ADDRESS -->
+        <div id="conv-ip" class="panel">
+          <div class="input-group">
+            <span class="input-label">IP address</span>
+            <input type="text" id="ip-input" value="192.168.10.5" style="width:210px;" oninput="ipConvert()"/>
+          </div>
+          <div id="ip-result" style="margin-top:12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ DRILL ══════════════════════════════ -->
+  <div id="main-drill" class="panel">
+    <div class="section">
+      <div class="section-title">Speed Drill</div>
+      <div class="card">
+        <div class="score-stats">
+          <span>Correct: <strong id="d-correct">0</strong></span>
+          <span>Total: <strong id="d-total">0</strong></span>
+          <span>Streak: <strong id="d-streak">0</strong> 🔥</span>
+          <span>Accuracy: <strong id="d-acc">—</strong></span>
+        </div>
+        <div class="score-bar-wrap"><div class="score-bar-fill" id="d-bar" style="width:0%"></div></div>
+
+        <div style="font-size:13px;color:var(--text3);font-family:var(--mono);" id="d-q-label">Convert this binary to decimal:</div>
+        <div class="drill-big" id="d-display">11000000</div>
+
+        <div class="drill-hint-row" id="d-hint-row"></div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <input type="number" id="d-input" min="0" max="255" placeholder="Your answer" style="width:150px;font-size:16px;" onkeydown="if(event.key==='Enter')drillCheck()"/>
+          <button class="btn-primary" onclick="drillCheck()">Check</button>
+          <button class="btn-secondary" id="d-hint-btn" onclick="drillHint()">Show hint</button>
+          <span id="d-feedback" style="display:none;" class="feedback-box"></span>
+        </div>
+        <div id="d-math" class="math-breakdown" style="margin-top:12px;"></div>
+        <div style="margin-top:14px;">
+          <button class="btn-secondary" id="d-next" style="display:none;" onclick="drillNext()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ QUIZ ══════════════════════════════ -->
+  <div id="main-quiz" class="panel">
+    <div class="section">
+      <div class="section-title">Knowledge Quiz</div>
+      <div class="score-stats">
+        <span>Score: <strong id="q-score">0 / 0</strong></span>
+        <span id="q-streak-badge" class="streak-badge" style="display:none;">🔥 <span id="q-streak-num">0</span> streak</span>
+      </div>
+      <div class="score-bar-wrap"><div class="score-bar-fill" id="q-bar" style="width:0%"></div></div>
+      <button class="btn-secondary" onclick="quizReset()" style="margin-bottom:16px;">↺ Reset</button>
+      <div id="quiz-container"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ REFERENCE ══════════════════════════════ -->
+  <div id="main-reference" class="panel">
+    <div class="section">
+      <div class="section-title">CIDR Reference Table</div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>Prefix</th>
+              <th>Subnet mask</th>
+              <th>Mask (binary, last octet)</th>
+              <th>Total hosts</th>
+              <th>Usable</th>
+              <th>Use case</th>
+            </tr>
+          </thead>
+          <tbody id="ref-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Division Method</div>
+      <div class="card">
+        <p style="color:var(--text2);font-size:14px;line-height:1.8;margin-bottom:16px;">
+          To convert any decimal number to binary: repeatedly divide by 2, collect remainders. Read them <strong style="color:var(--accent);">bottom to top</strong>.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Example: 172</div>
+            <div style="font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);">
+              172 ÷ 2 = 86 <span style="color:var(--accent);">r 0</span><br>
+              86 ÷ 2 = 43 <span style="color:var(--accent);">r 0</span><br>
+              43 ÷ 2 = 21 <span style="color:var(--accent);">r 1</span><br>
+              21 ÷ 2 = 10 <span style="color:var(--accent);">r 1</span><br>
+              10 ÷ 2 = 5 <span style="color:var(--accent);">r 0</span><br>
+              5 ÷ 2 = 2 <span style="color:var(--accent);">r 1</span><br>
+              2 ÷ 2 = 1 <span style="color:var(--accent);">r 0</span><br>
+              1 ÷ 2 = 0 <span style="color:var(--accent);">r 1</span><br>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Result (read bottom → top)</div>
+            <div style="font-family:var(--mono);font-size:28px;color:var(--accent);letter-spacing:3px;margin-bottom:12px;">10101100</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+              128 + 32 + 8 + 4 = 172 ✓<br>
+              Positions: 8,6,4,3 are ON
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Position Shortcut</div>
+      <div class="card">
+        <p style="color:var(--text2);font-size:14px;line-height:1.8;margin-bottom:16px;">
+          Memorise these 8 values. For any number, go left to right: if it fits, bit=1 and subtract; if not, bit=0.
+        </p>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+          <div class="bit-cell" style="gap:6px;">
+            <div class="bit-val" style="font-size:13px;font-weight:700;color:var(--accent);">128</div>
+            <div class="bit-btn on" style="cursor:default;">1</div>
+            <div class="bit-pos">pos 8</div>
+          </div>
+          <div style="color:var(--text3);align-self:center;font-size:18px;padding:0 4px;">→</div>
+          <div class="bit-cell" style="gap:6px;">
+            <div class="bit-val" style="font-size:13px;font-weight:700;color:var(--accent2);">64</div>
+            <div class="bit-btn" style="cursor:default;border-color:var(--accent2);">0</div>
+            <div class="bit-pos">pos 7</div>
+          </div>
+          <div style="color:var(--text3);align-self:center;font-size:12px;padding:0 4px;">...</div>
+          <div style="color:var(--text2);align-self:center;font-size:13px;font-family:var(--mono);">32 · 16 · 8 · 4 · 2 · 1</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--text2);background:var(--surface2);padding:14px 16px;border-radius:8px;border:1px solid var(--border);line-height:2;">
+          For 172:<br>
+          172 ≥ 128? <span style="color:var(--accent3);">YES → 1</span>, rem 44<br>
+          44 ≥ 64? <span style="color:var(--danger);">NO → 0</span><br>
+          44 ≥ 32? <span style="color:var(--accent3);">YES → 1</span>, rem 12<br>
+          12 ≥ 16? <span style="color:var(--danger);">NO → 0</span><br>
+          12 ≥ 8? <span style="color:var(--accent3);">YES → 1</span>, rem 4<br>
+          4 ≥ 4? <span style="color:var(--accent3);">YES → 1</span>, rem 0<br>
+          0 ≥ 2? <span style="color:var(--danger);">NO → 0</span> · 0 ≥ 1? <span style="color:var(--danger);">NO → 0</span><br>
+          Result: <span style="color:var(--accent);font-weight:700;">10101100</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ CHEAT SHEET ══════════════════════════════ -->
+  <div id="main-cheatsheet" class="panel">
+    <div class="section">
+      <div class="section-title">Must-Know Values</div>
+      <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7;">
+        These values appear constantly in networking. Recognise them instantly and you'll never need to calculate them again.
+      </p>
+      <div class="cheat-grid" id="cheat-grid"></div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+/* ═══════════════════════ HELPERS ═══════════════════════ */
+const vals = [128,64,32,16,8,4,2,1];
+
+function toBin(n) { return n.toString(2).padStart(8,'0'); }
+
+function showMain(tab) {
+  document.querySelectorAll('[id^="main-"]').forEach(p => p.classList.remove('active'));
+  document.getElementById('main-'+tab).classList.add('active');
+  document.querySelectorAll('.tab-nav:first-of-type .tab-btn').forEach((b,i) => {
+    b.classList.remove('active');
+  });
+  event.target.classList.add('active');
+}
+
+function showConv(tab) {
+  document.querySelectorAll('[id^="conv-"]').forEach(p => p.classList.remove('active'));
+  document.getElementById('conv-'+tab).classList.add('active');
+  document.querySelectorAll('#main-converter .tab-nav:nth-of-type(2) .tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+/* ═══════════════════════ CONVERTER: DEC→BIN ═══════════════════════ */
+function buildPosTable(binStr, containerId, clickable=false) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  binStr.split('').forEach((b,i) => {
+    const cell = document.createElement('div');
+    cell.className = 'bit-cell';
+    const btnClass = 'bit-btn' + (b==='1' ? ' on' : '') + (clickable ? ' clickable' : '');
+    cell.innerHTML = `<div class="bit-val">${vals[i]}</div>
+      <div class="${btnClass}" ${clickable ? `onclick="toggleBit(${i})"` : ''}>${b}</div>
+      <div class="bit-pos">bit ${8-i}</div>`;
+    el.appendChild(cell);
+  });
+}
+
+function decToBin() {
+  let n = parseInt(document.getElementById('dec-input').value);
+  if (isNaN(n) || n<0 || n>255) return;
+  const bin = toBin(n);
+  document.getElementById('dec-result').textContent = bin;
+
+  const onBits = bin.split('').map((b,i)=>b==='1'?vals[i]:null).filter(Boolean);
+  document.getElementById('dec-check').textContent = onBits.length
+    ? '= ' + onBits.join(' + ') + ' = ' + n
+    : '= 0 (all bits off)';
+
+  buildPosTable(bin, 'pos-table-dec');
+
+  const steps = document.getElementById('steps-list');
+  steps.innerHTML = '';
+  let cur = n; let rows = [];
+  for (let i=0; i<8; i++) {
+    const rem = cur % 2, q = Math.floor(cur/2);
+    rows.push({cur, q, rem});
+    if (q === 0) break;
+    cur = q;
+  }
+  rows.forEach((r,i) => {
+    const d = document.createElement('div');
+    d.className = 'step-row';
+    d.innerHTML = `<span class="step-cur">${r.cur}</span>
+      <span class="step-mid">÷ 2 = ${r.q} &nbsp;remainder</span>
+      <span class="step-bit-chip ${r.rem?'one':'zero'}">${r.rem}</span>
+      ${i===0 ? '<span style="font-size:11px;color:var(--text3);">← LSB</span>' : ''}`;
+    steps.appendChild(d);
+  });
+  const note = document.createElement('div');
+  note.style.cssText='font-size:12px;color:var(--text3);margin-top:8px;font-family:var(--mono);';
+  note.textContent = 'Read bottom → top: ' + bin;
+  steps.appendChild(note);
+}
+
+/* ═══════════════════════ CONVERTER: BIN→DEC ═══════════════════════ */
+let bits = [0,0,0,0,0,0,0,0];
+
+function buildSwitches() {
+  const binStr = bits.join('');
+  buildPosTable(binStr, 'bit-switches', true);
+  const dec = bits.reduce((a,b,i)=>a+b*vals[i],0);
+  document.getElementById('bin-result').textContent = dec;
+  const parts = bits.map((b,i)=>b?`${b}×${vals[i]}`:null).filter(Boolean);
+  const m = document.getElementById('bin-math');
+  m.textContent = parts.length ? parts.join(' + ') + ' = ' + dec : '0 (all bits off)';
+  m.style.display='block';
+}
+
+function toggleBit(i) {
+  bits[i] = bits[i] ? 0 : 1;
+  buildSwitches();
+}
+
+/* ═══════════════════════ CONVERTER: IP ═══════════════════════ */
+function ipConvert() {
+  const val = document.getElementById('ip-input').value.trim();
+  const out = document.getElementById('ip-result');
+  const octets = val.split('.');
+  if (octets.length !== 4) { out.innerHTML='<span style="color:var(--danger);font-family:var(--mono);font-size:13px;">Invalid IPv4 address</span>'; return; }
+
+  const html = octets.map((o,idx) => {
+    const n = parseInt(o);
+    if (isNaN(n)||n<0||n>255) return `<div class="ip-row"><span class="ip-octet" style="color:var(--danger);">${o}</span><span style="color:var(--danger);font-size:13px;font-family:var(--mono);">invalid</span></div>`;
+    const b = toBin(n);
+    const bits = b.split('').map(bit=>`<div class="ip-bit ${bit==='1'?'one':'zero'}">${bit}</div>`).join('');
+    return `<div class="ip-row">
+      <span class="ip-octet">${String(n).padStart(3,' ')}</span>
+      <span style="color:var(--text3);font-family:var(--mono);">→</span>
+      <div class="ip-bits">${bits}</div>
+    </div>`;
+  }).join('');
+
+  out.innerHTML = html;
+}
+
+/* ═══════════════════════ DRILL ═══════════════════════ */
+let dCorrect=0, dTotal=0, dStreak=0, dVal=0, dMode='', dAnswered=false, dHintShown=false;
+
+const commonVals = [0,1,10,16,32,64,128,168,192,224,240,248,252,254,255];
+
+function drillNext() {
+  dAnswered=false; dHintShown=false;
+  document.getElementById('d-feedback').style.display='none';
+  document.getElementById('d-math').style.display='none';
+  document.getElementById('d-next').style.display='none';
+  document.getElementById('d-hint-btn').style.display='';
+  document.getElementById('d-hint-row').innerHTML='';
+  document.getElementById('d-input').value='';
+  document.getElementById('d-input').disabled=false;
+  document.getElementById('d-input').focus();
+
+  const useCommon = Math.random()<0.5;
+  dVal = useCommon ? commonVals[Math.floor(Math.random()*commonVals.length)] : Math.floor(Math.random()*256);
+  dMode = Math.random()<0.5 ? 'b2d' : 'd2b';
+
+  if (dMode==='b2d') {
+    document.getElementById('d-q-label').textContent='Convert binary → decimal:';
+    document.getElementById('d-display').textContent = toBin(dVal);
+  } else {
+    document.getElementById('d-q-label').textContent='Convert decimal → binary (enter decimal to verify):';
+    document.getElementById('d-display').textContent = dVal;
+  }
+}
+
+function drillHint() {
+  dHintShown=true;
+  document.getElementById('d-hint-btn').style.display='none';
+  const binStr = toBin(dVal);
+  const row = document.getElementById('d-hint-row');
+  row.innerHTML='';
+  binStr.split('').forEach((b,i)=>{
+    const cell = document.createElement('div');
+    cell.className='bit-cell';
+    cell.innerHTML=`<div class="bit-val">${vals[i]}</div>
+      <div class="bit-btn ${b==='1'?'on':''}" style="cursor:default;">${b}</div>
+      <div class="bit-pos">bit ${8-i}</div>`;
+    row.appendChild(cell);
+  });
+}
+
+function drillCheck() {
+  if (dAnswered) return;
+  const inp = parseInt(document.getElementById('d-input').value);
+  if (isNaN(inp)) return;
+  dAnswered=true;
+  dTotal++;
+  document.getElementById('d-input').disabled=true;
+
+  const ok = inp===dVal;
+  if (ok) { dCorrect++; dStreak++; } else { dStreak=0; }
+
+  document.getElementById('d-correct').textContent=dCorrect;
+  document.getElementById('d-total').textContent=dTotal;
+  document.getElementById('d-streak').textContent=dStreak;
+  document.getElementById('d-acc').textContent=Math.round(dCorrect/dTotal*100)+'%';
+  document.getElementById('d-bar').style.width=(dCorrect/Math.max(dTotal,1)*100)+'%';
+
+  const fb=document.getElementById('d-feedback');
+  fb.style.display='inline-block';
+  fb.className='feedback-box '+(ok?'correct':'wrong');
+  fb.textContent=ok?'Correct!':'Wrong — answer: '+dVal;
+
+  drillHint();
+  const onBits = toBin(dVal).split('').map((b,i)=>b==='1'?vals[i]:null).filter(Boolean);
+  const m=document.getElementById('d-math');
+  m.textContent=onBits.length?onBits.join(' + ')+' = '+dVal:'0 (all bits off)';
+  m.style.display='block';
+
+  document.getElementById('d-next').style.display='';
+}
+
+/* ═══════════════════════ QUIZ ═══════════════════════ */
+const QUIZ = [
+  {q:'How many usable hosts does a /24 provide?',opts:['256','254','255','252'],ans:1,exp:'2^8 = 256 total. Minus network (0) + broadcast (255) = 254 usable.'},
+  {q:'What is the subnet mask for /20?',opts:['255.255.240.0','255.255.248.0','255.255.252.0','255.255.255.0'],ans:0,exp:'20 bits set: 255.255.xxxx.0 — third octet: 11110000 = 240. So 255.255.240.0'},
+  {q:'A router has /8, /16, /24 routes. Packet to 10.10.5.22 — which route wins?',opts:['/8','/16','/24','Dropped'],ans:2,exp:'Longest Prefix Match: all three match, but /24 is most specific. Always prefer the longest matching prefix.'},
+  {q:'How many /26 subnets fit inside a /24?',opts:['2','4','8','16'],ans:1,exp:'/26 borrows 2 bits from /24 host portion. 2^2 = 4 subnets.'},
+  {q:'Network address of 172.16.35.200/20?',opts:['172.16.32.0','172.16.35.0','172.16.0.0','172.16.48.0'],ans:0,exp:'Mask = 255.255.240.0. Third octet: 35 AND 240 = 32. Network = 172.16.32.0'},
+  {q:'Which prefix has the fewest hosts?',opts:['/24','/28','/20','/16'],ans:1,exp:'/28 → 2^4 - 2 = 14 usable. Larger prefix = smaller network.'},
+  {q:'Broadcast of 10.0.4.0/22?',opts:['10.0.4.255','10.0.7.255','10.0.5.255','10.0.6.255'],ans:1,exp:'/22 spans 4 × /24 blocks from .4.0 to .7.255. Broadcast = 10.0.7.255'},
+  {q:'CIDR replaced which older system?',opts:['NAT','Classful networking','VLSM','OSPF'],ans:1,exp:'Before CIDR (1993): rigid Class A/B/C. CIDR introduced variable-length prefixes.'},
+  {q:'/31 subnets are used for what?',opts:['Large LANs','Point-to-point router links','Home networks','Server farms'],ans:1,exp:'RFC 3021: /31 has 2 addresses, no broadcast needed — perfect for router-to-router links.'},
+  {q:'192.168.1.130/26 — which network?',opts:['192.168.1.0/26','192.168.1.128/26','192.168.1.64/26','192.168.1.192/26'],ans:1,exp:'Mask = 255.255.255.192. 130 AND 192 = 128. Network = 192.168.1.128/26 (range .128–.191)'},
+  {q:'What does 11111111.11111111.11111111.00000000 represent?',opts:['255.255.255.0','255.255.0.0','Subnet /24 mask','Both A and C'],ans:3,exp:'255.255.255.0 is the dotted decimal AND it is the subnet mask for a /24 — both A and C are correct.'},
+  {q:'How many total addresses in a /16?',opts:['512','1024','65536','16384'],ans:2,exp:'2^(32-16) = 2^16 = 65,536 total addresses (65,534 usable).'},
+];
+
+let qCorrect=0, qTotal=0, qStreak=0;
+
+function quizReset() {
+  qCorrect=0; qTotal=0; qStreak=0;
+  document.getElementById('q-score').textContent='0 / 0';
+  document.getElementById('q-bar').style.width='0%';
+  document.getElementById('q-streak-badge').style.display='none';
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const c = document.getElementById('quiz-container');
+  c.innerHTML='';
+  QUIZ.forEach((q,qi)=>{
+    const card = document.createElement('div');
+    card.className='card';
+    card.style.marginBottom='14px';
+    card.innerHTML=`<div class="quiz-question">Q${qi+1}. ${q.q}</div>` +
+      q.opts.map((o,oi)=>`<div class="quiz-opt" id="qo${qi}_${oi}" onclick="quizPick(${qi},${oi})">
+        <div class="quiz-label">${String.fromCharCode(65+oi)}</div>
+        <span>${o}</span>
+      </div>`).join('') +
+      `<div class="explain-box" id="qexp${qi}">${q.exp}</div>`;
+    c.appendChild(card);
+  });
+}
+
+function quizPick(qi,oi) {
+  const q=QUIZ[qi];
+  const already = q.opts.some((_,i)=>{
+    const el=document.getElementById(`qo${qi}_${i}`);
+    return el.classList.contains('correct')||el.classList.contains('wrong');
+  });
+  if(already) return;
+
+  qTotal++;
+  const ok = oi===q.ans;
+  if(ok){qCorrect++;qStreak++;} else {qStreak=0;}
+
+  q.opts.forEach((_,i)=>{
+    const el=document.getElementById(`qo${qi}_${i}`);
+    el.classList.add('disabled');
+    el.onclick=null;
+    if(i===oi) el.classList.add(ok?'correct':'wrong');
+    else if(i===q.ans) el.classList.add('show-correct');
+  });
+  document.getElementById(`qexp${qi}`).style.display='block';
+
+  document.getElementById('q-score').textContent=`${qCorrect} / ${qTotal}`;
+  document.getElementById('q-bar').style.width=(qCorrect/QUIZ.length*100)+'%';
+
+  const badge=document.getElementById('q-streak-badge');
+  if(qStreak>=2){badge.style.display='inline-flex';document.getElementById('q-streak-num').textContent=qStreak;}
+  else badge.style.display='none';
+}
+
+/* ═══════════════════════ REFERENCE TABLE ═══════════════════════ */
+const CIDR_DATA = [
+  [8,'255.0.0.0',16777216,'16,777,214','Large enterprise/ISP'],
+  [12,'255.240.0.0',1048576,'1,048,574','RFC 1918 Class B'],
+  [16,'255.255.0.0',65536,'65,534','Mid-size network'],
+  [20,'255.255.240.0',4096,'4,094','Large VPC subnet'],
+  [22,'255.255.252.0',1024,'1,022','Medium subnet'],
+  [23,'255.255.254.0',512,'510','Medium subnet'],
+  [24,'255.255.255.0',256,'254','Standard LAN'],
+  [25,'255.255.255.128',128,'126','Half a /24'],
+  [26,'255.255.255.192',64,'62','Small subnet'],
+  [27,'255.255.255.224',32,'30','Smaller subnet'],
+  [28,'255.255.255.240',16,'14','Very small subnet'],
+  [29,'255.255.255.248',8,'6','Tiny subnet'],
+  [30,'255.255.255.252',4,'2','Very small link'],
+  [31,'255.255.255.254',2,'2','Point-to-point'],
+  [32,'255.255.255.255',1,'1','Host route'],
+];
+
+function buildRefTable() {
+  const tb = document.getElementById('ref-tbody');
+  tb.innerHTML = '';
+  CIDR_DATA.forEach(([prefix, mask, total, usable, note]) => {
+    const lastOctet = parseInt(mask.split('.')[3]);
+    const lastBin = lastOctet.toString(2).padStart(8,'0');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="mono-val">/${prefix}</td>
+      <td class="mono-val">${mask}</td>
+      <td class="mono-val">${lastBin}</td>
+      <td class="dec-val">${total.toLocaleString()}</td>
+      <td style="color:var(--accent3);font-family:var(--mono);font-weight:700;">${usable}</td>
+      <td class="note-val">${note}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ═══════════════════════ CHEAT SHEET ═══════════════════════ */
+const CHEAT_DATA = [
+  [0,'00000000','All bits off — host 0'],
+  [1,'00000001','Smallest host'],
+  [10,'00001010','RFC 1918 Class A start'],
+  [16,'00010000','Power of 2'],
+  [32,'00100000','Power of 2'],
+  [64,'01000000','Power of 2'],
+  [128,'10000000','Half byte, /1 bit'],
+  [168,'10101000','Second octet of 172.168'],
+  [172,'10101100','RFC 1918 Class B 1st octet'],
+  [192,'11000000','/26 jump, Class C start'],
+  [224,'11100000','/3 mask, multicast'],
+  [240,'11110000','/4 mask, 255.255.240.0'],
+  [248,'11111000','/5 mask byte'],
+  [252,'11111100','/6 mask byte, /30 last'],
+  [254,'11111110','/7 mask byte'],
+  [255,'11111111','Full byte — all ones'],
+];
+
+function buildCheat() {
+  const grid = document.getElementById('cheat-grid');
+  grid.innerHTML='';
+  CHEAT_DATA.forEach(([dec, bin, note])=>{
+    const card = document.createElement('div');
+    card.className='cheat-card';
+    card.innerHTML=`<div class="cheat-dec">${dec}</div>
+      <div class="cheat-bin">${bin}</div>
+      <div class="cheat-note">${note}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════ INIT ═══════════════════════ */
+decToBin();
+buildSwitches();
+ipConvert();
+drillNext();
+renderQuiz();
+buildRefTable();
+buildCheat();
+</script>
+</body>
+</html>

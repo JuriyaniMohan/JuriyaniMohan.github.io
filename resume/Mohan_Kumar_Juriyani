@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mohan Kumar Juriyani — Resume</title>
+<style>
+  :root { --navy: #1F3864; --ink: #222; --muted: #595959; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.4;
+    max-width: 820px;
+    margin: 24px auto;
+    padding: 0 24px;
+  }
+  h1 { color: var(--navy); font-size: 30px; margin: 0 0 4px; letter-spacing: .5px; }
+  .headline { font-size: 12.5px; color: #404040; margin: 0 0 4px; }
+  .passline { font-size: 12.5px; font-style: italic; margin: 0 0 4px; }
+  .contact { font-size: 12.5px; margin: 0 0 6px; }
+  .contact a { color: var(--navy); }
+  h2 {
+    color: var(--navy);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 1.5px solid var(--navy);
+    padding-bottom: 3px;
+    margin: 18px 0 8px;
+  }
+  p.summary { margin: 0 0 6px; }
+  ul { margin: 4px 0 6px; padding-left: 20px; }
+  li { margin: 0 0 4px; }
+  .role {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-weight: bold;
+    margin: 12px 0 2px;
+  }
+  .role .date { font-weight: normal; font-style: italic; font-size: 12.5px; white-space: nowrap; }
+  .project { font-style: italic; color: var(--muted); font-size: 12.5px; margin: 0 0 4px; }
+  .edu {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 3px;
+  }
+  .edu .name { font-weight: bold; }
+  .edu .date { font-style: italic; font-size: 12.5px; white-space: nowrap; }
+  .lead { font-weight: bold; }
+  @media print { body { margin: 0; } }
+</style>
+</head>
+<body>
 
+  <h1>MOHAN KUMAR JURIYANI</h1>
+  <p class="headline">Senior RHEL / Linux Engineer | Red Hat Systems Management (Satellite / Ansible) | Cloud IaaS &amp; PaaS | Customer-Facing Technical Support</p>
+  <p class="passline">Singapore | Employment Pass</p>
+  <p class="contact">+65 8964 7482 &bull; mrjuriyani@gmail.com | <a href="https://www.linkedin.com/in/mohanjuriyani">linkedin.com/in/mohanjuriyani</a></p>
+
+  <h2>Professional Summary</h2>
+  <p class="summary">Senior RHEL / Linux engineer with 7+ years operating enterprise Red Hat Enterprise Linux estates for global banking, energy, retail and managed-services customers, on a strong Linux and Unix foundation. Deep subject-matter strength in RHEL 7/8/9 and Red Hat systems management (Red Hat Satellite, Ansible / AWX, Foreman), with hands-on IaaS and PaaS delivery across AWS, Azure, GCP, Kubernetes, and Red Hat OpenShift. Consistently the customer-facing engineer &mdash; direct daily client interaction, translating requirements into working solutions, running compliance audits, and authoring the SOPs and runbooks teams rely on. Red Hat Delivery Specialist and Red Hat Ascend (Ansible) certified; Microsoft Azure and Google Cloud certified. Strong communicator with a track record of trusted client relationships.</p>
+
+  <h2>Core Skills</h2>
+  <ul>
+    <li><span class="lead">Red Hat &amp; Linux:</span> Red Hat Enterprise Linux (RHEL) 7/8/9, SUSE Linux Enterprise Server (SLES 11/12/15), Oracle Linux, CentOS; Unix (AIX, Solaris) exposure; CIS hardening, patching, migrations, troubleshooting.</li>
+    <li><span class="lead">Red Hat Systems Management:</span> Red Hat Satellite, Foreman, Ansible / AWX, subscription &amp; content lifecycle, patch delivery, repository sync.</li>
+    <li><span class="lead">Cloud &mdash; IaaS &amp; PaaS:</span> AWS (EC2, S3, IAM, VPC, CloudWatch, Security Groups), Microsoft Azure, Red Hat OpenShift, Kubernetes, Docker.</li>
+    <li><span class="lead">Automation &amp; IaC:</span> Ansible, Puppet, Terraform (CLI, lifecycle); Bash / Shell, Python.</li>
+    <li><span class="lead">CI/CD &amp; Source Control:</span> CloudBees Jenkins, Jenkins Pipelines, Git (PR review / merge workflows).</li>
+    <li><span class="lead">HA &amp; Clustering:</span> RHEL Pacemaker (PCS), SUSE Pacemaker (CRM).</li>
+    <li><span class="lead">Observability &amp; Tooling:</span> Prometheus, Grafana, Zabbix, Amazon CloudWatch; VMware ESXi / vCenter; JIRA, ServiceNow, Confluence.</li>
+    <li><span class="lead">Customer-Facing &amp; Delivery:</span> Direct client interaction, requirement analysis, solution translation, compliance audits, SOP / runbook documentation, L1/L2 enablement.</li>
+  </ul>
+
+  <h2>Professional Experience</h2>
+
+  <div class="role"><span>Senior Linux Engineer | NCS Group</span><span class="date">Jul 2025 &ndash; Present</span></div>
+  <p class="project">Singapore | Project: Land Transport Authority &ndash; GovTech</p>
+  <ul>
+    <li><span class="lead">RHEL &amp; systems management:</span> Own RHEL 7/8/9 across VMware ESXi/vCenter, AWS, and Azure; administer Red Hat Satellite for patch delivery, subscription management, and content lifecycle across the fleet.</li>
+    <li><span class="lead">Automation:</span> Build automation with Ansible and Bash to enforce configuration consistency and remove repetitive manual operations to save cost and increase productivity.</li>
+    <li><span class="lead">Kubernetes &amp; CI/CD:</span> Administer Kubernetes clusters and operate CloudBees Jenkins pipelines; work with Red Hat OpenShift for container orchestration.</li>
+    <li><span class="lead">Tech Refresh:</span> Performed successful tech refresh of Linux servers by liaising with the vendor to meet customer expectations.</li>
+    <li><span class="lead">HA &amp; migrations:</span> Support SUSE and RHEL Pacemaker cluster operations; execute CentOS-to-RHEL migrations end-to-end.</li>
+    <li><span class="lead">Security &amp; compliance:</span> Plan and execute vulnerability remediation across large server estates, tracking compliance to closure.</li>
+    <li><span class="lead">Observability:</span> Patch and maintain Prometheus, Grafana, and Zabbix for proactive fault detection and performance visibility.</li>
+    <li><span class="lead">On-site client engagement:</span> Embedded on-site at the client (Land Transport Authority / GovTech), working directly with client teams daily to own RHEL / Linux and cloud infrastructure requirements and deliver solutions across their production and non-production environments.</li>
+  </ul>
+
+  <div class="role"><span>Technical Specialist | Linux &ndash; Multi-Cloud (AWS, Azure) | HCL Technologies</span><span class="date">May 2023 &ndash; May 2025</span></div>
+  <p class="project">Pune, India | Project: ODP Business Solutions &ndash; USA</p>
+  <ul>
+    <li><span class="lead">Customer-facing lead:</span> Direct daily client interaction &mdash; collaborated with customers and managers to interpret needs, own their end-to-end technical requirements, and deliver solutions spanning RHEL / Linux, cloud (AWS / Azure), automation (Ansible / AWX), and observability across production, UAT, and development environments.</li>
+    <li><span class="lead">RHEL &amp; multi-distro Linux:</span> Administered RHEL, SUSE, Oracle Linux, and CentOS; troubleshot CPU, memory, filesystem, and OS issues; delivered CentOS 7 &rarr; Oracle Linux 8 / RHEL 8 migrations.</li>
+    <li><span class="lead">Cloud IaaS:</span> Managed AWS EC2 and Azure servers; configured CloudWatch alarms, analyzed logs, and enforced IAM and security-group policies against unauthorized access.</li>
+    <li><span class="lead">Automations:</span> Build automation to increase productivity and managed AWX environment from end to end.</li>
+    <li><span class="lead">HA delivery:</span> Built RHEL 8 clusters and maintained SUSE cluster health, delivering production-grade HA directly to clients.</li>
+    <li><span class="lead">Systems management &amp; tooling:</span> Operated AWX, Foreman, and Zabbix; resolved repository-sync issues; remediated vulnerabilities; managed Git repositories (PR creation, review, merge).</li>
+    <li><span class="lead">Enablement &amp; documentation:</span> Provided direct technical support to L1/L2 teams; authored Confluence SOPs and runbooks for new tasks and tools.</li>
+  </ul>
+
+  <div class="role"><span>Senior Project Engineer | Wipro Limited</span><span class="date">Feb 2019 &ndash; Apr 2023</span></div>
+  <p class="project">Pune, India | Project: RWE &amp; E.ON &ndash; Energy &amp; Gas, Europe</p>
+  <ul>
+    <li><span class="lead">Large enterprise estate:</span> Supported a 3,000+ server estate spanning Linux (RHEL / SUSE) and Unix (AIX / Solaris) across production, test, and development.</li>
+    <li><span class="lead">Customer Engagement:</span> Served as daily technical point of contact for enterprise client accounts, translating business and technical requirements into working RHEL / Linux solutions and coordinating change with minimal disruption.</li>
+    <li><span class="lead">Cloud &amp; IaC:</span> Optimized cost and performance by analyzing CloudWatch metrics for EC2; managed infrastructure lifecycle with Terraform CLI across AWS (EC2, S3, IAM, security groups).</li>
+    <li><span class="lead">Upgrades &amp; virtualization:</span> Performed RHEL 7 &rarr; RHEL 8 upgrades across multiple servers; built and configured SUSE and Red Hat virtual servers on VMware.</li>
+    <li><span class="lead">OS operations:</span> Executed patching and package management; configured user access, Samba, NFS, FTP, and YUM repositories; remediated vulnerabilities for compliance.</li>
+    <li><span class="lead">Storage &amp; change:</span> Delivered storage migrations on Linux servers; managed change-management workflows.</li>
+    <li><span class="lead">Tools &amp; Delivery:</span> Managing UC4 Tool, BMC, TSM, Commvault for Automation and Monitoring.</li>
+    <li><span class="lead">Recognition:</span> Multiple performance awards, Best Employee twice, and a Certificate of Appreciation for the Wipro&ndash;E.ON engagement.</li>
+  </ul>
+
+  <h2>Education</h2>
+  <div class="edu"><span class="name">M.Tech | BITS Pilani (Pune) &mdash; 73%</span><span class="date">2019 &ndash; 2022</span></div>
+  <div class="edu"><span class="name">B.C.A | CSJM University (Kanpur) &mdash; 65%</span><span class="date">2015 &ndash; 2018</span></div>
+
+  <h2>Certifications</h2>
+  <ul>
+    <li>Red Hat Certified Delivery Specialist &mdash; Red Hat</li>
+    <li>Red Hat Ascend &mdash; Ansible Automation &mdash; Red Hat</li>
+    <li>Microsoft Certified: Azure Fundamentals (AZ-900)</li>
+    <li>Microsoft Certified: Azure Administrator (AZ-104)</li>
+    <li>Google Cloud Certified &mdash; Associate Cloud Engineer &mdash; Google Cloud</li>
+    <li>Preparing for RHCE &mdash; targeting November 2026.</li>
+  </ul>
+
+  <h2>Additional Information</h2>
+  <ul>
+    <li><span class="lead">Work Authorization:</span> Singapore Employment Pass</li>
+    <li><span class="lead">Travel:</span> Open to travel up to 50% for customer engagements.</li>
+    <li><span class="lead">Languages:</span> English, Hindi. Nationality: Indian. Notice: 30 days.</li>
+    <li><span class="lead">Interests:</span> Music composition, writing. References available on request.</li>
+  </ul>
+
+</body>
+</html>
